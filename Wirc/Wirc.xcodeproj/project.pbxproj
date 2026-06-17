@@ -41,6 +41,7 @@
 		EFAE2659F2ED47FD1DE8817C /* IRCEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD36B880B97E4EDF5E8A0309 /* IRCEvent.swift */; };
 		AAAAAAAAAABBBBBBBBCCCCCCCC /* FeedItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBBBBBBBCCCCCCCCDDDDDDDD /* FeedItem.swift */; };
 		444444445555555566666666 /* FeedSubscription.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDEEEEEEEEFFFFFFFF /* FeedSubscription.swift */; };
+			E7D6C5B4A3F2918071655443 /* JSONFileStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7B8C9D0E1F2233445566778 /* JSONFileStore.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -80,6 +81,7 @@
 		FDE1F18BDE942722566DA463 /* DebugView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugView.swift; sourceTree = "<group>"; };
 		BBBBBBBBCCCCCCCCDDDDDDDD /* FeedItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedItem.swift; sourceTree = "<group>"; };
 		DDDDDDDDEEEEEEEEFFFFFFFF /* FeedSubscription.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedSubscription.swift; sourceTree = "<group>"; };
+			A7B8C9D0E1F2233445566778 /* JSONFileStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSONFileStore.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -105,6 +107,7 @@
 			children = (
 				4A9D83E615CA39680B6D1405 /* InMemoryWOMStore.swift */,
 				5B7847091404A9B9666E9D5F /* WOMStore.swift */,
+					A7B8C9D0E1F2233445566778 /* JSONFileStore.swift */,
 			);
 			path = Persistence;
 			sourceTree = "<group>";
@@ -332,6 +335,7 @@
 				68F56DB16D64D7DF03FC5C4B /* IRCParser.swift in Sources */,
 				6533D9A172E226BB99DD3C15 /* IRCToWOMAdapter.swift in Sources */,
 				D3A953C8893F023EFB20D6CB /* InMemoryWOMStore.swift in Sources */,
+				E7D6C5B4A3F2918071655443 /* JSONFileStore.swift in Sources */,
 				A31014B086E449E4EB6AF1E5 /* MessageView.swift in Sources */,
 				650ADA11D0E8C152956F478B /* RawEventLogView.swift in Sources */,
 				7EC94869472B0565F65A371D /* RemoteIdentity.swift in Sources */,
