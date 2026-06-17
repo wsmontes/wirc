@@ -1,64 +1,29 @@
 import SwiftUI
-import BackgroundTasks
 
 @main
 struct WircApp: App {
     @State private var appState = AppState()
-    @Environment(\.scenePhase) private var scenePhase
 
     var body: some Scene {
         WindowGroup {
             TabView {
-                ChatView()
+                StreamView()
                     .tabItem {
-                        Label("Chat", systemImage: "bubble.left.and.bubble.right")
+                        Label("Stream", systemImage: "waveform")
                     }
 
-                FeedView()
+                LibraryView()
                     .tabItem {
-                        Label("Feed", systemImage: "house")
+                        Label("Library", systemImage: "archivebox")
                     }
 
-                SettingsView()
+                WorkshopView()
                     .tabItem {
-                        Label("Settings", systemImage: "gear")
+                        Label("Workshop", systemImage: "hammer")
                     }
             }
+            .tint(DesignSystem.Colors.signal)
             .environment(appState)
-            .onAppear {
-                registerBackgroundTasks()
-                appState.scheduleNextRefresh()
-                Task {
-                    await appState.refreshAllFeeds()
-                }
-            }
-        }
-    }
-
-    private func registerBackgroundTasks() {
-        BGTaskScheduler.shared.register(
-            forTaskWithIdentifier: "com.wirc.feed-refresh",
-            using: nil
-        ) { task in
-            guard let refreshTask = task as? BGAppRefreshTask else { return }
-
-            var completed = false
-
-            Task {
-                await appState.refreshAllFeeds()
-                if !completed {
-                    completed = true
-                    refreshTask.setTaskCompleted(success: true)
-                    appState.scheduleNextRefresh()
-                }
-            }
-
-            refreshTask.expirationHandler = {
-                if !completed {
-                    completed = true
-                    refreshTask.setTaskCompleted(success: false)
-                }
-            }
         }
     }
 }
