@@ -45,6 +45,7 @@
 			F1F1F1F1F2F2F2F2F3F3F3F3 /* FeedSubscriptionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4F4F4F4F5F5F5F5F6F6F6F6 /* FeedSubscriptionStore.swift */; };
 			FEEDPARSER1234567890BUILD /* FeedParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEEDPARSER1234567890FILE /* FeedParser.swift */; };
 			5C5C5C5C6D6D6D6D7E7E7E7E /* FeedFetcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F8F8F8F9A9A9A9ABBBBBBBB /* FeedFetcher.swift */; };
+			A1B2C3D4E5F6A7B8C9D0E1F2 /* FeedToWOMAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2E1D0C9B8A7F6E5D4C3B2A1 /* FeedToWOMAdapter.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -88,6 +89,7 @@
 			F4F4F4F4F5F5F5F5F6F6F6F6 /* FeedSubscriptionStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedSubscriptionStore.swift; sourceTree = "<group>"; };
 			FEEDPARSER1234567890FILE /* FeedParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedParser.swift; sourceTree = "<group>"; };
 			8F8F8F8F9A9A9A9ABBBBBBBB /* FeedFetcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedFetcher.swift; sourceTree = "<group>"; };
+		F2E1D0C9B8A7F6E5D4C3B2A1 /* FeedToWOMAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedToWOMAdapter.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -107,6 +109,7 @@
 				F4F4F4F4F5F5F5F5F6F6F6F6 /* FeedSubscriptionStore.swift */,
 				FEEDPARSER1234567890FILE /* FeedParser.swift */,
 				8F8F8F8F9A9A9A9ABBBBBBBB /* FeedFetcher.swift */,
+				F2E1D0C9B8A7F6E5D4C3B2A1 /* FeedToWOMAdapter.swift */,
 			);
 			path = Feed;
 			sourceTree = "<group>";
@@ -340,6 +343,7 @@
 				F1F1F1F1F2F2F2F2F3F3F3F3 /* FeedSubscriptionStore.swift in Sources */,
 				FEEDPARSER1234567890BUILD /* FeedParser.swift in Sources */,
 				5C5C5C5C6D6D6D6D7E7E7E7E /* FeedFetcher.swift in Sources */,
+				A1B2C3D4E5F6A7B8C9D0E1F2 /* FeedToWOMAdapter.swift in Sources */,
 				DF00A7A6ADD9370AF764D3D9 /* IRCClient.swift in Sources */,
 				DC9D1DFA06EEFA62B253FD57 /* IRCConnectionConfig.swift in Sources */,
 				EFAE2659F2ED47FD1DE8817C /* IRCEvent.swift in Sources */,
