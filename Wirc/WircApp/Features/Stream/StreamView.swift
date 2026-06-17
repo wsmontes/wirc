@@ -256,7 +256,7 @@ struct MessageCard: View {
         }
         .background(DesignSystem.Colors.surface)
         .clipShape(RoundedRectangle(cornerRadius: DesignSystem.Radius.card))
-        .shadow(color: .black.opacity(0.04), radius: 2, y: 1)
+        .overlay(RoundedRectangle(cornerRadius: DesignSystem.Radius.card).stroke(DesignSystem.Colors.border, lineWidth: 0.5))
         .padding(.horizontal, DesignSystem.Spacing.lg)
         .padding(.vertical, DesignSystem.Spacing.sm)
         .sheet(isPresented: $showInspector) {

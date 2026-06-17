@@ -36,7 +36,7 @@ struct FeedCard: View {
         }
         .background(DesignSystem.Colors.surface)
         .clipShape(RoundedRectangle(cornerRadius: DesignSystem.Radius.card))
-        .shadow(color: .black.opacity(0.04), radius: 2, y: 1)
+        .overlay(RoundedRectangle(cornerRadius: DesignSystem.Radius.card).stroke(DesignSystem.Colors.border, lineWidth: 0.5))
         .padding(.horizontal, DesignSystem.Spacing.lg)
         .padding(.vertical, DesignSystem.Spacing.sm)
         .sheet(isPresented: $showInspector) {
@@ -442,22 +442,16 @@ struct FeedCard: View {
 // MARK: - HTML stripping helper
 
 extension String {
+    /// Fast HTML tag stripper — uses regex only, never NSAttributedString
+    /// (which blocks the main thread when called during scroll rendering).
     var stripHTML: String {
-        guard let data = data(using: .utf8) else { return self }
-        if let plain = try? NSAttributedString(
-            data: data,
-            options: [.documentType: NSAttributedString.DocumentType.html],
-            documentAttributes: nil
-        ).string {
-            return plain
-        }
-        // Fallback: basic regex strip
-        return replacingOccurrences(of: "<[^>]+>", with: "", options: .regularExpression)
+        replacingOccurrences(of: "<[^>]+>", with: "", options: .regularExpression)
             .replacingOccurrences(of: "&amp;", with: "&")
             .replacingOccurrences(of: "&lt;", with: "<")
             .replacingOccurrences(of: "&gt;", with: ">")
             .replacingOccurrences(of: "&quot;", with: "\"")
             .replacingOccurrences(of: "&#39;", with: "'")
+            .replacingOccurrences(of: "&nbsp;", with: " ")
             .trimmingCharacters(in: .whitespacesAndNewlines)
     }
 }

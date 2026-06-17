@@ -426,6 +426,7 @@
 			files = (
 				B9D9F45CF4E0337214450B94 /* SuggestedChannels.json in Resources */,
 				57935944E52BD16C7D829850 /* SuggestedServers.json in Resources */,
+				67207DDCC898482FBF633D96 /* DefaultFeeds.json in Resources */,
 				EC8AF2CDF21393C5E26B11D3 /* mastodon_config.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
