@@ -1,8 +1,10 @@
 import SwiftUI
+import BackgroundTasks
 
 @main
 struct WircApp: App {
     @State private var appState = AppState()
+    @Environment(\.scenePhase) private var scenePhase
 
     var body: some Scene {
         WindowGroup {
@@ -23,6 +25,32 @@ struct WircApp: App {
                     }
             }
             .environment(appState)
+            .onAppear {
+                registerBackgroundTasks()
+                appState.scheduleNextRefresh()
+                Task {
+                    await appState.refreshAllFeeds()
+                }
+            }
+        }
+    }
+
+    private func registerBackgroundTasks() {
+        BGTaskScheduler.shared.register(
+            forTaskWithIdentifier: "com.wirc.feed-refresh",
+            using: nil
+        ) { task in
+            guard let refreshTask = task as? BGAppRefreshTask else { return }
+
+            Task {
+                await appState.refreshAllFeeds()
+                refreshTask.setTaskCompleted(success: true)
+                appState.scheduleNextRefresh()
+            }
+
+            refreshTask.expirationHandler = {
+                refreshTask.setTaskCompleted(success: false)
+            }
         }
     }
 }
