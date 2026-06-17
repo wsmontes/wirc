@@ -92,7 +92,7 @@ struct MessageView: View {
                             case .message(let object):
                                 MessageBubble(object: object)
                             case .system(let object):
-                                SystemEventRow(object: object)
+                                SystemEventPill(object: object)
                             }
                         }
                     }
@@ -185,9 +185,11 @@ struct MessageView: View {
 struct MessageBubble: View {
     let object: WOMObject
 
-    private var isFromLocalUser: Bool { object.provenance?.origin == "localUser" }
+    private var isFromLocalUser: Bool { object.provenance?.isLocalUser ?? false }
     private var senderName: String { object.attributedTo?.name ?? object.data["nick"] ?? "unknown" }
     private var text: String { object.content?.text ?? "" }
+    private var network: String { object.data["network"] ?? "irc" }
+    private var sourceColor: Color { DesignSystem.Colors.forSource(network) }
 
     var body: some View {
         HStack(alignment: .top) {
@@ -196,15 +198,16 @@ struct MessageBubble: View {
             VStack(alignment: isFromLocalUser ? .trailing : .leading, spacing: 2) {
                 if !isFromLocalUser {
                     Text(senderName)
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
+                        .font(DesignSystem.Fonts.senderName)
+                        .foregroundStyle(sourceColor)
                 }
                 Text(text)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 6)
-                    .background(isFromLocalUser ? Color.blue : Color(.systemGray5))
-                    .foregroundStyle(isFromLocalUser ? .white : .primary)
-                    .clipShape(RoundedRectangle(cornerRadius: 14))
+                    .font(DesignSystem.Fonts.messageBody)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
+                    .background(isFromLocalUser ? sourceColor : DesignSystem.Colors.border.opacity(0.3))
+                    .foregroundStyle(isFromLocalUser ? .white : DesignSystem.Colors.ink)
+                    .clipShape(RoundedRectangle(cornerRadius: DesignSystem.Radius.bubble))
             }
             .contextMenu {
                 Button { UIPasteboard.general.string = text } label: {
@@ -224,9 +227,9 @@ struct MessageBubble: View {
     }
 }
 
-// MARK: - System Event Row
+// MARK: - System Event Pill
 
-struct SystemEventRow: View {
+struct SystemEventPill: View {
     let object: WOMObject
 
     private var text: String {
@@ -236,8 +239,7 @@ struct SystemEventRow: View {
 
         switch eventType {
         case "join":
-            let ch = object.data["channel"] ?? ""
-            return "→ \(nick) joined \(ch)"
+            return "→ \(nick) joined \(channel)"
         case "part":
             let reason = object.data["reason"]
             return "← \(nick) left\(reason.map { " (\($0))" } ?? "")"
@@ -264,41 +266,16 @@ struct SystemEventRow: View {
         }
     }
 
-    private var icon: String {
-        switch object.data["eventType"] ?? object.data["event"] ?? "" {
-        case "join": return "arrow.right.circle"
-        case "part", "quit": return "arrow.left.circle"
-        case "kick": return "xmark.circle"
-        case "nick": return "arrow.triangle.swap"
-        case "topic": return "pencil"
-        case "mode": return "gearshape"
-        default: return "info.circle"
-        }
-    }
-
-    private var color: Color {
-        switch object.data["eventType"] ?? object.data["event"] ?? "" {
-        case "join": return .green
-        case "part", "quit": return .orange
-        case "kick": return .red
-        case "nick": return .blue
-        case "topic": return .purple
-        default: return .secondary
-        }
-    }
-
     var body: some View {
-        HStack(spacing: 6) {
-            Image(systemName: icon)
-                .font(.caption2)
-                .foregroundStyle(color)
-            Text(text)
-                .font(.caption2)
-                .foregroundStyle(.secondary)
-        }
-        .padding(.vertical, 2)
-        .padding(.horizontal, 4)
-        .frame(maxWidth: .infinity, alignment: .leading)
+        Text(text)
+            .font(DesignSystem.Fonts.systemEvent)
+            .foregroundStyle(DesignSystem.Colors.pencil)
+            .padding(.horizontal, DesignSystem.Spacing.md)
+            .padding(.vertical, DesignSystem.Spacing.xs)
+            .background(DesignSystem.Colors.border.opacity(0.5))
+            .clipShape(Capsule())
+            .frame(maxWidth: .infinity, alignment: .center)
+            .padding(.vertical, 2)
     }
 }
 
