@@ -68,7 +68,7 @@ struct StreamView: View {
                                     SystemEventPill(object: object)
                                         .padding(.vertical, 2)
                                 } else if object.type.contains("wom:Message") && !object.type.contains("wom:SystemEvent") {
-                                    MessageCard(object: object)
+                                    MessageCard(object: object, onTapChannel: { showingChannelPicker = true })
                                 } else {
                                     FeedCard(post: object)
                                 }
@@ -80,15 +80,6 @@ struct StreamView: View {
             }
             .background(DesignSystem.Colors.page)
             .navigationTitle("Stream")
-            .navigationDestination(for: ChatRoute.self) { route in
-                switch route {
-                case .userChannel(let serverId, let serverHost, let channel):
-                    MessageView(serverId: serverId, serverHost: serverHost, conversation: .channel(channel))
-                case .globalChannel(let serverHost, let serverPort, let serverUseTLS, let channel):
-                    let sid = findOrCreateServerID(host: serverHost, port: serverPort, useTLS: serverUseTLS)
-                    MessageView(serverId: sid, serverHost: serverHost, conversation: .channel(channel))
-                }
-            }
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button { showingChannelPicker = true } label: {
@@ -185,15 +176,11 @@ struct StreamView: View {
 
 struct MessageCard: View {
     let object: WOMObject
+    var onTapChannel: (() -> Void)? = nil
     @State private var showInspector = false
-    @Environment(AppState.self) private var appState
 
     private var network: String { object.data["network"] ?? "irc" }
     private var sourceColor: Color { DesignSystem.Colors.forSource(network) }
-
-    private func serverId(for host: String) -> UUID {
-        appState.servers.first(where: { $0.host == host })?.id ?? UUID()
-    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -248,14 +235,11 @@ struct MessageCard: View {
                 Spacer(minLength: 40)
             }
 
-            // Footer
-            if let channel = object.data["channel"], let server = object.data["server"] {
-                // Look up serverId from configured servers for this host
-                NavigationLink(value: ChatRoute.userChannel(
-                    serverId: serverId(for: server),
-                    serverHost: server,
-                    channel: channel
-                )) {
+            // Footer — tappable channel opens filter sheet
+            if let channel = object.data["channel"] {
+                Button {
+                    onTapChannel?()
+                } label: {
                     HStack {
                         Text(channel)
                             .font(DesignSystem.Fonts.footer)
@@ -266,15 +250,7 @@ struct MessageCard: View {
                             .foregroundStyle(DesignSystem.Colors.pencil)
                     }
                 }
-                .padding(.horizontal, DesignSystem.Spacing.md)
-                .padding(.bottom, DesignSystem.Spacing.sm)
-            } else if let channel = object.data["channel"] {
-                HStack {
-                    Text(channel)
-                        .font(DesignSystem.Fonts.footer)
-                        .foregroundStyle(DesignSystem.Colors.pencil)
-                    Spacer()
-                }
+                .buttonStyle(.plain)
                 .padding(.horizontal, DesignSystem.Spacing.md)
                 .padding(.bottom, DesignSystem.Spacing.sm)
             }
