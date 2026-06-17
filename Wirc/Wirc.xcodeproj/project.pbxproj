@@ -21,6 +21,7 @@
 		3E814D0755AD1D8801399E5C /* WOMGovernance.swift in Sources */ = {isa = PBXBuildFile; fileRef = 080F7B7462FB8F4E7F90D92E /* WOMGovernance.swift */; };
 		3F838981C16016FD2DF0443C /* FeedCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02BFA0A70998650F4CAD3670 /* FeedCard.swift */; };
 		4DA3E8A6D23BBF6ED1126E17 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAE7D6E8E5F39710B7B47F82 /* SettingsView.swift */; };
+				C3D4E5F60718293A0B1C2D3E /* StreamView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2C3D4E5F60718293A0B1C2D /* StreamView.swift */; };
 		57935944E52BD16C7D829850 /* SuggestedServers.json in Resources */ = {isa = PBXBuildFile; fileRef = 2BA08C7EEC27E8FED76DCB54 /* SuggestedServers.json */; };
 		57D623F3F96FCC6090F802F2 /* WOMEnums.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45721F0D4168305EC5827852 /* WOMEnums.swift */; };
 		5A564F0F105370D5C227631C /* WOMReference.swift in Sources */ = {isa = PBXBuildFile; fileRef = 483BB0DC491D7758B7C2E381 /* WOMReference.swift */; };
@@ -124,6 +125,7 @@
 		EC2AB09D725C342CEACEAEF1 /* MastodonModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MastodonModels.swift; sourceTree = "<group>"; };
 		F48F757875C2347632356611 /* FeedToWOMAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedToWOMAdapter.swift; sourceTree = "<group>"; };
 		FDE1F18BDE942722566DA463 /* DebugView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugView.swift; sourceTree = "<group>"; };
+		B2C3D4E5F60718293A0B1C2D /* StreamView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -201,9 +203,18 @@
 				C9E9DB7C2281B09165AD78FD /* Debug */,
 				88F4DD70905DEE09FC3CBF1B /* Feed */,
 				CC45187C8720D690484C4929 /* Settings */,
+				A1B2C3D4E5F60718293A0B1C /* Stream */,
 				3F3BAAE714EFDB70F4D078D0 /* Shared */,
 			);
 			path = Features;
+			sourceTree = "<group>";
+		};
+		A1B2C3D4E5F60718293A0B1C /* Stream */ = {
+			isa = PBXGroup;
+			children = (
+				B2C3D4E5F60718293A0B1C2D /* StreamView.swift */,
+			);
+			path = Stream;
 			sourceTree = "<group>";
 		};
 		4E0777227E87289411EBA1CB /* Chat */ = {
@@ -432,6 +443,7 @@
 				7EC94869472B0565F65A371D /* RemoteIdentity.swift in Sources */,
 				89545409416029AA5D6EF14F /* ServerOrchestrator.swift in Sources */,
 				4DA3E8A6D23BBF6ED1126E17 /* SettingsView.swift in Sources */,
+					C3D4E5F60718293A0B1C2D3E /* StreamView.swift in Sources */,
 				5ACE5505CCF4639B50B95A91 /* SocialSignal.swift in Sources */,
 				B28C05DA310EF2AE7F9492A2 /* SuggestedChannels.swift in Sources */,
 				28F555CA915D88B0DB64E00F /* SuggestedServers.swift in Sources */,
