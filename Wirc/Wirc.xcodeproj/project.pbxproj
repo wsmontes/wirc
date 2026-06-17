@@ -66,6 +66,8 @@
 		EFAE2659F2ED47FD1DE8817C /* IRCEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD36B880B97E4EDF5E8A0309 /* IRCEvent.swift */; };
 		F3CA86BEEE333FE4E794472D /* WOMIdentity.swift in Sources */ = {isa = PBXBuildFile; fileRef = C94C2AC88AC3752EA7372150 /* WOMIdentity.swift */; };
 		FCA62EE42233B48D04936EE9 /* WOMKnowledge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E3FC8EAFB913B8F773D2FF0 /* WOMKnowledge.swift */; };
+		67207DDCC898482FBF633D96 /* DefaultFeeds.json in Resources */ = {isa = PBXBuildFile; fileRef = A71564092EE74C10B88563DC /* DefaultFeeds.json */; };
+		F9EFA01B3C3E4B74AF13043E /* DefaultFeedsLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A25279B4ED747D19F5B7540 /* DefaultFeedsLoader.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -130,6 +132,8 @@
 		B2C3D4E5F60718293A0B1C2D /* StreamView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamView.swift; sourceTree = "<group>"; };
 		A4B5C6D7E8F90019283A4B5D /* LibraryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryView.swift; sourceTree = "<group>"; };
 		E5F4A3B2C1D60718293A0B1E /* WorkshopView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkshopView.swift; sourceTree = "<group>"; };
+		A71564092EE74C10B88563DC /* DefaultFeeds.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = WircApp/Infrastructure/Feed/DefaultFeeds.json; sourceTree = SOURCE_ROOT; };
+		6A25279B4ED747D19F5B7540 /* DefaultFeedsLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WircApp/Infrastructure/Feed/DefaultFeedsLoader.swift; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -447,6 +451,7 @@
 				9A32DFFC6C0109974EA32C25 /* FeedSubscription.swift in Sources */,
 				6794DF1FEFEEF119002734B6 /* FeedSubscriptionStore.swift in Sources */,
 				EB3E4FCDC74623DA8E2D0F0D /* FeedToWOMAdapter.swift in Sources */,
+				F9EFA01B3C3E4B74AF13043E /* DefaultFeedsLoader.swift in Sources */,
 				97C3D31649C0B6A7776D3892 /* FeedView.swift in Sources */,
 				DF00A7A6ADD9370AF764D3D9 /* IRCClient.swift in Sources */,
 				DC9D1DFA06EEFA62B253FD57 /* IRCConnectionConfig.swift in Sources */,

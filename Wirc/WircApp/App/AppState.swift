@@ -87,6 +87,15 @@ final class AppState {
     init() {
         loadServers()
         loadMastodonAccounts()
+        // Preload ~200 default feeds if feed store is empty (first launch)
+        let loaded = DefaultFeedsLoader.loadIfEmpty(into: feedStore)
+        if loaded > 0 {
+            // Refresh all feeds in the background — batched to avoid UI block
+            Task { @MainActor [weak self] in
+                guard let self else { return }
+                await self.refreshAllFeedsBatched()
+            }
+        }
     }
 
     // MARK: - Server persistence
@@ -171,10 +180,29 @@ final class AppState {
             id: objectId,
             type: ["wom:Message"],
             createdAt: Date(),
+            schema: WOMSchema.message,
             attributedTo: WOMReference(id: "local:user", type: ["wom:Person"], name: config.nickname),
-            content: WOMContent(format: "text/plain", text: text),
+            content: WOMContent(format: "text/plain", text: text, language: "en"),
             data: ["network": "irc", "server": config.host, "channel": channel],
-            provenance: WOMProvenance(origin: "localUser", createdAt: Date(), confidence: 1.0, reviewStatus: "none")
+            provenance: .localUser(),
+            governance: WOMGovernance(
+                purpose: ["messaging"],
+                adsUse: WOMAdsUse.notAllowed.rawValue,
+                agentUse: "allowed",
+                sharing: WOMSharing.groupOnly.rawValue,
+                retention: "forever"
+            ),
+            classification: WOMClassification(
+                semanticType: "social.message",
+                dataSubject: "local_user",
+                origin: WOMOrigin.userProvided.rawValue,
+                sensitivity: WOMDataSensitivity.personal.rawValue
+            ),
+            bindings: WOMBindings(irc: WOMIRCBinding(
+                server: config.host,
+                channel: channel,
+                nick: config.nickname
+            ))
         )
         clients[serverId]?.sendMessage(text, to: channel)
         Task {
@@ -376,7 +404,14 @@ final class AppState {
                 let adapter = MastodonToWOMAdapter(instanceURL: client.config.instanceURL)
                 let obj = adapter.convert(status: status)
                 var localObj = obj
-                localObj.provenance = WOMProvenance(origin: "localUser", createdAt: Date(), confidence: 1.0)
+                localObj.provenance = .localUser()
+                localObj.governance = WOMGovernance(
+                    purpose: ["messaging"],
+                    adsUse: WOMAdsUse.notAllowed.rawValue,
+                    agentUse: "allowed",
+                    sharing: WOMSharing.public.rawValue,
+                    retention: "forever"
+                )
                 try? await store.save(localObj)
                 womObjects.append(localObj)
             } catch {
@@ -467,6 +502,21 @@ final class AppState {
             // Fetch lazily — just store the subscription; first refresh picks up items
         }
         return count
+    }
+
+    /// Refresh all feeds in small batches, yielding to the main thread between each
+    /// to prevent UI freezes when processing hundreds of feeds with thousands of items.
+    func refreshAllFeedsBatched() async {
+        let all = feedStore.getAll()
+        let batchSize = 5
+        for batch in stride(from: 0, to: all.count, by: batchSize) {
+            let end = min(batch + batchSize, all.count)
+            for i in batch..<end {
+                await refreshFeed(all[i])
+            }
+            // Yield to the main thread between batches
+            try? await Task.sleep(for: .milliseconds(100))
+        }
     }
 
     func refreshAllFeeds() async {
