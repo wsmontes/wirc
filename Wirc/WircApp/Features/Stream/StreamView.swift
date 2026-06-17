@@ -13,7 +13,9 @@ struct StreamView: View {
         case media = "Media"
     }
 
-    /// All objects in reverse chronological order.
+    /// Capped timeline — last 200 objects, reverse chronological.
+    private let maxTimelineItems = 200
+
     private var timeline: [WOMObject] {
         let objects = appState.womObjects
         let filtered: [WOMObject]
@@ -31,7 +33,7 @@ struct StreamView: View {
                 !obj.attachments.isEmpty
             }
         }
-        return filtered.sorted { $0.createdAt > $1.createdAt }
+        return Array(filtered.sorted { $0.createdAt > $1.createdAt }.prefix(maxTimelineItems))
     }
 
     /// Whether any IRC server is currently online.
@@ -45,51 +47,48 @@ struct StreamView: View {
     }
 
     var body: some View {
-        NavigationStack {
-            VStack(spacing: 0) {
-                // Connection status bar (only when disconnected with servers configured)
-                if !hasOnlineServer && hasServersConfigured {
-                    connectionStatusBar
-                }
+        VStack(spacing: 0) {
+            // Connection status bar
+            if !hasOnlineServer && hasServersConfigured {
+                connectionStatusBar
+            }
 
-                // Filter chips
-                filterBar
-                    .padding(.horizontal, DesignSystem.Spacing.lg)
-                    .padding(.vertical, DesignSystem.Spacing.sm)
+            // Filter chips
+            filterBar
+                .padding(.horizontal, DesignSystem.Spacing.lg)
+                .padding(.vertical, DesignSystem.Spacing.sm)
 
-                // Timeline
-                if timeline.isEmpty {
-                    emptyState
-                } else {
-                    ScrollView {
-                        LazyVStack(spacing: 0) {
-                            ForEach(timeline) { object in
-                                if object.type.contains("wom:SystemEvent") {
-                                    SystemEventPill(object: object)
-                                        .padding(.vertical, 2)
-                                } else if object.type.contains("wom:Message") && !object.type.contains("wom:SystemEvent") {
-                                    MessageCard(object: object, onTapChannel: { showingChannelPicker = true })
-                                } else {
-                                    FeedCard(post: object)
-                                }
+            // Timeline
+            if timeline.isEmpty {
+                emptyState
+            } else {
+                ScrollView {
+                    LazyVStack(spacing: 0) {
+                        ForEach(timeline) { object in
+                            if object.type.contains("wom:SystemEvent") {
+                                SystemEventPill(object: object)
+                                    .padding(.vertical, 2)
+                            } else if object.type.contains("wom:Message") && !object.type.contains("wom:SystemEvent") {
+                                MessageCard(object: object, onTapChannel: { showingChannelPicker = true })
+                            } else {
+                                FeedCard(post: object)
                             }
                         }
-                        .padding(.vertical, DesignSystem.Spacing.lg)
                     }
+                    .padding(.vertical, DesignSystem.Spacing.lg)
                 }
             }
-            .background(DesignSystem.Colors.page)
-            .navigationTitle("Stream")
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button { showingChannelPicker = true } label: {
-                        Image(systemName: "line.3.horizontal.decrease")
-                    }
+        }
+        .background(DesignSystem.Colors.page)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button { showingChannelPicker = true } label: {
+                    Image(systemName: "line.3.horizontal.decrease")
                 }
             }
-            .sheet(isPresented: $showingChannelPicker) {
-                ChannelFilterView()
-            }
+        }
+        .sheet(isPresented: $showingChannelPicker) {
+            ChannelFilterView()
         }
     }
 
