@@ -22,6 +22,19 @@ struct FeedCard: View {
         network == "rss"
     }
 
+    private var isBoost: Bool {
+        post.type.contains("wom:Boost")
+    }
+
+    private var networkDisplayName: String {
+        switch network.lowercased() {
+        case "rss": return "RSS"
+        case "irc": return "IRC"
+        case "mastodon": return "Mastodon"
+        default: return network.capitalized
+        }
+    }
+
     var body: some View {
         if isYouTubeVideo {
             youTubeCard
@@ -221,6 +234,14 @@ struct FeedCard: View {
                     .foregroundStyle(.secondary)
             }
 
+            // Boost indicator (Mastodon reblogs)
+            if isBoost, let booster = post.data["boostedByDisplayName"], !booster.isEmpty {
+                Label("\(booster) boosted", systemImage: "arrow.2.squarepath")
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+                    .foregroundStyle(.green)
+            }
+
             // Title (RSS posts have a name/headline)
             if let name = post.name, !name.isEmpty,
                name != post.content?.text {
@@ -278,7 +299,7 @@ struct FeedCard: View {
                 HStack(spacing: 2) {
                     Image(systemName: networkIcon)
                         .font(.caption2)
-                    Text(post.data["via"] ?? network.capitalized)
+                    Text(post.data["via"] ?? networkDisplayName)
                         .font(.caption2)
                 }
                 .foregroundStyle(.tertiary)
