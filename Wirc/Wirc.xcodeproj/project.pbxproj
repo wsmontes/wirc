@@ -43,6 +43,7 @@
 		444444445555555566666666 /* FeedSubscription.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDEEEEEEEEFFFFFFFF /* FeedSubscription.swift */; };
 			E7D6C5B4A3F2918071655443 /* JSONFileStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7B8C9D0E1F2233445566778 /* JSONFileStore.swift */; };
 			F1F1F1F1F2F2F2F2F3F3F3F3 /* FeedSubscriptionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4F4F4F4F5F5F5F5F6F6F6F6 /* FeedSubscriptionStore.swift */; };
+			FEEDPARSER1234567890BUILD /* FeedParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEEDPARSER1234567890FILE /* FeedParser.swift */; };
 			5C5C5C5C6D6D6D6D7E7E7E7E /* FeedFetcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F8F8F8F9A9A9A9ABBBBBBBB /* FeedFetcher.swift */; };
 /* End PBXBuildFile section */
 
@@ -85,6 +86,7 @@
 		DDDDDDDDEEEEEEEEFFFFFFFF /* FeedSubscription.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedSubscription.swift; sourceTree = "<group>"; };
 			A7B8C9D0E1F2233445566778 /* JSONFileStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSONFileStore.swift; sourceTree = "<group>"; };
 			F4F4F4F4F5F5F5F5F6F6F6F6 /* FeedSubscriptionStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedSubscriptionStore.swift; sourceTree = "<group>"; };
+			FEEDPARSER1234567890FILE /* FeedParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedParser.swift; sourceTree = "<group>"; };
 			8F8F8F8F9A9A9A9ABBBBBBBB /* FeedFetcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedFetcher.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -103,6 +105,7 @@
 				BBBBBBBBCCCCCCCCDDDDDDDD /* FeedItem.swift */,
 				DDDDDDDDEEEEEEEEFFFFFFFF /* FeedSubscription.swift */,
 				F4F4F4F4F5F5F5F5F6F6F6F6 /* FeedSubscriptionStore.swift */,
+				FEEDPARSER1234567890FILE /* FeedParser.swift */,
 				8F8F8F8F9A9A9A9ABBBBBBBB /* FeedFetcher.swift */,
 			);
 			path = Feed;
@@ -335,6 +338,7 @@
 				AAAAAAAAAABBBBBBBBCCCCCCCC /* FeedItem.swift in Sources */,
 				444444445555555566666666 /* FeedSubscription.swift in Sources */,
 				F1F1F1F1F2F2F2F2F3F3F3F3 /* FeedSubscriptionStore.swift in Sources */,
+				FEEDPARSER1234567890BUILD /* FeedParser.swift in Sources */,
 				5C5C5C5C6D6D6D6D7E7E7E7E /* FeedFetcher.swift in Sources */,
 				DF00A7A6ADD9370AF764D3D9 /* IRCClient.swift in Sources */,
 				DC9D1DFA06EEFA62B253FD57 /* IRCConnectionConfig.swift in Sources */,
