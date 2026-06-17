@@ -39,6 +39,8 @@
 		DF00A7A6ADD9370AF764D3D9 /* IRCClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9C0B724FA14588CD378CBD1 /* IRCClient.swift */; };
 		E507E3CC098099E1AACAB37A /* AddServerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 354688CFC206205439A3FFFF /* AddServerView.swift */; };
 		EFAE2659F2ED47FD1DE8817C /* IRCEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD36B880B97E4EDF5E8A0309 /* IRCEvent.swift */; };
+		AAAAAAAAAABBBBBBBBCCCCCCCC /* FeedItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBBBBBBBCCCCCCCCDDDDDDDD /* FeedItem.swift */; };
+		444444445555555566666666 /* FeedSubscription.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDEEEEEEEEFFFFFFFF /* FeedSubscription.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -76,6 +78,8 @@
 		DAE7D6E8E5F39710B7B47F82 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		DD36B880B97E4EDF5E8A0309 /* IRCEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IRCEvent.swift; sourceTree = "<group>"; };
 		FDE1F18BDE942722566DA463 /* DebugView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugView.swift; sourceTree = "<group>"; };
+		BBBBBBBBCCCCCCCCDDDDDDDD /* FeedItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedItem.swift; sourceTree = "<group>"; };
+		DDDDDDDDEEEEEEEEFFFFFFFF /* FeedSubscription.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedSubscription.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -85,6 +89,15 @@
 				49FCCA37D5C72DCC660EA0C9 /* WircApp */,
 				FFC8696CE1066C637F57B71F /* Products */,
 			);
+			sourceTree = "<group>";
+		};
+		777777778888888899999999 /* Feed */ = {
+			isa = PBXGroup;
+			children = (
+				BBBBBBBBCCCCCCCCDDDDDDDD /* FeedItem.swift */,
+				DDDDDDDDEEEEEEEEFFFFFFFF /* FeedSubscription.swift */,
+			);
+			path = Feed;
 			sourceTree = "<group>";
 		};
 		1339EE67F10569CE15BD969C /* Persistence */ = {
@@ -172,6 +185,7 @@
 		9C0147EDB6A337029D8E056C /* Infrastructure */ = {
 			isa = PBXGroup;
 			children = (
+				777777778888888899999999 /* Feed */,
 				9D6E03E92B2659AB6B6A9176 /* IRC */,
 				1339EE67F10569CE15BD969C /* Persistence */,
 			);
@@ -309,6 +323,8 @@
 				1614A2CBB02FDFECE1C3043F /* DebugView.swift in Sources */,
 				3F838981C16016FD2DF0443C /* FeedCard.swift in Sources */,
 				97C3D31649C0B6A7776D3892 /* FeedView.swift in Sources */,
+				AAAAAAAAAABBBBBBBBCCCCCCCC /* FeedItem.swift in Sources */,
+				444444445555555566666666 /* FeedSubscription.swift in Sources */,
 				DF00A7A6ADD9370AF764D3D9 /* IRCClient.swift in Sources */,
 				DC9D1DFA06EEFA62B253FD57 /* IRCConnectionConfig.swift in Sources */,
 				EFAE2659F2ED47FD1DE8817C /* IRCEvent.swift in Sources */,
