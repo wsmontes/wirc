@@ -38,7 +38,7 @@ final class JSONFileStore: WOMStore, @unchecked Sendable {
     // MARK: - WOMStore
 
     func save(_ object: WOMObject) async throws {
-        try await withCheckedThrowingContinuation { continuation in
+        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
             queue.async(flags: .barrier) { [weak self] in
                 guard let self else {
                     continuation.resume(throwing: JSONFileStoreError.deallocated)
@@ -56,7 +56,7 @@ final class JSONFileStore: WOMStore, @unchecked Sendable {
     }
 
     func saveMany(_ objects: [WOMObject]) async throws {
-        try await withCheckedThrowingContinuation { continuation in
+        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
             queue.async(flags: .barrier) { [weak self] in
                 guard let self else {
                     continuation.resume(throwing: JSONFileStoreError.deallocated)
@@ -89,7 +89,7 @@ final class JSONFileStore: WOMStore, @unchecked Sendable {
     }
 
     func delete(id: String) async throws {
-        try await withCheckedThrowingContinuation { continuation in
+        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
             queue.async(flags: .barrier) { [weak self] in
                 guard let self else {
                     continuation.resume(throwing: JSONFileStoreError.deallocated)

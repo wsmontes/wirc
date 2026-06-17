@@ -29,7 +29,7 @@ enum FeedError: Error, LocalizedError {
 
 // MARK: - FeedFetcher
 
-final class FeedFetcher {
+final class FeedFetcher: @unchecked Sendable {
     private let session: URLSession
 
     init() {

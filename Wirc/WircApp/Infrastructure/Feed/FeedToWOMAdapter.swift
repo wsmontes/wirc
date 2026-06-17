@@ -3,7 +3,7 @@ import Foundation
 /// Converts parsed FeedItems into WOMObjects.
 /// Type mapping is driven by the subscription's sourceType.
 /// Mirrors IRCToWOMAdapter in pattern.
-final class FeedToWOMAdapter {
+final class FeedToWOMAdapter: @unchecked Sendable {
 
     /// Convert feed items to WOM objects, skipping items already in the store (dedup by canonicalUrl).
     func convert(
@@ -77,7 +77,6 @@ final class FeedToWOMAdapter {
                 text: item.description ?? ""
             ),
             data: data,
-            attachments: attachments,
             provenance: WOMProvenance(
                 origin: "remotePeer",
                 source: WOMReference(
@@ -87,7 +86,8 @@ final class FeedToWOMAdapter {
                 createdAt: Date(),
                 confidence: 1.0,
                 reviewStatus: "none"
-            )
+            ),
+            attachments: attachments
         )
     }
 

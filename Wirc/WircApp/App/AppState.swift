@@ -1,5 +1,6 @@
 import SwiftUI
 import Observation
+import BackgroundTasks
 
 @Observable
 @MainActor
@@ -10,7 +11,7 @@ final class AppState {
     }
 
     // MARK: - WOM Store
-    let store: WOMStore = InMemoryWOMStore()
+    let store: WOMStore = JSONFileStore()
 
     // MARK: - IRC Clients
     private var clients: [UUID: IRCClient] = [:]
@@ -22,10 +23,35 @@ final class AppState {
     var channelTopics: [String: ChannelTopic] = [:]
     var channelUsers: [String: [ChannelUser]] = [:]
     var joinedChannels: [UUID: [String]] = [:]  // serverId → [channel names]
+    var serverChannelList: [UUID: [ListedChannel]] = [:]  // serverId → LIST results
+    var isListing: [UUID: Bool] = [:]
+
+    struct ListedChannel: Hashable, Identifiable {
+        var id: String { name }
+        let name: String
+        let users: Int
+        let topic: String
+    }
 
     // MARK: - Debug logs
     var rawEvents: [DebugRawEvent] = []
     var womObjects: [WOMObject] = []
+
+    // MARK: - Server Orchestrator
+    var orchestrator = ServerOrchestrator(servers: SuggestedServersLoader.servers)
+
+    // MARK: - Feed (RSS/Atom)
+    let feedStore = FeedSubscriptionStore()
+    private let feedFetcher = FeedFetcher()
+    private let feedAdapter = FeedToWOMAdapter()
+
+    // MARK: - Mastodon
+    var mastodonAccounts: [MastodonServerConfig] = [] {
+        didSet { saveMastodonAccounts() }
+    }
+    private var mastodonClients: [UUID: MastodonClient] = [:]
+    var feedLoading = false
+    var feedError: String?
 
     // MARK: - Adapters
     private let ircToWOM = IRCToWOMAdapter()
@@ -58,7 +84,10 @@ final class AppState {
 
     // MARK: - Init
 
-    init() { loadServers() }
+    init() {
+        loadServers()
+        loadMastodonAccounts()
+    }
 
     // MARK: - Server persistence
 
@@ -102,6 +131,29 @@ final class AppState {
         }
     }
 
+    /// Connect to a server if needed, then join a channel once online.
+    func connectAndJoin(channel: String, serverId: UUID) {
+        let ch = channel.hasPrefix("#") ? channel : "#\(channel)"
+        if !(joinedChannels[serverId]?.contains(ch) ?? false) {
+            joinedChannels[serverId, default: []].append(ch)
+        }
+        switch connectionStates[serverId] ?? .disconnected {
+        case .online:
+            clients[serverId]?.join(channel: ch)
+        case .connecting:
+            break // Will join when .connected fires
+        case .disconnected:
+            connect(to: serverId) // Will join when .connected fires
+        }
+    }
+
+    func fetchChannelList(serverId: UUID) {
+        guard let client = clients[serverId] else { return }
+        serverChannelList[serverId] = []
+        isListing[serverId] = true
+        client.listChannels()
+    }
+
     func partChannel(_ channel: String, serverId: UUID) {
         let ch = channel.hasPrefix("#") ? channel : "#\(channel)"
         clients[serverId]?.part(channel: ch)
@@ -139,11 +191,19 @@ final class AppState {
         switch event {
         case .connected:
             connectionStates[serverId] = .online
-            // Track auto-join channels
+            // Join all pending channels
+            if let pending = joinedChannels[serverId] {
+                for ch in pending {
+                    clients[serverId]?.join(channel: ch)
+                }
+            }
+            // Also join auto-join from config
             if let cfg = servers.first(where: { $0.id == serverId }) {
                 for ch in cfg.autoJoinChannels {
-                    if !(joinedChannels[serverId]?.contains(ch) ?? false) {
-                        joinedChannels[serverId, default: []].append(ch)
+                    let c = ch.hasPrefix("#") ? ch : "#\(ch)"
+                    if !(joinedChannels[serverId]?.contains(c) ?? false) {
+                        joinedChannels[serverId, default: []].append(c)
+                        clients[serverId]?.join(channel: c)
                     }
                 }
             }
@@ -202,6 +262,13 @@ final class AppState {
         case .kick(let channel, let nick, _, _):
             let key = channelKey(serverId: serverId, channel: channel)
             channelUsers[key]?.removeAll { $0.nick == nick }
+        case .listStart:
+            serverChannelList[serverId] = []
+            isListing[serverId] = true
+        case .listItem(let channel, let users, let topic):
+            serverChannelList[serverId, default: []].append(ListedChannel(name: channel, users: users, topic: topic))
+        case .listEnd:
+            isListing[serverId] = false
         default:
             break
         }
@@ -214,6 +281,267 @@ final class AppState {
                 womObjects.append(contentsOf: objects)
             }
         }
+    }
+
+    // MARK: - Mastodon
+
+    private let mastodonAccountsKey = "wirc.mastodonAccounts"
+
+    private func saveMastodonAccounts() {
+        guard let d = try? JSONEncoder().encode(mastodonAccounts) else { return }
+        UserDefaults.standard.set(d, forKey: mastodonAccountsKey)
+    }
+
+    private func loadMastodonAccounts() {
+        // 1. Load from UserDefaults (manually added accounts)
+        if let d = UserDefaults.standard.data(forKey: mastodonAccountsKey),
+           let a = try? JSONDecoder().decode([MastodonServerConfig].self, from: d),
+           !a.isEmpty {
+            mastodonAccounts = a
+        }
+        // 2. Also load from bundle config file (auto-installed)
+        else if let url = Bundle.main.url(forResource: "mastodon_config", withExtension: "json"),
+                let data = try? Data(contentsOf: url),
+                let cfg = try? JSONDecoder().decode(MastodonServerConfig.self, from: data) {
+            mastodonAccounts = [cfg]
+            saveMastodonAccounts()
+        } else {
+            return
+        }
+        // Init clients and refresh
+        for acct in mastodonAccounts {
+            mastodonClients[acct.id] = MastodonClient(config: acct)
+        }
+        Task { @MainActor in
+            try? await Task.sleep(for: .seconds(1))
+            for acct in mastodonAccounts {
+                refreshMastodonFeed(accountId: acct.id)
+            }
+        }
+    }
+
+    func addMastodonAccount(name: String, instanceURL: String, token: String) {
+        let c = MastodonServerConfig(name: name, instanceURL: instanceURL, accessToken: token)
+        mastodonAccounts.append(c)
+        mastodonClients[c.id] = MastodonClient(config: c)
+        refreshMastodonFeed(accountId: c.id)
+    }
+
+    func removeMastodonAccount(id: UUID) {
+        mastodonAccounts.removeAll { $0.id == id }
+        mastodonClients.removeValue(forKey: id)
+    }
+
+    func refreshMastodonFeed(accountId: UUID) {
+        guard let client = mastodonClients[accountId] ?? {
+            if let acct = mastodonAccounts.first(where: { $0.id == accountId }) {
+                let c = MastodonClient(config: acct)
+                mastodonClients[accountId] = c
+                return c
+            }
+            return nil
+        }() else { return }
+
+        feedLoading = true
+        feedError = nil
+        let adapter = MastodonToWOMAdapter(instanceURL: client.config.instanceURL)
+
+        Task { @MainActor in
+            do {
+                let timeline = try await client.homeTimeline(limit: 40)
+                for status in timeline {
+                    let obj = adapter.convert(status: status)
+                    try? await store.save(obj)
+                    if !womObjects.contains(where: { $0.id == obj.id }) {
+                        womObjects.append(obj)
+                    }
+                }
+                feedLoading = false
+            } catch {
+                feedError = error.localizedDescription
+                feedLoading = false
+                rawEvents.append(DebugRawEvent(
+                    timestamp: Date(), server: client.config.instanceURL,
+                    raw: error.localizedDescription, parsedAs: "mastodon_error"
+                ))
+            }
+        }
+    }
+
+    func postToMastodon(_ text: String, accountId: UUID, visibility: String = "public") {
+        guard let client = mastodonClients[accountId] else { return }
+        Task { @MainActor in
+            do {
+                let status = try await client.postStatus(text, visibility: visibility)
+                let adapter = MastodonToWOMAdapter(instanceURL: client.config.instanceURL)
+                let obj = adapter.convert(status: status)
+                var localObj = obj
+                localObj.provenance = WOMProvenance(origin: "localUser", createdAt: Date(), confidence: 1.0)
+                try? await store.save(localObj)
+                womObjects.append(localObj)
+            } catch {
+                rawEvents.append(DebugRawEvent(
+                    timestamp: Date(), server: client.config.instanceURL,
+                    raw: error.localizedDescription, parsedAs: "mastodon_post_error"
+                ))
+            }
+        }
+    }
+
+    func boostMastodonStatus(_ statusId: String, accountId: UUID) {
+        guard let client = mastodonClients[accountId] else { return }
+        Task { @MainActor in
+            _ = try? await client.boost(statusId: statusId)
+        }
+    }
+
+    func favouriteMastodonStatus(_ statusId: String, accountId: UUID) {
+        guard let client = mastodonClients[accountId] else { return }
+        Task { @MainActor in
+            _ = try? await client.favourite(statusId: statusId)
+        }
+    }
+
+    // MARK: - Feed management
+
+    func addFeed(url: String, sourceType: FeedSourceType? = nil) async throws {
+        guard let feedURL = URL(string: url) else {
+            throw FeedError.invalidURL(url)
+        }
+
+        // Capture sendable references before crossing async boundaries
+        let fetcher = feedFetcher
+
+        // If it looks like a website URL, auto-discover
+        let finalURL: String
+        let detectedType: FeedSourceType
+
+        if url.hasSuffix(".xml") || url.hasSuffix(".rss") || url.contains("/feed") {
+            finalURL = url
+            detectedType = sourceType ?? .rss
+        } else {
+            let discovered = try await fetcher.discoverFeed(from: feedURL)
+            guard let first = discovered.first else {
+                throw FeedError.invalidURL("No feed found at \(url)")
+            }
+            finalURL = first.absoluteString
+            detectedType = sourceType ?? detectSourceType(from: finalURL)
+        }
+
+        // Create a temporary subscription to fetch title
+        var tempSub = FeedSubscription(feedURL: finalURL, sourceType: detectedType)
+        do {
+            let (data, _) = try await fetcher.fetch(subscription: tempSub)
+            let result = try FeedParser.parse(data: data, sourceURL: finalURL)
+            tempSub.title = result.title ?? finalURL
+        } catch {
+            tempSub.title = finalURL // use URL as fallback title
+        }
+
+        feedStore.add(tempSub)
+
+        // Fetch items for this feed immediately
+        Task { await refreshFeed(tempSub) }
+    }
+
+    func removeFeed(_ subscription: FeedSubscription) {
+        feedStore.remove(id: subscription.id)
+    }
+
+    func importOPML(data: Data) async throws -> Int {
+        let outlines = try feedFetcher.parseOPML(data)
+        var count = 0
+        for outline in outlines {
+            let xmlURL = outline.xmlURL
+            let sourceType = detectSourceType(from: xmlURL)
+            var tags: [String] = []
+            if let folder = outline.folderName { tags.append(folder) }
+            let sub = FeedSubscription(
+                feedURL: xmlURL,
+                title: outline.title ?? xmlURL,
+                sourceType: sourceType,
+                tags: tags
+            )
+            feedStore.add(sub)
+            count += 1
+            // Fetch lazily — just store the subscription; first refresh picks up items
+        }
+        return count
+    }
+
+    func refreshAllFeeds() async {
+        for sub in feedStore.subscriptions {
+            await refreshFeed(sub)
+        }
+    }
+
+    func discoverFeedURL(from url: String) async throws -> [String] {
+        guard let feedURL = URL(string: url) else {
+            throw FeedError.invalidURL(url)
+        }
+        let fetcher = feedFetcher
+        let discovered = try await fetcher.discoverFeed(from: feedURL)
+        return discovered.map { $0.absoluteString }
+    }
+
+    // MARK: - Feed refresh (private)
+
+    private let maxConsecutiveErrors = 5
+
+    private func refreshFeed(_ subscription: FeedSubscription) async {
+        let fetcher = feedFetcher
+        let adapter = feedAdapter
+        do {
+            let (data, response) = try await fetcher.fetch(subscription: subscription)
+
+            // Check for 304 Not Modified
+            if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 304 {
+                var sub = subscription
+                sub.lastFetchedAt = Date()
+                sub.errorCount = 0
+                feedStore.update(sub)
+                return
+            }
+
+            let result = try FeedParser.parse(data: data, sourceURL: subscription.feedURL)
+
+            // Update subscription with parsed title and headers
+            var sub = subscription
+            if let title = result.title { sub.title = title }
+            sub.lastFetchedAt = Date()
+            sub.errorCount = 0
+            if let httpResponse = response as? HTTPURLResponse {
+                sub.etag = httpResponse.allHeaderFields["ETag"] as? String ?? httpResponse.allHeaderFields["Etag"] as? String
+                sub.lastModified = httpResponse.allHeaderFields["Last-Modified"] as? String
+            }
+            feedStore.update(sub)
+
+            // Convert items to WOM and save
+            let objects = await adapter.convert(items: result.items, subscription: sub, store: store)
+            if !objects.isEmpty {
+                try? await store.saveMany(objects)
+                womObjects.append(contentsOf: objects)
+            }
+        } catch {
+            var sub = subscription
+            sub.errorCount += 1
+            sub.lastFetchedAt = Date()
+            feedStore.update(sub)
+        }
+    }
+
+    private func detectSourceType(from url: String) -> FeedSourceType {
+        if url.contains("youtube.com") { return .youtube }
+        if url.contains("github.com") { return .github }
+        // Check for podcast indicators in URL
+        if url.contains("/podcast") || url.contains("itunes") { return .podcast }
+        return .rss
+    }
+
+    func scheduleNextRefresh() {
+        let request = BGAppRefreshTaskRequest(identifier: "com.wirc.feed-refresh")
+        request.earliestBeginDate = Date(timeIntervalSinceNow: 30 * 60)
+        try? BGTaskScheduler.shared.submit(request)
     }
 
     // MARK: - Queries
