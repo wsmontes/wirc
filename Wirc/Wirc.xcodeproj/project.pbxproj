@@ -22,6 +22,7 @@
 		3F838981C16016FD2DF0443C /* FeedCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02BFA0A70998650F4CAD3670 /* FeedCard.swift */; };
 		4DA3E8A6D23BBF6ED1126E17 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAE7D6E8E5F39710B7B47F82 /* SettingsView.swift */; };
 				C3D4E5F60718293A0B1C2D3E /* StreamView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2C3D4E5F60718293A0B1C2D /* StreamView.swift */; };
+		A4B5C6D7E8F90019283A4B5E /* LibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4B5C6D7E8F90019283A4B5D /* LibraryView.swift */; };
 		57935944E52BD16C7D829850 /* SuggestedServers.json in Resources */ = {isa = PBXBuildFile; fileRef = 2BA08C7EEC27E8FED76DCB54 /* SuggestedServers.json */; };
 		57D623F3F96FCC6090F802F2 /* WOMEnums.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45721F0D4168305EC5827852 /* WOMEnums.swift */; };
 		5A564F0F105370D5C227631C /* WOMReference.swift in Sources */ = {isa = PBXBuildFile; fileRef = 483BB0DC491D7758B7C2E381 /* WOMReference.swift */; };
@@ -126,6 +127,7 @@
 		F48F757875C2347632356611 /* FeedToWOMAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedToWOMAdapter.swift; sourceTree = "<group>"; };
 		FDE1F18BDE942722566DA463 /* DebugView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugView.swift; sourceTree = "<group>"; };
 		B2C3D4E5F60718293A0B1C2D /* StreamView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamView.swift; sourceTree = "<group>"; };
+		A4B5C6D7E8F90019283A4B5D /* LibraryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -204,6 +206,7 @@
 				88F4DD70905DEE09FC3CBF1B /* Feed */,
 				CC45187C8720D690484C4929 /* Settings */,
 				A1B2C3D4E5F60718293A0B1C /* Stream */,
+				A4B5C6D7E8F90019283A4B5C /* Library */,
 				3F3BAAE714EFDB70F4D078D0 /* Shared */,
 			);
 			path = Features;
@@ -215,6 +218,14 @@
 				B2C3D4E5F60718293A0B1C2D /* StreamView.swift */,
 			);
 			path = Stream;
+			sourceTree = "<group>";
+		};
+		A4B5C6D7E8F90019283A4B5C /* Library */ = {
+			isa = PBXGroup;
+			children = (
+				A4B5C6D7E8F90019283A4B5D /* LibraryView.swift */,
+			);
+			path = Library;
 			sourceTree = "<group>";
 		};
 		4E0777227E87289411EBA1CB /* Chat */ = {

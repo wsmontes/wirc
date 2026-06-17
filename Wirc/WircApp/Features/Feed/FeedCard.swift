@@ -441,7 +441,7 @@ struct FeedCard: View {
 
 // MARK: - HTML stripping helper
 
-private extension String {
+extension String {
     var stripHTML: String {
         guard let data = data(using: .utf8) else { return self }
         if let plain = try? NSAttributedString(
