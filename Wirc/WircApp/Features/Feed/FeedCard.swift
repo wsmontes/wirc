@@ -2,332 +2,440 @@ import SwiftUI
 
 struct FeedCard: View {
     let post: WOMObject
+    @State private var showInspector = false
+
+    // MARK: - Derived properties
 
     private var network: String { post.data["network"] ?? "" }
-    private var sourceType: String { post.data["sourceType"] ?? "" }
+
+    private var sourceColor: Color {
+        DesignSystem.Colors.forSource(network)
+    }
 
     private var isYouTubeVideo: Bool {
         post.type.contains("external.youtube.video")
     }
-
     private var isPodcastEpisode: Bool {
         post.type.contains("external.podcast.episode")
     }
-
     private var isGitHubRelease: Bool {
         post.type.contains("external.github.release")
     }
-
-    private var isRSS: Bool {
-        network == "rss"
-    }
-
     private var isBoost: Bool {
         post.type.contains("wom:Boost")
     }
 
+    // MARK: - Body
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            provenanceBadge
+            hairline
+            contentArea
+            if hasFooter { footerArea }
+        }
+        .background(DesignSystem.Colors.surface)
+        .clipShape(RoundedRectangle(cornerRadius: DesignSystem.Radius.card))
+        .shadow(color: .black.opacity(0.04), radius: 2, y: 1)
+        .padding(.horizontal, DesignSystem.Spacing.lg)
+        .padding(.vertical, DesignSystem.Spacing.sm)
+        .sheet(isPresented: $showInspector) {
+            ObjectInspectorSheet(object: post)
+        }
+    }
+
+    // MARK: - Provenance Badge
+
+    private var provenanceBadge: some View {
+        Button {
+            showInspector = true
+        } label: {
+            HStack(spacing: DesignSystem.Spacing.xs) {
+                Circle()
+                    .fill(sourceColor)
+                    .frame(width: 6, height: 6)
+                Text(networkDisplayName)
+                    .font(DesignSystem.Fonts.provenanceLabel)
+                    .foregroundStyle(DesignSystem.Colors.ink)
+                if !sourceDetail.isEmpty {
+                    Text("\u{00B7}")
+                        .foregroundStyle(DesignSystem.Colors.pencil)
+                    Text(sourceDetail)
+                        .font(DesignSystem.Fonts.provenanceDetail)
+                        .foregroundStyle(DesignSystem.Colors.pencil)
+                        .lineLimit(1)
+                }
+                Text("\u{00B7}")
+                    .foregroundStyle(DesignSystem.Colors.pencil)
+                Text(post.createdAt, style: .relative)
+                    .font(DesignSystem.Fonts.timestamp)
+                    .foregroundStyle(DesignSystem.Colors.pencil)
+            }
+            .padding(.horizontal, DesignSystem.Spacing.md)
+            .padding(.vertical, DesignSystem.Spacing.sm)
+        }
+        .buttonStyle(.plain)
+    }
+
     private var networkDisplayName: String {
         switch network.lowercased() {
-        case "rss": return "RSS"
         case "irc": return "IRC"
         case "mastodon": return "Mastodon"
+        case "rss": return "RSS"
+        case "github": return "GitHub"
+        case "youtube": return "YouTube"
+        case "podcast": return "Podcast"
         default: return network.capitalized
         }
     }
 
-    var body: some View {
+    private var sourceDetail: String {
+        if let channel = post.data["channel"], !channel.isEmpty {
+            return channel
+        }
+        if let instance = post.data["instance"] {
+            return instance
+        }
+        if let feedTitle = post.data["feedTitle"] {
+            return feedTitle
+        }
+        if let server = post.data["server"] {
+            return server
+        }
+        return ""
+    }
+
+    // MARK: - Hairline
+
+    private var hairline: some View {
+        Rectangle()
+            .fill(sourceColor)
+            .frame(height: 1)
+            .padding(.horizontal, DesignSystem.Spacing.md)
+    }
+
+    // MARK: - Content Area
+
+    @ViewBuilder
+    private var contentArea: some View {
         if isYouTubeVideo {
-            youTubeCard
+            youTubeContent
         } else if isPodcastEpisode {
-            podcastCard
+            podcastContent
         } else if isGitHubRelease {
-            gitHubCard
+            gitHubContent
+        } else if isBoost {
+            boostContent
+        } else if network == "irc" {
+            ircContent
+        } else if network == "mastodon" {
+            mastodonContent
         } else {
-            standardCard
+            rssContent
         }
     }
 
-    // MARK: - YouTube Video Card
+    // MARK: - IRC message content
 
-    private var youTubeCard: some View {
-        HStack(alignment: .top, spacing: 12) {
-            // Thumbnail
+    private var ircContent: some View {
+        VStack(alignment: .leading, spacing: DesignSystem.Spacing.xs) {
+            if let nick = post.attributedTo?.name ?? post.data["nick"] {
+                Text(nick)
+                    .font(DesignSystem.Fonts.senderName)
+                    .foregroundStyle(sourceColor)
+                    .padding(.horizontal, DesignSystem.Spacing.md)
+                    .padding(.top, DesignSystem.Spacing.md)
+            }
+            if let text = post.content?.text {
+                Text(text)
+                    .font(DesignSystem.Fonts.messageBody)
+                    .foregroundStyle(DesignSystem.Colors.ink)
+                    .lineLimit(12)
+                    .padding(.horizontal, DesignSystem.Spacing.md)
+            }
+        }
+    }
+
+    // MARK: - Mastodon post content
+
+    private var mastodonContent: some View {
+        VStack(alignment: .leading, spacing: DesignSystem.Spacing.xs) {
+            if let name = post.attributedTo?.displayName ?? post.attributedTo?.name {
+                HStack(spacing: DesignSystem.Spacing.xs) {
+                    Text(name)
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundStyle(DesignSystem.Colors.ink)
+                    if let handle = post.data["nick"] ?? post.attributedTo?.name {
+                        Text("@\(handle)")
+                            .font(DesignSystem.Fonts.provenanceDetail)
+                            .foregroundStyle(DesignSystem.Colors.pencil)
+                    }
+                }
+                .padding(.horizontal, DesignSystem.Spacing.md)
+                .padding(.top, DesignSystem.Spacing.md)
+            }
+            if let spoiler = post.data["spoiler"], !spoiler.isEmpty {
+                Text(spoiler)
+                    .font(DesignSystem.Fonts.headline)
+                    .foregroundStyle(DesignSystem.Colors.ink)
+                    .padding(.horizontal, DesignSystem.Spacing.md)
+            }
+            if let text = post.content?.text, !text.isEmpty {
+                Text(text.stripHTML)
+                    .font(DesignSystem.Fonts.messageBody)
+                    .foregroundStyle(DesignSystem.Colors.ink)
+                    .lineLimit(12)
+                    .padding(.horizontal, DesignSystem.Spacing.md)
+            }
+            // Media attachments
+            if !post.attachments.isEmpty {
+                mediaAttachments
+            }
+        }
+    }
+
+    private var mediaAttachments: some View {
+        ForEach(post.attachments) { att in
+            if att.type?.contains("image") == true || att.type?.contains("media:image") == true,
+               let url = URL(string: att.id) {
+                AsyncImage(url: url) { phase in
+                    switch phase {
+                    case .success(let image):
+                        image.resizable().scaledToFill()
+                            .frame(maxHeight: 200)
+                            .clipShape(RoundedRectangle(cornerRadius: DesignSystem.Radius.thumbnail))
+                    default:
+                        EmptyView()
+                    }
+                }
+                .padding(.horizontal, DesignSystem.Spacing.md)
+            }
+        }
+    }
+
+    // MARK: - Boost content
+
+    private var boostContent: some View {
+        VStack(alignment: .leading, spacing: DesignSystem.Spacing.sm) {
+            if let booster = post.data["boostedByDisplayName"], !booster.isEmpty {
+                HStack(spacing: DesignSystem.Spacing.xs) {
+                    Image(systemName: "arrow.2.squarepath")
+                        .font(.caption2)
+                    Text("\(booster) boosted")
+                        .font(DesignSystem.Fonts.provenanceDetail)
+                }
+                .foregroundStyle(DesignSystem.Colors.mastodon)
+                .padding(.horizontal, DesignSystem.Spacing.md)
+                .padding(.top, DesignSystem.Spacing.sm)
+            }
+            // Original content rendered same as mastodon post
+            if let text = post.content?.text, !text.isEmpty {
+                Text(text.stripHTML)
+                    .font(DesignSystem.Fonts.messageBody)
+                    .foregroundStyle(DesignSystem.Colors.ink)
+                    .lineLimit(12)
+                    .padding(.horizontal, DesignSystem.Spacing.md)
+            }
+        }
+    }
+
+    // MARK: - RSS article content
+
+    private var rssContent: some View {
+        VStack(alignment: .leading, spacing: DesignSystem.Spacing.xs) {
+            if let name = post.name, !name.isEmpty {
+                Text(name)
+                    .font(DesignSystem.Fonts.headline)
+                    .foregroundStyle(DesignSystem.Colors.ink)
+                    .lineLimit(3)
+                    .padding(.horizontal, DesignSystem.Spacing.md)
+                    .padding(.top, DesignSystem.Spacing.md)
+            }
+            if let author = post.attributedTo?.name {
+                Text(author)
+                    .font(DesignSystem.Fonts.provenanceDetail)
+                    .foregroundStyle(DesignSystem.Colors.pencil)
+                    .padding(.horizontal, DesignSystem.Spacing.md)
+            }
+            if let text = post.content?.text, !text.isEmpty {
+                Text(text.stripHTML)
+                    .font(DesignSystem.Fonts.cardBody)
+                    .foregroundStyle(DesignSystem.Colors.ink)
+                    .lineLimit(8)
+                    .padding(.horizontal, DesignSystem.Spacing.md)
+            }
+        }
+    }
+
+    // MARK: - YouTube video content
+
+    private var youTubeContent: some View {
+        HStack(alignment: .top, spacing: DesignSystem.Spacing.md) {
             if let thumbURL = post.data["enclosureURL"],
                let url = URL(string: thumbURL) {
                 AsyncImage(url: url) { phase in
                     switch phase {
                     case .success(let image):
-                        image
-                            .resizable()
+                        image.resizable()
                             .aspectRatio(16/9, contentMode: .fit)
                             .frame(width: 120)
-                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                            .clipShape(RoundedRectangle(cornerRadius: DesignSystem.Radius.thumbnail))
                     default:
-                        RoundedRectangle(cornerRadius: 8)
-                            .fill(Color(.systemGray5))
+                        RoundedRectangle(cornerRadius: DesignSystem.Radius.thumbnail)
+                            .fill(DesignSystem.Colors.border)
                             .frame(width: 120, height: 68)
-                            .overlay(Image(systemName: "play.rectangle").foregroundStyle(.secondary))
+                            .overlay(Image(systemName: "play.rectangle").foregroundStyle(DesignSystem.Colors.pencil))
                     }
                 }
             }
-
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: DesignSystem.Spacing.xs) {
                 Text(post.name ?? post.content?.text ?? "")
-                    .font(.subheadline)
-                    .fontWeight(.semibold)
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(DesignSystem.Colors.ink)
                     .lineLimit(3)
-
                 Text(post.attributedTo?.name ?? "")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-
-                HStack(spacing: 8) {
+                    .font(DesignSystem.Fonts.caption())
+                    .foregroundStyle(DesignSystem.Colors.pencil)
+                HStack(spacing: DesignSystem.Spacing.sm) {
                     if let dur = post.data["duration"], !dur.isEmpty {
                         Label(dur, systemImage: "clock")
-                            .font(.caption2)
-                            .foregroundStyle(.secondary)
+                            .font(.caption2).foregroundStyle(DesignSystem.Colors.pencil)
                     }
-                    Label("YouTube", systemImage: "play.rectangle.fill")
-                        .font(.caption2)
-                        .foregroundStyle(.red)
+                    pill("YouTube", color: DesignSystem.Colors.youtube)
                     Text(post.createdAt, style: .relative)
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
+                        .font(.caption2).foregroundStyle(DesignSystem.Colors.pencil)
                 }
             }
             Spacer()
         }
-        .padding()
-        .background(Color(.systemGray6))
-        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .padding(DesignSystem.Spacing.md)
     }
 
-    // MARK: - Podcast Episode Card
+    // MARK: - Podcast episode content
 
-    private var podcastCard: some View {
-        HStack(alignment: .top, spacing: 12) {
-            // Cover art
+    private var podcastContent: some View {
+        HStack(alignment: .top, spacing: DesignSystem.Spacing.md) {
             if let artURL = post.data["enclosureURL"],
                let url = URL(string: artURL) {
                 AsyncImage(url: url) { phase in
                     switch phase {
                     case .success(let image):
-                        image
-                            .resizable()
+                        image.resizable()
                             .frame(width: 64, height: 64)
-                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                            .clipShape(RoundedRectangle(cornerRadius: DesignSystem.Radius.thumbnail))
                     default:
-                        RoundedRectangle(cornerRadius: 8)
-                            .fill(Color(.systemGray5))
+                        RoundedRectangle(cornerRadius: DesignSystem.Radius.thumbnail)
+                            .fill(DesignSystem.Colors.border)
                             .frame(width: 64, height: 64)
-                            .overlay(Image(systemName: "waveform").foregroundStyle(.secondary))
+                            .overlay(Image(systemName: "waveform").foregroundStyle(DesignSystem.Colors.pencil))
                     }
                 }
             }
-
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: DesignSystem.Spacing.xs) {
                 Text(post.name ?? "")
-                    .font(.subheadline)
-                    .fontWeight(.semibold)
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(DesignSystem.Colors.ink)
                     .lineLimit(2)
-
                 Text(post.attributedTo?.name ?? post.data["feedTitle"] ?? "")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-
-                HStack(spacing: 8) {
+                    .font(DesignSystem.Fonts.caption())
+                    .foregroundStyle(DesignSystem.Colors.pencil)
+                HStack(spacing: DesignSystem.Spacing.sm) {
                     if let dur = post.data["duration"], !dur.isEmpty {
                         Label(dur, systemImage: "clock")
-                            .font(.caption2)
-                            .foregroundStyle(.secondary)
+                            .font(.caption2).foregroundStyle(DesignSystem.Colors.pencil)
                     }
-                    Label("Podcast", systemImage: "waveform")
-                        .font(.caption2)
-                        .foregroundStyle(.purple)
+                    pill("Podcast", color: DesignSystem.Colors.podcast)
                     Text(post.createdAt, style: .relative)
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
+                        .font(.caption2).foregroundStyle(DesignSystem.Colors.pencil)
                 }
             }
             Spacer()
         }
-        .padding()
-        .background(Color(.systemGray6))
-        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .padding(DesignSystem.Spacing.md)
     }
 
-    // MARK: - GitHub Release Card
+    // MARK: - GitHub release content
 
-    private var gitHubCard: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            HStack {
+    private var gitHubContent: some View {
+        VStack(alignment: .leading, spacing: DesignSystem.Spacing.xs) {
+            HStack(spacing: DesignSystem.Spacing.xs) {
                 Image(systemName: "tag.fill")
                     .font(.caption)
-                    .foregroundStyle(.green)
+                    .foregroundStyle(DesignSystem.Colors.github)
                 Text(post.name ?? "")
-                    .font(.subheadline)
-                    .fontWeight(.semibold)
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(DesignSystem.Colors.ink)
                 Spacer()
                 Text(post.createdAt, style: .relative)
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
+                    .font(.caption2).foregroundStyle(DesignSystem.Colors.pencil)
             }
-
             Text(post.data["feedTitle"] ?? "")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-
+                .font(DesignSystem.Fonts.data(12))
+                .foregroundStyle(DesignSystem.Colors.pencil)
             if let desc = post.content?.text, !desc.isEmpty {
                 Text(desc.stripHTML.prefix(200) + (desc.stripHTML.count > 200 ? "..." : ""))
-                    .font(.body)
+                    .font(.system(size: 14))
+                    .foregroundStyle(DesignSystem.Colors.ink)
                     .lineLimit(5)
             }
         }
-        .padding()
-        .background(Color(.systemGray6))
-        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .padding(DesignSystem.Spacing.md)
     }
 
-    // MARK: - Standard Card (Blog, Mastodon, IRC)
+    // MARK: - Footer
 
-    private var standardCard: some View {
-        // Reuse existing card layout, with RSS-awareness
-        VStack(alignment: .leading, spacing: 8) {
-            // Header
-            HStack(spacing: 8) {
-                Circle()
-                    .fill(networkColor.opacity(0.3))
-                    .frame(width: 36, height: 36)
-                    .overlay(
-                        Image(systemName: networkIcon)
-                            .font(.caption)
-                            .foregroundStyle(networkColor)
-                    )
+    private var hasFooter: Bool {
+        switch network.lowercased() {
+        case "irc": return post.data["channel"] != nil
+        case "mastodon": return true
+        default: return post.data["feedTitle"] != nil
+        }
+    }
 
-                VStack(alignment: .leading, spacing: 1) {
-                    HStack(spacing: 4) {
-                        Text(post.attributedTo?.name ?? post.data["feedTitle"] ?? "unknown")
-                            .font(.subheadline)
-                            .fontWeight(.semibold)
-                        if isRSS {
-                            Image(systemName: "dot.radiowaves.left.and.right")
-                                .font(.caption2)
-                                .foregroundStyle(.orange)
-                        }
-                    }
-                    if let feedTitle = post.data["feedTitle"], !feedTitle.isEmpty,
-                       post.attributedTo?.name != feedTitle {
-                        Text("via \(feedTitle)")
-                            .font(.caption2)
-                            .foregroundStyle(.secondary)
-                    } else if let instance = post.data["instance"] {
-                        Text("@\(post.attributedTo?.id.components(separatedBy: "/@").last ?? "") · \(instance)")
-                            .font(.caption2)
-                            .foregroundStyle(.secondary)
-                    }
-                }
-
-                Spacer()
-
-                Text(post.createdAt, style: .relative)
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
+    private var footerArea: some View {
+        HStack(spacing: DesignSystem.Spacing.sm) {
+            if network == "irc", let channel = post.data["channel"] {
+                Text(channel)
+                    .font(DesignSystem.Fonts.footer)
+                    .foregroundStyle(DesignSystem.Colors.pencil)
             }
-
-            // Boost indicator (Mastodon reblogs)
-            if isBoost, let booster = post.data["boostedByDisplayName"], !booster.isEmpty {
-                Label("\(booster) boosted", systemImage: "arrow.2.squarepath")
-                    .font(.subheadline)
-                    .fontWeight(.medium)
-                    .foregroundStyle(.green)
-            }
-
-            // Title (RSS posts have a name/headline)
-            if let name = post.name, !name.isEmpty,
-               name != post.content?.text {
-                Text(name)
-                    .font(.headline)
-                    .fontWeight(.medium)
-            }
-
-            // Content
-            if let text = post.content?.text, !text.isEmpty {
-                Text(text.stripHTML)
-                    .font(.body)
-                    .lineLimit(12)
-            }
-
-            // Media previews (Mastodon images)
-            if !post.attachments.isEmpty {
-                ForEach(post.attachments) { att in
-                    let url = att.id
-                    if att.type?.contains("image") == true || att.type?.contains("media:image") == true {
-                        AsyncImage(url: URL(string: url)) { phase in
-                            switch phase {
-                            case .success(let image):
-                                image
-                                    .resizable()
-                                    .scaledToFill()
-                                    .frame(maxHeight: 200)
-                                    .clipShape(RoundedRectangle(cornerRadius: 8))
-                            default:
-                                EmptyView()
-                            }
-                        }
-                    }
-                }
-            }
-
-            // Footer
-            HStack(spacing: 24) {
-                if let count = post.data["repliesCount"], let n = Int(count), n > 0 {
+            if network == "mastodon" {
+                if let replies = post.data["repliesCount"], let n = Int(replies), n > 0 {
                     Label("\(n)", systemImage: "bubble.right")
-                        .font(.caption).foregroundStyle(.secondary)
+                        .font(.caption2).foregroundStyle(DesignSystem.Colors.pencil)
                 }
-                if let count = post.data["reblogsCount"], let n = Int(count), n > 0 {
+                if let reblogs = post.data["reblogsCount"], let n = Int(reblogs), n > 0 {
                     Label("\(n)", systemImage: "arrow.2.squarepath")
-                        .font(.caption).foregroundStyle(.secondary)
+                        .font(.caption2).foregroundStyle(DesignSystem.Colors.pencil)
                 }
-                if let count = post.data["favouritesCount"], let n = Int(count), n > 0 {
+                if let favs = post.data["favouritesCount"], let n = Int(favs), n > 0 {
                     Label("\(n)", systemImage: "star")
-                        .font(.caption).foregroundStyle(.secondary)
+                        .font(.caption2).foregroundStyle(DesignSystem.Colors.pencil)
                 }
-
-                Spacer()
-
-                // Network badge
-                HStack(spacing: 2) {
-                    Image(systemName: networkIcon)
-                        .font(.caption2)
-                    Text(post.data["via"] ?? networkDisplayName)
-                        .font(.caption2)
-                }
-                .foregroundStyle(.tertiary)
+            }
+            Spacer()
+            if let feedTitle = post.data["feedTitle"] {
+                Text(feedTitle)
+                    .font(DesignSystem.Fonts.footer)
+                    .foregroundStyle(DesignSystem.Colors.pencil)
+                    .lineLimit(1)
             }
         }
-        .padding()
-        .background(Color(.systemGray6))
-        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .padding(.horizontal, DesignSystem.Spacing.md)
+        .padding(.vertical, DesignSystem.Spacing.sm)
     }
 
     // MARK: - Helpers
 
-    private var networkIcon: String {
-        switch network {
-        case "mastodon": return "m.circle.fill"
-        case "irc": return "number"
-        case "rss": return "dot.radiowaves.left.and.right"
-        default: return "globe"
-        }
-    }
-
-    private var networkColor: Color {
-        switch network {
-        case "mastodon": return .purple
-        case "irc": return .blue
-        case "rss": return .orange
-        default: return .gray
-        }
+    private func pill(_ text: String, color: Color) -> some View {
+        Text(text)
+            .font(.caption2)
+            .fontWeight(.medium)
+            .foregroundStyle(color)
+            .padding(.horizontal, DesignSystem.Spacing.sm)
+            .padding(.vertical, 2)
+            .background(color.opacity(0.12))
+            .clipShape(RoundedRectangle(cornerRadius: DesignSystem.Radius.badge))
     }
 }
 
