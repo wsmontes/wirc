@@ -37,6 +37,7 @@
 		6794DF1FEFEEF119002734B6 /* FeedSubscriptionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E9842883A75E2FC1841C43D /* FeedSubscriptionStore.swift */; };
 		68F56DB16D64D7DF03FC5C4B /* IRCParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF814FAA578F93CB5FC90BB5 /* IRCParser.swift */; };
 		6E01703388ADF79FF75D4BF5 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEC539290F0DCC4E113874FF /* AppState.swift */; };
+		D3C4B5A6E7F801293A0B1C2 /* WorkshopView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5F4A3B2C1D60718293A0B1E /* WorkshopView.swift */; };
 		728523B504672CB8A4ECDE94 /* WOMIDGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02F21BC17F83816701A37D7B /* WOMIDGenerator.swift */; };
 		798F1A5BB0ECD2C6DB4C27EB /* JSONFileStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 977059C372AB2F3C65D20D14 /* JSONFileStore.swift */; };
 		7B85E860C10694C08CC3BC3D /* WircApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FA00F37E1FF2C32DDF280ED /* WircApp.swift */; };
@@ -128,6 +129,7 @@
 		FDE1F18BDE942722566DA463 /* DebugView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugView.swift; sourceTree = "<group>"; };
 		B2C3D4E5F60718293A0B1C2D /* StreamView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamView.swift; sourceTree = "<group>"; };
 		A4B5C6D7E8F90019283A4B5D /* LibraryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryView.swift; sourceTree = "<group>"; };
+		E5F4A3B2C1D60718293A0B1E /* WorkshopView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkshopView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -207,6 +209,7 @@
 				CC45187C8720D690484C4929 /* Settings */,
 				A1B2C3D4E5F60718293A0B1C /* Stream */,
 				A4B5C6D7E8F90019283A4B5C /* Library */,
+				C2D3E4F5A6B718293A0B1C3 /* Workshop */,
 				3F3BAAE714EFDB70F4D078D0 /* Shared */,
 			);
 			path = Features;
@@ -226,6 +229,14 @@
 				A4B5C6D7E8F90019283A4B5D /* LibraryView.swift */,
 			);
 			path = Library;
+			sourceTree = "<group>";
+		};
+		C2D3E4F5A6B718293A0B1C3 /* Workshop */ = {
+			isa = PBXGroup;
+			children = (
+				E5F4A3B2C1D60718293A0B1E /* WorkshopView.swift */,
+			);
+			path = Workshop;
 			sourceTree = "<group>";
 		};
 		4E0777227E87289411EBA1CB /* Chat */ = {
@@ -455,6 +466,7 @@
 				89545409416029AA5D6EF14F /* ServerOrchestrator.swift in Sources */,
 				4DA3E8A6D23BBF6ED1126E17 /* SettingsView.swift in Sources */,
 					C3D4E5F60718293A0B1C2D3E /* StreamView.swift in Sources */,
+					D3C4B5A6E7F801293A0B1C2 /* WorkshopView.swift in Sources */,
 				5ACE5505CCF4639B50B95A91 /* SocialSignal.swift in Sources */,
 				B28C05DA310EF2AE7F9492A2 /* SuggestedChannels.swift in Sources */,
 				28F555CA915D88B0DB64E00F /* SuggestedServers.swift in Sources */,
