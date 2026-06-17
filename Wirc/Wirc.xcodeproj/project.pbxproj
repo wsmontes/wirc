@@ -53,6 +53,14 @@
 		F1F1F1F1F2F2F2F2F3F3F3F3 /* FeedSubscriptionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4F4F4F4F5F5F5F5F6F6F6F6 /* FeedSubscriptionStore.swift */; };
 		FEEDPARSER1234567890BUILD /* FeedParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEEDPARSER1234567890FILE /* FeedParser.swift */; };
 		ADD2FEED00000000B1LD00001 /* AddFeedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADD2FEED00000000F1LE00001 /* AddFeedView.swift */; };
+		DE7D184324314EBDA9D7C10F /* WOMEnums.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3331AB2364A64855909AE6E5 /* WOMEnums.swift */; };
+		20CEB53B3A4D4F1481B78C38 /* WOMIdentity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30B1F03CDECC445AA08683D4 /* WOMIdentity.swift */; };
+		A4A163E3334944F2ABB66C37 /* WOMGovernance.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB6A1226F2D040C0AAE24D26 /* WOMGovernance.swift */; };
+		740A9C78E57B415483467487 /* WOMBinding.swift in Sources */ = {isa = PBXBuildFile; fileRef = 024936CA70234DABA57E57C5 /* WOMBinding.swift */; };
+		475504590B13492BAF4BA62B /* WOMClassification.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14FFCDA6114D4EE1999C5463 /* WOMClassification.swift */; };
+		A22AA90B294346FEA3AD5495 /* WOMAnnotation.swift in Sources */ = {isa = PBXBuildFile; fileRef = E39097EB48744C1A90FC8A7F /* WOMAnnotation.swift */; };
+		533A5901BA3B4707B2E4F606 /* WOMKnowledge.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0FDA4C498AD4404A12BAE5F /* WOMKnowledge.swift */; };
+			DBFCCC1FEC10425FACD1A49F /* DesignSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB7EF7000E6A4646B59A426A /* DesignSystem.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -104,6 +112,14 @@
 		FDE1F18BDE942722566DA463 /* DebugView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugView.swift; sourceTree = "<group>"; };
 		FEEDPARSER1234567890FILE /* FeedParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedParser.swift; sourceTree = "<group>"; };
 		ADD2FEED00000000F1LE00001 /* AddFeedView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddFeedView.swift; sourceTree = "<group>"; };
+		3331AB2364A64855909AE6E5 /* WOMEnums.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WOMEnums.swift; sourceTree = "<group>"; };
+		30B1F03CDECC445AA08683D4 /* WOMIdentity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WOMIdentity.swift; sourceTree = "<group>"; };
+		AB6A1226F2D040C0AAE24D26 /* WOMGovernance.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WOMGovernance.swift; sourceTree = "<group>"; };
+		024936CA70234DABA57E57C5 /* WOMBinding.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WOMBinding.swift; sourceTree = "<group>"; };
+		14FFCDA6114D4EE1999C5463 /* WOMClassification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WOMClassification.swift; sourceTree = "<group>"; };
+		E39097EB48744C1A90FC8A7F /* WOMAnnotation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WOMAnnotation.swift; sourceTree = "<group>"; };
+		A0FDA4C498AD4404A12BAE5F /* WOMKnowledge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WOMKnowledge.swift; sourceTree = "<group>"; };
+			DB7EF7000E6A4646B59A426A /* DesignSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignSystem.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -145,6 +161,13 @@
 				BB33105D31E371B41A8F523F /* WOMProvenance.swift */,
 				483BB0DC491D7758B7C2E381 /* WOMReference.swift */,
 				906BE3C7E975E7E8264B40A1 /* WOMRelation.swift */,
+				3331AB2364A64855909AE6E5 /* WOMEnums.swift */,
+				30B1F03CDECC445AA08683D4 /* WOMIdentity.swift */,
+				AB6A1226F2D040C0AAE24D26 /* WOMGovernance.swift */,
+				024936CA70234DABA57E57C5 /* WOMBinding.swift */,
+				14FFCDA6114D4EE1999C5463 /* WOMClassification.swift */,
+				E39097EB48744C1A90FC8A7F /* WOMAnnotation.swift */,
+				A0FDA4C498AD4404A12BAE5F /* WOMKnowledge.swift */,
 			);
 			path = WOM;
 			sourceTree = "<group>";
@@ -196,6 +219,7 @@
 			children = (
 				BAFF978153FEFBC98288B865 /* Social */,
 				237682781EF8DA6DC129DCA0 /* WOM */,
+				DB7EF7000E6A4646B59A426A /* DesignSystem.swift */,
 			);
 			path = Core;
 			sourceTree = "<group>";
@@ -404,6 +428,14 @@
 				D79DDF4532539CA96597B082 /* MastodonClient.swift in Sources */,
 				0321DB719449E908543B42D7 /* MastodonModels.swift in Sources */,
 				EF517AD1E1D77FAD27B0D5AB /* MastodonToWOMAdapter.swift in Sources */,
+				DE7D184324314EBDA9D7C10F /* WOMEnums.swift in Sources */,
+				20CEB53B3A4D4F1481B78C38 /* WOMIdentity.swift in Sources */,
+				A4A163E3334944F2ABB66C37 /* WOMGovernance.swift in Sources */,
+				740A9C78E57B415483467487 /* WOMBinding.swift in Sources */,
+				475504590B13492BAF4BA62B /* WOMClassification.swift in Sources */,
+				A22AA90B294346FEA3AD5495 /* WOMAnnotation.swift in Sources */,
+				533A5901BA3B4707B2E4F606 /* WOMKnowledge.swift in Sources */,
+				DBFCCC1FEC10425FACD1A49F /* DesignSystem.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
