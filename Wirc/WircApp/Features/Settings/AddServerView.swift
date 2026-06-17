@@ -24,8 +24,11 @@ struct AddServerView: View {
                     suggestedList
                 }
             }
+            .scrollContentBackground(.hidden)
+            .background(DesignSystem.Colors.page)
             .navigationTitle("Add Server")
             .navigationBarTitleDisplayMode(.inline)
+            .tint(DesignSystem.Colors.signal)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }

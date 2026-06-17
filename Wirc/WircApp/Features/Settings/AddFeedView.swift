@@ -88,8 +88,11 @@ struct AddFeedView: View {
                     Text("Import subscriptions from another RSS reader via OPML file.")
                 }
             }
+            .scrollContentBackground(.hidden)
+            .background(DesignSystem.Colors.page)
             .navigationTitle("Add Feed")
             .navigationBarTitleDisplayMode(.inline)
+            .tint(DesignSystem.Colors.signal)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
