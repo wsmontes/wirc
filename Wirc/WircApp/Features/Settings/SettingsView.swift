@@ -4,6 +4,7 @@ struct SettingsView: View {
     @Environment(AppState.self) private var appState
     @State private var showingAddServer = false
     @State private var showingAddMastodon = false
+    @State private var showingAddFeed = false
 
     var body: some View {
         NavigationStack {
@@ -51,6 +52,67 @@ struct SettingsView: View {
                     }
                 }
 
+                // RSS/Atom Feeds
+                Section("Feeds") {
+                    if appState.feedStore.subscriptions.isEmpty {
+                        Text("No feeds subscribed")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                    } else {
+                        ForEach(appState.feedStore.subscriptions) { sub in
+                            HStack {
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(sub.title)
+                                        .font(.subheadline)
+                                    HStack(spacing: 4) {
+                                        Image(systemName: sourceTypeIcon(sub.sourceType))
+                                            .font(.caption2)
+                                        Text(sub.sourceType.rawValue.capitalized)
+                                            .font(.caption)
+                                        if let fetched = sub.lastFetchedAt {
+                                            Text("· fetched \(fetched, style: .relative) ago")
+                                                .font(.caption2)
+                                        }
+                                    }
+                                    .foregroundStyle(.secondary)
+                                    if !sub.tags.isEmpty {
+                                        Text(sub.tags.joined(separator: ", "))
+                                            .font(.caption2)
+                                            .foregroundStyle(.blue)
+                                    }
+                                    if sub.errorCount > 0 {
+                                        Text("\(sub.errorCount) errors")
+                                            .font(.caption2)
+                                            .foregroundStyle(.red)
+                                    }
+                                }
+                                Spacer()
+                                Button {
+                                    Task { await appState.refreshAllFeeds() }
+                                } label: {
+                                    Image(systemName: "arrow.clockwise")
+                                        .font(.caption)
+                                }
+                            }
+                        }
+                        .onDelete { indexSet in
+                            for idx in indexSet {
+                                let sub = appState.feedStore.subscriptions[idx]
+                                appState.removeFeed(sub)
+                            }
+                        }
+                    }
+                    Button { showingAddFeed = true } label: {
+                        Label("Add Feed", systemImage: "plus")
+                    }
+                    Button {
+                        // OPML import via AddFeedView
+                        showingAddFeed = true
+                    } label: {
+                        Label("Import OPML", systemImage: "doc.text")
+                    }
+                }
+
                 // Debug
                 Section {
                     NavigationLink {
@@ -70,6 +132,18 @@ struct SettingsView: View {
                     appState.addMastodonAccount(name: name, instanceURL: url, token: token)
                 }
             }
+            .sheet(isPresented: $showingAddFeed) {
+                AddFeedView()
+            }
+        }
+    }
+
+    private func sourceTypeIcon(_ type: FeedSourceType) -> String {
+        switch type {
+        case .rss, .atom: return "dot.radiowaves.left.and.right"
+        case .youtube: return "play.rectangle.fill"
+        case .github: return "tag.fill"
+        case .podcast: return "waveform"
         }
     }
 }

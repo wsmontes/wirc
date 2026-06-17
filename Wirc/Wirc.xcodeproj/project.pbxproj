@@ -52,6 +52,7 @@
 		EFAE2659F2ED47FD1DE8817C /* IRCEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD36B880B97E4EDF5E8A0309 /* IRCEvent.swift */; };
 		F1F1F1F1F2F2F2F2F3F3F3F3 /* FeedSubscriptionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4F4F4F4F5F5F5F5F6F6F6F6 /* FeedSubscriptionStore.swift */; };
 		FEEDPARSER1234567890BUILD /* FeedParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEEDPARSER1234567890FILE /* FeedParser.swift */; };
+		ADD2FEED00000000B1LD00001 /* AddFeedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADD2FEED00000000F1LE00001 /* AddFeedView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -102,6 +103,7 @@
 		F4F4F4F4F5F5F5F5F6F6F6F6 /* FeedSubscriptionStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedSubscriptionStore.swift; sourceTree = "<group>"; };
 		FDE1F18BDE942722566DA463 /* DebugView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugView.swift; sourceTree = "<group>"; };
 		FEEDPARSER1234567890FILE /* FeedParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedParser.swift; sourceTree = "<group>"; };
+		ADD2FEED00000000F1LE00001 /* AddFeedView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddFeedView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -275,6 +277,7 @@
 			children = (
 				354688CFC206205439A3FFFF /* AddServerView.swift */,
 				DAE7D6E8E5F39710B7B47F82 /* SettingsView.swift */,
+				ADD2FEED00000000F1LE00001 /* AddFeedView.swift */,
 			);
 			path = Settings;
 			sourceTree = "<group>";
@@ -382,6 +385,7 @@
 				650ADA11D0E8C152956F478B /* RawEventLogView.swift in Sources */,
 				7EC94869472B0565F65A371D /* RemoteIdentity.swift in Sources */,
 				4DA3E8A6D23BBF6ED1126E17 /* SettingsView.swift in Sources */,
+				ADD2FEED00000000B1LD00001 /* AddFeedView.swift in Sources */,
 				5ACE5505CCF4639B50B95A91 /* SocialSignal.swift in Sources */,
 				B28C05DA310EF2AE7F9492A2 /* SuggestedChannels.swift in Sources */,
 				208A7FE391E119C11444ECB8 /* TrustRelation.swift in Sources */,
