@@ -266,21 +266,41 @@ struct MessageCard: View {
     }
 }
 
-// MARK: - Channel Filter (navigates to per-channel MessageView)
+// MARK: - Channel Filter (uses simple sheet presentation — no NavigationLinks)
 
 struct ChannelFilterView: View {
     @Environment(AppState.self) private var appState
     @Environment(\.dismiss) private var dismiss
-    @State private var navPath = NavigationPath()
+
+    @State private var selectedChannel: ChannelSelection?
+    @State private var showJoinAlert = false
+    @State private var joinChannel = ""
+    @State private var joinServerId: UUID?
 
     var body: some View {
-        NavigationStack(path: $navPath) {
+        NavigationStack {
             List {
                 // Quick-join global channels
                 if !appState.orchestrator.globalChannels.isEmpty {
                     Section("Global Channels") {
                         ForEach(appState.orchestrator.globalChannels) { entry in
-                            globalChannelRow(entry)
+                            Button {
+                                let sid = findOrCreateServer(host: entry.serverHost, port: entry.serverPort, useTLS: entry.serverUseTLS)
+                                selectedChannel = ChannelSelection(serverId: sid, serverHost: entry.serverHost, channel: entry.name)
+                            } label: {
+                                HStack {
+                                    Text(entry.name)
+                                        .font(DesignSystem.Fonts.data(13))
+                                        .foregroundStyle(DesignSystem.Colors.ink)
+                                    Spacer()
+                                    Text("\(entry.users)")
+                                        .font(DesignSystem.Fonts.data(11))
+                                        .foregroundStyle(DesignSystem.Colors.pencil)
+                                    Text(entry.serverHost)
+                                        .font(DesignSystem.Fonts.data(10))
+                                        .foregroundStyle(DesignSystem.Colors.pencil)
+                                }
+                            }
                         }
                     }
                 }
@@ -313,17 +333,17 @@ struct ChannelFilterView: View {
                                     .foregroundStyle(DesignSystem.Colors.pencil)
                                 Spacer()
                                 Button("Join...") {
-                                    // Simple join via alert
+                                    joinServerId = server.id
+                                    joinChannel = ""
+                                    showJoinAlert = true
                                 }
                                 .font(DesignSystem.Fonts.caption())
                             }
                         }
                         ForEach(conversations) { conv in
-                            NavigationLink(value: ChatRoute.userChannel(
-                                serverId: server.id,
-                                serverHost: server.host,
-                                channel: conv.name
-                            )) {
+                            Button {
+                                selectedChannel = ChannelSelection(serverId: server.id, serverHost: server.host, channel: conv.name)
+                            } label: {
                                 HStack {
                                     Image(systemName: "number")
                                         .font(.caption)
@@ -349,60 +369,24 @@ struct ChannelFilterView: View {
             }
             .navigationTitle("Channels")
             .navigationBarTitleDisplayMode(.inline)
-            .navigationDestination(for: ChatRoute.self) { route in
-                channelDestination(for: route)
-            }
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Done") { dismiss() }
                 }
             }
-        }
-    }
-
-    // MARK: - Navigation destination
-
-    @ViewBuilder
-    private func channelDestination(for route: ChatRoute) -> some View {
-        switch route {
-        case .userChannel(let serverId, let serverHost, let channel):
-            MessageView(
-                serverId: serverId,
-                serverHost: serverHost,
-                conversation: .channel(channel)
-            )
-        case .globalChannel(let serverHost, let serverPort, let serverUseTLS, let channel):
-            // For global channels: connect on-the-fly if needed, then navigate
-            MessageView(
-                serverId: findOrCreateServer(host: serverHost, port: serverPort, useTLS: serverUseTLS),
-                serverHost: serverHost,
-                conversation: .channel(channel)
-            )
-        }
-    }
-
-    // MARK: - Global channel row
-
-    @ViewBuilder
-    private func globalChannelRow(_ entry: ServerOrchestrator.GlobalChannel) -> some View {
-        let route = ChatRoute.globalChannel(
-            serverHost: entry.serverHost,
-            serverPort: entry.serverPort,
-            serverUseTLS: entry.serverUseTLS,
-            channel: entry.name
-        )
-        NavigationLink(value: route) {
-            HStack {
-                Text(entry.name)
-                    .font(DesignSystem.Fonts.data(13))
-                    .foregroundStyle(DesignSystem.Colors.ink)
-                Spacer()
-                Text("\(entry.users)")
-                    .font(DesignSystem.Fonts.data(11))
-                    .foregroundStyle(DesignSystem.Colors.pencil)
-                Text(entry.serverHost)
-                    .font(DesignSystem.Fonts.data(10))
-                    .foregroundStyle(DesignSystem.Colors.pencil)
+            .sheet(item: $selectedChannel) { sel in
+                MessageView(serverId: sel.serverId, serverHost: sel.serverHost, conversation: .channel(sel.channel))
+            }
+            .alert("Join Channel", isPresented: $showJoinAlert) {
+                TextField("#channel", text: $joinChannel)
+                Button("Join") {
+                    if let sid = joinServerId, !joinChannel.isEmpty {
+                        appState.joinChannel(joinChannel, serverId: sid)
+                    }
+                }
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text("Enter the channel name to join on this server.")
             }
         }
     }
@@ -411,19 +395,12 @@ struct ChannelFilterView: View {
 
     private func findOrCreateServer(host: String, port: Int, useTLS: Bool) -> UUID {
         if let existing = appState.servers.first(where: { $0.host == host && $0.port == port }) {
-            // Auto-connect if disconnected
             if appState.connectionStates[existing.id] != .online {
                 appState.connect(to: existing.id)
             }
             return existing.id
         }
-        // Create ephemeral server config
-        let config = IRCConnectionConfig(
-            host: host,
-            port: port,
-            useTLS: useTLS,
-            nickname: "wirc_user"
-        )
+        let config = IRCConnectionConfig(host: host, port: port, useTLS: useTLS, nickname: "wirc_user")
         appState.servers.append(config)
         appState.connect(to: config.id)
         return config.id
@@ -452,4 +429,11 @@ struct ChannelFilterView: View {
         case .connecting, .online: appState.disconnect(from: id)
         }
     }
+}
+
+struct ChannelSelection: Identifiable {
+    let serverId: UUID
+    let serverHost: String
+    let channel: String
+    var id: String { "\(serverId)|\(channel)" }
 }
