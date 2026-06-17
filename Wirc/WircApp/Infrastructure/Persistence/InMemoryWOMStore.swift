@@ -1,0 +1,33 @@
+import Foundation
+
+final class InMemoryWOMStore: WOMStore, @unchecked Sendable {
+    private var storage: [String: WOMObject] = [:]
+
+    func save(_ object: WOMObject) async throws {
+        storage[object.id] = object
+    }
+
+    func saveMany(_ objects: [WOMObject]) async throws {
+        for obj in objects {
+            storage[obj.id] = obj
+        }
+    }
+
+    func get(id: String) async throws -> WOMObject? {
+        return storage[id]
+    }
+
+    func list(type: String?) async throws -> [WOMObject] {
+        let all = Array(storage.values)
+        guard let type = type else { return all }
+        return all.filter { $0.type.contains(type) }
+    }
+
+    func delete(id: String) async throws {
+        storage.removeValue(forKey: id)
+    }
+
+    func all() async throws -> [WOMObject] {
+        return Array(storage.values)
+    }
+}
