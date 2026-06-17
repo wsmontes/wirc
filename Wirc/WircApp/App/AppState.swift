@@ -489,6 +489,16 @@ final class AppState {
     private let maxConsecutiveErrors = 5
 
     private func refreshFeed(_ subscription: FeedSubscription) async {
+        // Skip feeds that have exceeded the max consecutive error threshold
+        if subscription.errorCount >= maxConsecutiveErrors {
+            rawEvents.append(DebugRawEvent(
+                timestamp: Date(), server: subscription.feedURL,
+                raw: "Skipping feed refresh — \(subscription.errorCount) consecutive errors (max \(maxConsecutiveErrors))",
+                parsedAs: "feed_error"
+            ))
+            return
+        }
+
         let fetcher = feedFetcher
         let adapter = feedAdapter
         do {
@@ -527,6 +537,14 @@ final class AppState {
             sub.errorCount += 1
             sub.lastFetchedAt = Date()
             feedStore.update(sub)
+
+            if sub.errorCount >= maxConsecutiveErrors {
+                rawEvents.append(DebugRawEvent(
+                    timestamp: Date(), server: sub.feedURL,
+                    raw: "Feed \(sub.feedURL) hit \(sub.errorCount) consecutive errors — giving up until next app launch",
+                    parsedAs: "feed_error"
+                ))
+            }
         }
     }
 

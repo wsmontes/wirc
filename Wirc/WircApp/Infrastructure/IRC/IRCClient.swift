@@ -1,262 +1,183 @@
 import Foundation
 import Network
 
+// MARK: - Console Entry
+
+struct ConsoleEntry: Identifiable {
+    let id = UUID()
+    let timestamp: Date
+    let direction: Direction
+    let text: String
+    let tag: Int
+    enum Direction { case sent, received }
+}
+
+// MARK: - IRC Client
+
 final class IRCClient: @unchecked Sendable {
     let config: IRCConnectionConfig
     var onEvent: ((IRCEvent) -> Void)?
+    var onConsole: ((ConsoleEntry) -> Void)?
 
     private var connection: NWConnection?
     private var state: ClientState = .disconnected
-    private let queue = DispatchQueue(label: "irc.client.\(UUID().uuidString.prefix(8))")
-    private var readBuffer: String = ""
-    private var nickRetryCount = 0
+    private let queue = DispatchQueue(label: "irc.\(UUID().uuidString.prefix(6))")
+    private var readBuffer = ""
+    private var nickRetry = 0
     private var shouldReconnect = false
+    private var writeTag = 0
 
-    enum ClientState {
-        case disconnected
-        case connecting
-        case registering
-        case online
-    }
+    enum ClientState { case disconnected, connecting, registering, online }
 
-    init(config: IRCConnectionConfig) {
-        self.config = config
-    }
+    init(config: IRCConnectionConfig) { self.config = config }
 
     // MARK: - Public API
 
     func connect() {
         guard case .disconnected = state else { return }
-        nickRetryCount = 0
-        shouldReconnect = true
-        connectSocket()
-    }
-
-    func disconnect() {
-        shouldReconnect = false
-        sendRaw("QUIT :Wirc")
-        connection?.cancel()
-        connection = nil
-        state = .disconnected
-        DispatchQueue.main.async { [weak self] in
-            self?.onEvent?(.disconnected(reason: nil))
-        }
-    }
-
-    func join(channel: String) {
-        let ch = channel.hasPrefix("#") || channel.hasPrefix("&") ? channel : "#\(channel)"
-        sendRaw("JOIN \(ch)")
-    }
-
-    func part(channel: String, reason: String? = nil) {
-        if let reason {
-            sendRaw("PART \(channel) :\(reason)")
-        } else {
-            sendRaw("PART \(channel)")
-        }
-    }
-
-    func sendMessage(_ text: String, to target: String) {
-        // Split long messages
-        let maxLen = 400
-        var remaining = text
-        while !remaining.isEmpty {
-            let chunk = String(remaining.prefix(maxLen))
-            sendRaw("PRIVMSG \(target) :\(chunk)")
-            if remaining.count > maxLen {
-                remaining = String(remaining.dropFirst(maxLen))
-            } else {
-                remaining = ""
-            }
-        }
-    }
-
-    func sendCTCPReply(nick: String, command: String, response: String) {
-        sendRaw("NOTICE \(nick) :\u{01}\(command) \(response)\u{01}")
-    }
-
-    func setTopic(channel: String, topic: String) {
-        sendRaw("TOPIC \(channel) :\(topic)")
-    }
-
-    func whois(nick: String) {
-        sendRaw("WHOIS \(nick)")
-    }
-
-    func kick(channel: String, nick: String, reason: String? = nil) {
-        if let reason {
-            sendRaw("KICK \(channel) \(nick) :\(reason)")
-        } else {
-            sendRaw("KICK \(channel) \(nick)")
-        }
-    }
-
-    // MARK: - Private: Connection
-
-    private func connectSocket() {
+        nickRetry = 0; shouldReconnect = true
         state = .connecting
-
         let host = NWEndpoint.Host(config.host)
         let port = NWEndpoint.Port(integerLiteral: UInt16(config.port))
         let params: NWParameters = config.useTLS ? .tls : .tcp
         params.allowLocalEndpointReuse = true
-
         connection = NWConnection(host: host, port: port, using: params)
-        connection?.stateUpdateHandler = { [weak self] nwState in
-            DispatchQueue.main.async { self?.handleState(nwState) }
+        connection?.stateUpdateHandler = { [weak self] s in
+            DispatchQueue.main.async { self?.handleNWState(s) }
         }
         connection?.start(queue: queue)
     }
 
-    private func handleState(_ nwState: NWConnection.State) {
-        switch nwState {
+    func disconnect() {
+        shouldReconnect = false
+        write("QUIT :Wirc", tag: 0)
+        connection?.cancel()
+        connection = nil; state = .disconnected
+        emit(.disconnected(reason: nil))
+    }
+
+    func join(channel: String) {
+        let ch = channel.hasPrefix("#") || channel.hasPrefix("&") ? channel : "#\(channel)"
+        write("JOIN \(ch)", tag: 0)
+    }
+
+    func part(channel: String, reason: String? = nil) {
+        if let r = reason { write("PART \(channel) :\(r)", tag: 0) }
+        else { write("PART \(channel)", tag: 0) }
+    }
+
+    func sendMessage(_ text: String, to target: String) {
+        write("PRIVMSG \(target) :\(text)", tag: 0)
+    }
+
+    func listChannels() {
+        write("LIST", tag: 1)
+    }
+
+    func setTopic(channel: String, topic: String) {
+        write("TOPIC \(channel) :\(topic)", tag: 0)
+    }
+
+    // MARK: - Private: Network State
+
+    private func handleNWState(_ s: NWConnection.State) {
+        switch s {
         case .ready:
-            state = .registering
-            onEvent?(.connected)
-            register()
-            startReading()
-
-        case .failed(let error):
+            state = .registering; emit(.connected); register(); readLoop()
+        case .failed(let e):
             state = .disconnected
-            onEvent?(.error("Connection failed: \(error.localizedDescription)"))
-            onEvent?(.disconnected(reason: error.localizedDescription))
-            tryReconnect()
-
-        case .cancelled:
-            state = .disconnected
-
-        default:
-            break
+            emit(.error("Connection failed: \(e.localizedDescription)"))
+            emit(.disconnected(reason: e.localizedDescription))
+            scheduleReconnect()
+        case .cancelled: state = .disconnected
+        default: break
         }
     }
 
-    private func tryReconnect() {
+    private func scheduleReconnect() {
         guard shouldReconnect else { return }
         DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [weak self] in
             guard let self, self.shouldReconnect, case .disconnected = self.state else { return }
-            self.connectSocket()
+            self.connect()
         }
     }
 
     // MARK: - Private: Registration
 
     private func register() {
-        if let pass = config.password, !pass.isEmpty {
-            sendRaw("PASS \(pass)")
-        }
-        let nickname = nickRetryCount > 0 ? "\(config.nickname)\(nickRetryCount)" : config.nickname
-        let username = config.username ?? nickname
-        let realName = config.realName ?? nickname
-        sendRaw("NICK \(nickname)")
-        sendRaw("USER \(username) 0 * :\(realName)")
+        if let pass = config.password, !pass.isEmpty { write("PASS \(pass)", tag: 101) }
+        let nick = nickRetry > 0 ? "\(config.nickname)\(nickRetry)" : config.nickname
+        let user = config.username ?? nick
+        let real = config.realName ?? nick
+        write("NICK \(nick)", tag: 102)
+        write("USER \(user) 0 * :\(real)", tag: 103)
     }
 
-    // MARK: - Private: Reading
+    // MARK: - Private: Write
 
-    private func startReading() {
-        connection?.receive(minimumIncompleteLength: 1, maximumLength: 4096) { [weak self] data, _, _, error in
-            guard let self = self else { return }
+    private func write(_ cmd: String, tag: Int) {
+        writeTag += 1
+        let line = cmd + "\r\n"
+        guard let data = line.data(using: .utf8), let conn = connection else { return }
+        conn.send(content: data, completion: .contentProcessed({ _ in }))
+        let entry = ConsoleEntry(timestamp: Date(), direction: .sent, text: cmd, tag: tag)
+        DispatchQueue.main.async { [weak self] in self?.onConsole?(entry) }
+    }
 
-            if let error = error {
+    // MARK: - Private: Read Loop
+
+    private func readLoop() {
+        connection?.receive(minimumIncompleteLength: 1, maximumLength: 4096) { [weak self] data, _, _, err in
+            guard let self else { return }
+            if let err {
                 if self.shouldReconnect {
-                    DispatchQueue.main.async {
-                        self.onEvent?(.error("Read error: \(error.localizedDescription)"))
-                        self.onEvent?(.disconnected(reason: error.localizedDescription))
-                    }
-                    self.state = .disconnected
-                    self.tryReconnect()
+                    self.emit(.error("Read: \(err.localizedDescription)"))
+                    self.emit(.disconnected(reason: err.localizedDescription))
+                    self.state = .disconnected; self.scheduleReconnect()
                 }
                 return
             }
-
-            if let data = data, let text = String(data: data, encoding: .utf8) {
-                self.readBuffer.append(text)
-                self.processBuffer()
+            if let data, let text = String(data: data, encoding: .utf8) {
+                self.readBuffer.append(text); self.processLines()
             }
-
-            if self.state != .disconnected {
-                self.startReading()
-            }
+            if self.state != .disconnected { self.readLoop() }
         }
     }
 
-    private func processBuffer() {
-        while let crlfRange = readBuffer.range(of: "\r\n") {
-            let line = String(readBuffer[..<crlfRange.lowerBound])
-            readBuffer = String(readBuffer[crlfRange.upperBound...])
+    private func processLines() {
+        while let r = readBuffer.range(of: "\r\n") {
+            let line = String(readBuffer[..<r.lowerBound])
+            readBuffer = String(readBuffer[r.upperBound...])
             guard !line.isEmpty else { continue }
+            let entry = ConsoleEntry(timestamp: Date(), direction: .received, text: line, tag: 0)
+            DispatchQueue.main.async { [weak self] in self?.onConsole?(entry) }
 
-            // Handle PING
             if line.hasPrefix("PING") {
-                let token = line
-                    .replacingOccurrences(of: "PING :", with: "")
-                    .replacingOccurrences(of: "PING ", with: "")
-                sendRaw("PONG :\(token)")
-                DispatchQueue.main.async { [weak self] in
-                    self?.onEvent?(.rawLine(line))
-                }
-                continue
+                let tok = line.replacingOccurrences(of: "PING :", with: "").replacingOccurrences(of: "PING ", with: "")
+                write("PONG :\(tok)", tag: 0); emit(.rawLine(line)); continue
             }
-
-            // Detect registration
             if line.contains(" 001 ") {
-                if case .registering = state {
-                    state = .online
-                    nickRetryCount = 0
-                    for channel in config.autoJoinChannels {
-                        join(channel: channel)
-                    }
+                if case .registering = state { state = .online; nickRetry = 0
+                    for ch in config.autoJoinChannels { join(channel: ch) }
                 }
             }
-
-            // Handle nick in use -> retry
-            if line.contains(" 433 ") {
-                nickRetryCount += 1
-                if nickRetryCount <= 5 {
-                    let tryNick = "\(config.nickname)\(nickRetryCount)"
-                    sendRaw("NICK \(tryNick)")
-                }
-            }
-
-            // Process the line
-            var event = IRCParser.parse(rawLine: line, server: config.host)
-
-            // Route CTCP responses
-            if case .ctcpQuery(let nick, let command, let arg) = event {
-                handleCTCP(nick: nick, command: command, argument: arg)
-                // Also pass through as raw for debug
-                event = .rawLine(line)
-            }
-
-            DispatchQueue.main.async { [weak self] in
-                self?.onEvent?(event)
-            }
+            if line.contains(" 433 ") { nickRetry += 1; if nickRetry <= 5 { write("NICK \(config.nickname)\(nickRetry)", tag: 0) } }
+            var evt = IRCParser.parse(rawLine: line, server: config.host)
+            if case .ctcpQuery(let n, let c, let a) = evt { handleCTCP(nick: n, cmd: c, arg: a); evt = .rawLine(line) }
+            emit(evt)
         }
     }
 
-    private func handleCTCP(nick: String, command: String, argument: String?) {
-        switch command.uppercased() {
-        case "VERSION":
-            sendCTCPReply(nick: nick, command: "VERSION", response: "Wirc IRC Client (iOS)")
-        case "PING":
-            let ts = argument.map { " \($0)" } ?? ""
-            sendCTCPReply(nick: nick, command: "PING", response: "\(UInt64(Date().timeIntervalSince1970 * 1000))\(ts)")
-        case "TIME":
-            let df = DateFormatter()
-            df.dateFormat = "yyyy-MM-dd HH:mm:ss"
-            sendCTCPReply(nick: nick, command: "TIME", response: df.string(from: Date()))
-        case "SOURCE":
-            sendCTCPReply(nick: nick, command: "SOURCE", response: "https://github.com/wirc")
-        case "CLIENTINFO":
-            sendCTCPReply(nick: nick, command: "CLIENTINFO", response: "PING VERSION TIME SOURCE CLIENTINFO")
-        default:
-            break // Ignore unknown CTCP
+    private func handleCTCP(nick: String, cmd: String, arg: String?) {
+        switch cmd.uppercased() {
+        case "VERSION": write("NOTICE \(nick) :\u{01}VERSION Wirc IRC Client (iOS)\u{01}", tag: 0)
+        case "PING": write("NOTICE \(nick) :\u{01}PING \(arg ?? "")\u{01}", tag: 0)
+        case "TIME": let f = DateFormatter(); f.dateFormat = "yyyy-MM-dd HH:mm:ss"; write("NOTICE \(nick) :\u{01}TIME \(f.string(from: Date()))\u{01}", tag: 0)
+        case "CLIENTINFO": write("NOTICE \(nick) :\u{01}CLIENTINFO PING VERSION TIME SOURCE CLIENTINFO\u{01}", tag: 0)
+        case "SOURCE": write("NOTICE \(nick) :\u{01}SOURCE https://github.com/wirc\u{01}", tag: 0)
+        default: break
         }
     }
 
-    private func sendRaw(_ command: String) {
-        let line = command + "\r\n"
-        guard let data = line.data(using: .utf8), let conn = connection else { return }
-        conn.send(content: data, completion: .contentProcessed({ _ in }))
-    }
+    private func emit(_ e: IRCEvent) { DispatchQueue.main.async { [weak self] in self?.onEvent?(e) } }
 }

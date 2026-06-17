@@ -13,37 +13,15 @@ struct AddServerView: View {
     @State private var realName = ""
     @State private var password = ""
     @State private var autoJoinChannels = ""
-
-    private var portBinding: Binding<Int> {
-        Binding(
-            get: { port },
-            set: { port = max(1, min(65535, $0)) }
-        )
-    }
+    @State private var showSuggested = false
 
     var body: some View {
         NavigationStack {
             Form {
-                Section("Server") {
-                    TextField("Display Name", text: $name)
-                    TextField("Host (e.g. irc.libera.chat)", text: $host)
-                    HStack {
-                        Text("Port")
-                        TextField("6667", value: portBinding, format: .number)
-                            .keyboardType(.numberPad)
-                    }
-                    Toggle("Use TLS/SSL", isOn: $useTLS)
-                    TextField("Password (optional)", text: $password)
-                }
-
-                Section("Identity") {
-                    TextField("Nickname", text: $nickname)
-                    TextField("Username (optional)", text: $username)
-                    TextField("Real Name (optional)", text: $realName)
-                }
-
-                Section("Auto-join") {
-                    TextField("Channels (comma-separated, e.g. #general,#dev)", text: $autoJoinChannels)
+                if !showSuggested {
+                    serverForm
+                } else {
+                    suggestedList
                 }
             }
             .navigationTitle("Add Server")
@@ -52,9 +30,92 @@ struct AddServerView: View {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
                 }
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Save") { save() }
-                        .disabled(host.isEmpty || nickname.isEmpty)
+                if !showSuggested {
+                    ToolbarItem(placement: .primaryAction) {
+                        Button { showSuggested = true } label: {
+                            Image(systemName: "globe")
+                        }
+                    }
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button("Save") { save() }
+                            .disabled(host.isEmpty || nickname.isEmpty)
+                    }
+                }
+            }
+        }
+    }
+
+    private var serverForm: some View {
+        Group {
+            Section("Server") {
+                TextField("Display Name", text: $name)
+                TextField("Host (e.g. irc.libera.chat)", text: $host)
+                    .autocapitalization(.none)
+                    .autocorrectionDisabled()
+                HStack {
+                    Text("Port")
+                    TextField("6667", value: Binding(get: { port }, set: { port = max(1, min(65535, $0)) }), format: .number)
+                        .keyboardType(.numberPad)
+                }
+                Toggle("Use TLS/SSL", isOn: $useTLS)
+                TextField("Password (optional)", text: $password)
+            }
+
+            Section("Identity") {
+                TextField("Nickname", text: $nickname)
+                    .autocapitalization(.none)
+                    .autocorrectionDisabled()
+                TextField("Username (optional)", text: $username)
+                    .autocapitalization(.none)
+                    .autocorrectionDisabled()
+                TextField("Real Name (optional)", text: $realName)
+            }
+
+            Section("Auto-join") {
+                TextField("Channels (comma-separated, e.g. #general,#dev)", text: $autoJoinChannels)
+                    .autocapitalization(.none)
+                    .autocorrectionDisabled()
+            }
+        }
+    }
+
+    private var suggestedList: some View {
+        Group {
+            Section {
+                HStack {
+                    Image(systemName: "info.circle")
+                        .foregroundStyle(.blue)
+                    Text("Tap a server to pre-fill the form, then set your nickname and Save.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+
+            Section("Suggested Servers (\(SuggestedServersLoader.servers.count))") {
+                ForEach(SuggestedServersLoader.servers) { server in
+                    Button {
+                        name = server.name
+                        host = server.host
+                        port = server.port
+                        useTLS = server.useTLS
+                        showSuggested = false
+                    } label: {
+                        HStack {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(server.name)
+                                    .font(.body)
+                                    .foregroundStyle(.primary)
+                                Text("\(server.host):\(server.port) \(server.useTLS ? "🔒" : "") · \(server.description)")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                                    .lineLimit(1)
+                            }
+                            Spacer()
+                            Image(systemName: "arrow.right.circle")
+                                .font(.caption)
+                                .foregroundStyle(.blue)
+                        }
+                    }
                 }
             }
         }

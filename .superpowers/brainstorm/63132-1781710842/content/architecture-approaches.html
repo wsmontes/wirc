@@ -1,0 +1,50 @@
+<h2>RSS Feed Reader — Architectural Approaches</h2>
+<p class="subtitle">Como o WIRC deve buscar, interpretar e armazenar feeds RSS/Atom?</p>
+
+<div class="section">
+  <h3>Constraints</h3>
+  <p>Todas as abordagens compartilham: SwiftUI (iOS 17+), zero dependências externas, WOM como modelo de dados, JSON file persistence. A escolha é sobre <strong>organização interna</strong>.</p>
+</div>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>FeedManager Monolítico</h3>
+      <p>Uma classe <code>FeedManager</code> faz tudo: buscar HTTP, parse RSS/Atom, converter pra WOM, salvar, gerenciar subscriptions.</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Pros</h4><ul><li>Rápido de implementar (~2-3 arquivos novos)</li><li>Fácil de entender</li><li>Menos código boilerplate</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Difícil de testar isoladamente</li><li>Cresce mal — cada formato de feed vira mais if/else</li><li>Não segue o padrão de adapters do projeto</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Pipeline em Camadas</h3>
+      <p>Camadas separadas que seguem o padrão existente do IRC: <code>FeedFetcher → FeedParser → FeedToWOMAdapter → WOMStore</code>.</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Pros</h4><ul><li>Segue o padrão IRCClient → IRCToWOMAdapter → WOMStore</li><li>Cada camada testável isoladamente</li><li>Bom equilíbrio entre simplicidade e extensibilidade</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>~5-6 arquivos novos</li><li>Um pouco mais de código de coordenação</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Protocolo com Plugins por Formato</h3>
+      <p><code>FeedSource</code> protocol com implementações por tipo de feed: <code>RSSSource</code>, <code>AtomSource</code>, <code>YouTubeSource</code>, <code>GitHubSource</code>.</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Pros</h4><ul><li>Extensível — novo formato = novo plugin</li><li>Suporta pré-processamento específico (YouTube handle → channel ID)</li><li>Máxima testabilidade</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Overengineered pro MVP</li><li>~8-10 arquivos novos</li><li>Risco de abstração errada antes de ter variabilidade real</li></ul></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Minha Recomendação</h3>
+  <p><strong>B — Pipeline em Camadas</strong>. Segue o padrão que já existe no projeto (IRC Client → Adapter → Store), é testável, e não overengineer. Se precisarmos de plugins por formato depois, o Pipeline já tem os pontos de extensão certos — é uma evolução natural, não uma reescrita.</p>
+</div>

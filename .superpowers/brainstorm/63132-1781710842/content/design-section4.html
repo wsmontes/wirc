@@ -1,0 +1,105 @@
+<h2>Design — Seção 4: FeedToWOMAdapter &amp; Feed UI</h2>
+<p class="subtitle">A última camada do pipeline + os cards no Feed</p>
+
+<div class="section">
+  <h3>FeedToWOMAdapter</h3>
+  <p>Espelha o <code>IRCToWOMAdapter</code>. Recebe <code>[FeedItem]</code> + <code>FeedSubscription</code>, produz <code>[WOMObject]</code>.</p>
+
+  <pre style="font-family: monospace; font-size: 13px; line-height: 1.7; padding: 16px; background: #1a1a2e; color: #e0e0e0; border-radius: 8px; overflow-x: auto;">
+<span style="color: #ffd93d;">final class</span> <span style="color: #6bcb77;">FeedToWOMAdapter</span> {
+    <span style="color: #ffd93d;">func</span> <span style="color: #6bcb77;">convert</span>(
+        <span style="color: #4ec9b0;">items</span>: [FeedItem],
+        <span style="color: #4ec9b0;">subscription</span>: FeedSubscription
+    ) → [WOMObject]
+
+    <span style="color: #888;">// Type mapping depende do sourceType da subscription:
+    // .rss/.atom    → [wom:Post]
+    // .youtube      → [wom:Post, external.youtube.video]
+    // .github       → [wom:Post, external.github.release]
+    // .podcast      → [wom:Post, external.podcast.episode]</span>
+}
+</pre>
+</div>
+
+<div class="mockup">
+  <div class="mockup-header">Exemplo: YouTube video → WOMObject</div>
+  <div class="mockup-body">
+    <pre style="font-family: monospace; font-size: 12px; line-height: 1.6; padding: 16px; background: #1a1a2e; color: #e0e0e0; border-radius: 8px; overflow-x: auto;">
+{
+  <span style="color: #6bcb77;">"wom"</span>: <span style="color: #ce9178;">"0.1"</span>,
+  <span style="color: #6bcb77;">"id"</span>: <span style="color: #ce9178;">"urn:wom:post:abc123..."</span>,
+  <span style="color: #6bcb77;">"type"</span>: [<span style="color: #ce9178;">"wom:Post"</span>, <span style="color: #ce9178;">"external.youtube.video"</span>],
+  <span style="color: #6bcb77;">"name"</span>: <span style="color: #ce9178;">"The most beautiful equation in math"</span>,
+  <span style="color: #6bcb77;">"summary"</span>: <span style="color: #ce9178;">"Euler's formula explained visually..."</span>,
+  <span style="color: #6bcb77;">"createdAt"</span>: <span style="color: #ce9178;">"2026-06-15T14:00:00Z"</span>,
+  <span style="color: #6bcb77;">"attributedTo"</span>: {
+    <span style="color: #6bcb77;">"id"</span>: <span style="color: #ce9178;">"https://youtube.com/channel/UCYO_..."</span>,
+    <span style="color: #6bcb77;">"type"</span>: [<span style="color: #ce9178;">"wom:RemoteIdentity"</span>],
+    <span style="color: #6bcb77;">"name"</span>: <span style="color: #ce9178;">"3Blue1Brown"</span>
+  },
+  <span style="color: #6bcb77;">"content"</span>: { <span style="color: #6bcb77;">"format"</span>: <span style="color: #ce9178;">"text/html"</span>, <span style="color: #6bcb77;">"text"</span>: <span style="color: #ce9178;">"&lt;p&gt;Euler's formula...&lt;/p&gt;"</span> },
+  <span style="color: #6bcb77;">"attachments"</span>: [
+    { <span style="color: #6bcb77;">"id"</span>: <span style="color: #ce9178;">"https://i.ytimg.com/vi/.../hqdefault.jpg"</span>,
+      <span style="color: #6bcb77;">"type"</span>: [<span style="color: #ce9178;">"wom:Media"</span>], <span style="color: #6bcb77;">"name"</span>: <span style="color: #ce9178;">"thumbnail"</span> }
+  ],
+  <span style="color: #6bcb77;">"data"</span>: {
+    <span style="color: #6bcb77;">"network"</span>: <span style="color: #ce9178;">"rss"</span>,
+    <span style="color: #6bcb77;">"canonicalUrl"</span>: <span style="color: #ce9178;">"https://youtube.com/watch?v=..."</span>,
+    <span style="color: #6bcb77;">"feedTitle"</span>: <span style="color: #ce9178;">"3Blue1Brown"</span>,
+    <span style="color: #6bcb77;">"sourceType"</span>: <span style="color: #ce9178;">"youtube"</span>,
+    <span style="color: #6bcb77;">"duration"</span>: <span style="color: #ce9178;">"24:18"</span>
+  },
+  <span style="color: #6bcb77;">"provenance"</span>: {
+    <span style="color: #6bcb77;">"origin"</span>: <span style="color: #ce9178;">"remotePeer"</span>,
+    <span style="color: #6bcb77;">"source"</span>: { <span style="color: #6bcb77;">"id"</span>: <span style="color: #ce9178;">"https://youtube.com/feeds/videos.xml?channel_id=..."</span>,
+               <span style="color: #6bcb77;">"type"</span>: [<span style="color: #ce9178;">"rss:Feed"</span>] },
+    <span style="color: #6bcb77;">"confidence"</span>: <span style="color: #b5cea8;">1.0</span>
+  }
+}
+</pre>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Cards do Feed por Tipo</h3>
+  <p>Cada WOM type tem um layout de card diferente. O <code>FeedCard</code> faz switch pelo type.</p>
+
+  <table style="width:100%; border-collapse: collapse; margin-top: 12px;">
+    <tr style="background: rgba(255,255,255,0.05);">
+      <th style="text-align:left; padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.1);">Tipo</th>
+      <th style="text-align:left; padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.1);">Layout</th>
+      <th style="text-align:left; padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.1);">Elementos</th>
+    </tr>
+    <tr>
+      <td style="padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.05);"><code>wom:Post</code> (blog)</td>
+      <td style="padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.05);">Card textual</td>
+      <td style="padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.05);">Título, resumo, autor, data, fonte</td>
+    </tr>
+    <tr>
+      <td style="padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.05);"><code>youtube.video</code></td>
+      <td style="padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.05);">Card com thumbnail</td>
+      <td style="padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.05);">Thumbnail esquerda, título, canal, duração</td>
+    </tr>
+    <tr>
+      <td style="padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.05);"><code>podcast.episode</code></td>
+      <td style="padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.05);">Card com capa</td>
+      <td style="padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.05);">Capa, título, podcast, duração, botão play</td>
+    </tr>
+    <tr>
+      <td style="padding: 8px;"><code>github.release</code></td>
+      <td style="padding: 8px;">Card compacto</td>
+      <td style="padding: 8px;">Tag de versão, repo, changelog resumido</td>
+    </tr>
+  </table>
+</div>
+
+<div class="section">
+  <h3>FeedView — Nova estrutura</h3>
+  <pre style="font-family: monospace; font-size: 13px; line-height: 1.7; padding: 16px; background: #1a1a2e; color: #e0e0e0; border-radius: 8px; overflow-x: auto;">
+<span style="color: #888;">// Substitui o placeholder atual por:</span>
+<span style="color: #6bcb77;">FeedView</span>
+ ├── <span style="color: #ffd93d;">Pull-to-refresh</span>    <span style="color: #888;">// dispara fetch de todas as subscriptions</span>
+ ├── <span style="color: #ffd93d;">Segmented picker</span>  <span style="color: #888;">// "All" | "Blogs" | "Videos" | "Podcasts"</span>
+ ├── <span style="color: #ffd93d;">ScrollView</span> LazyVStack de FeedCards
+ └── <span style="color: #ffd93d;">Empty state</span>        <span style="color: #888;">// "Add feeds in Settings to see posts here"</span></pre>
+</div>

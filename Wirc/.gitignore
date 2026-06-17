@@ -16,3 +16,4 @@ xcuserdata/
 *.moved-aside
 *.xcuserstate
 *.DS_Store
+mastodon_config.json

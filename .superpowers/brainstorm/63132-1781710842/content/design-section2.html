@@ -1,0 +1,81 @@
+<h2>Design — Seção 2: Modelos de Dados</h2>
+<p class="subtitle">FeedItem intermediário, mapeamento WOM types, e FeedSubscription</p>
+
+<div class="section">
+  <h3>FeedItem — Struct Intermediário</h3>
+  <p>Representa um item parseado de qualquer feed (RSS ou Atom) antes de virar WOM. É o "IRCMessage" do pipeline de feeds.</p>
+  <pre style="font-family: monospace; font-size: 13px; line-height: 1.7; padding: 16px; background: #1a1a2e; color: #e0e0e0; border-radius: 8px; overflow-x: auto;">
+<span style="color: #ffd93d;">struct</span> <span style="color: #6bcb77;">FeedItem</span>: Codable, Equatable {
+    <span style="color: #888;">// Required (every feed format has these)</span>
+    <span style="color: #ffd93d;">let</span> <span style="color: #4ec9b0;">id</span>: String           <span style="color: #888;">// guid (RSS) or id (Atom), fallback: link</span>
+    <span style="color: #ffd93d;">let</span> <span style="color: #4ec9b0;">title</span>: String
+    <span style="color: #ffd93d;">let</span> <span style="color: #4ec9b0;">link</span>: String          <span style="color: #888;">// canonical URL</span>
+    <span style="color: #ffd93d;">let</span> <span style="color: #4ec9b0;">description</span>: String? <span style="color: #888;">// plain text or HTML summary</span>
+    <span style="color: #ffd93d;">let</span> <span style="color: #4ec9b0;">publishedAt</span>: Date?
+
+    <span style="color: #888;">// Optional enrichment</span>
+    <span style="color: #ffd93d;">let</span> <span style="color: #4ec9b0;">author</span>: String?
+    <span style="color: #ffd93d;">let</span> <span style="color: #4ec9b0;">category</span>: String?
+    <span style="color: #ffd93d;">let</span> <span style="color: #4ec9b0;">enclosureURL</span>: String?   <span style="color: #888;">// media: image, audio, video</span>
+    <span style="color: #ffd93d;">let</span> <span style="color: #4ec9b0;">enclosureType</span>: String? <span style="color: #888;">// MIME type</span>
+    <span style="color: #ffd93d;">let</span> <span style="color: #4ec9b0;">duration</span>: String?      <span style="color: #888;">// podcast/YouTube</span>
+}</pre>
+</div>
+
+<div class="section">
+  <h3>Mapeamento FeedItem → WOM Types</h3>
+  <p>O <strong>contexto da fonte</strong> (não o formato do feed) determina o WOM type. YouTube RSS e blog RSS usam o mesmo parser, mas o Adapter aplica o type correto baseado na subscription.</p>
+
+  <table style="width:100%; border-collapse: collapse; margin-top: 12px;">
+    <tr style="background: rgba(255,255,255,0.05);">
+      <th style="text-align:left; padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.1);">Fonte</th>
+      <th style="text-align:left; padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.1);">WOM type</th>
+      <th style="text-align:left; padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.1);">Card no Feed</th>
+    </tr>
+    <tr>
+      <td style="padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.05);">Blog / News site</td>
+      <td style="padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.05);"><code>[wom:Post]</code></td>
+      <td style="padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.05);">Título + descrição + link</td>
+    </tr>
+    <tr>
+      <td style="padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.05);">YouTube channel</td>
+      <td style="padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.05);"><code>[wom:Post, external.youtube.video]</code></td>
+      <td style="padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.05);">Thumbnail + título + link ao vídeo</td>
+    </tr>
+    <tr>
+      <td style="padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.05);">Podcast</td>
+      <td style="padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.05);"><code>[wom:Post, external.podcast.episode]</code></td>
+      <td style="padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.05);">Capa + título + duração + player</td>
+    </tr>
+    <tr>
+      <td style="padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.05);">GitHub releases</td>
+      <td style="padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.05);"><code>[wom:Post, external.github.release]</code></td>
+      <td style="padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.05);">Versão + changelog + link</td>
+    </tr>
+    <tr>
+      <td style="padding: 8px;">Newsletter (Substack, etc.)</td>
+      <td style="padding: 8px;"><code>[wom:Post]</code></td>
+      <td style="padding: 8px;">Título + corpo + link</td>
+    </tr>
+  </table>
+</div>
+
+<div class="section">
+  <h3>FeedSubscription — O que o usuário segue</h3>
+  <pre style="font-family: monospace; font-size: 13px; line-height: 1.7; padding: 16px; background: #1a1a2e; color: #e0e0e0; border-radius: 8px; overflow-x: auto;">
+<span style="color: #ffd93d;">struct</span> <span style="color: #6bcb77;">FeedSubscription</span>: Codable, Identifiable, Equatable {
+    <span style="color: #ffd93d;">let</span> <span style="color: #4ec9b0;">id</span>: UUID
+    <span style="color: #ffd93d;">var</span> <span style="color: #4ec9b0;">feedURL</span>: String           <span style="color: #888;">// https://example.com/feed.xml</span>
+    <span style="color: #ffd93d;">var</span> <span style="color: #4ec9b0;">title</span>: String              <span style="color: #888;">// "Wagner's Blog" (parsed from feed)</span>
+    <span style="color: #ffd93d;">var</span> <span style="color: #4ec9b0;">sourceType</span>: FeedSourceType <span style="color: #888;">// .rss, .atom, .youtube, .github, .podcast</span>
+    <span style="color: #ffd93d;">var</span> <span style="color: #4ec9b0;">tags</span>: [String]            <span style="color: #888;">// user + AI assigned: ["tech", "llm", "brasil"]</span>
+    <span style="color: #ffd93d;">var</span> <span style="color: #4ec9b0;">lastFetchedAt</span>: Date?
+    <span style="color: #ffd93d;">var</span> <span style="color: #4ec9b0;">etag</span>: String?              <span style="color: #888;">// HTTP ETag for conditional GET</span>
+    <span style="color: #ffd93d;">var</span> <span style="color: #4ec9b0;">lastModified</span>: String?     <span style="color: #888;">// HTTP Last-Modified</span>
+    <span style="color: #ffd93d;">var</span> <span style="color: #4ec9b0;">errorCount</span>: Int          <span style="color: #888;">// consecutive failures (for auto-pause)</span>
+}
+
+<span style="color: #ffd93d;">enum</span> <span style="color: #6bcb77;">FeedSourceType</span>: String, Codable {
+    <span style="color: #ffd93d;">case</span> <span style="color: #4ec9b0;">rss</span>, <span style="color: #4ec9b0;">atom</span>, <span style="color: #4ec9b0;">youtube</span>, <span style="color: #4ec9b0;">github</span>, <span style="color: #4ec9b0;">podcast</span>
+}</pre>
+</div>

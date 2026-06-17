@@ -1,0 +1,94 @@
+<h2>Design — Seção 5: Background Refresh, Settings &amp; AppState</h2>
+<p class="subtitle">Infraestrutura de refresh, UI de gerenciamento, e o que muda no AppState</p>
+
+<div class="section">
+  <h3>Background Refresh — BGAppRefreshTask</h3>
+  <p>iOS permite agendar uma tarefa de background que o sistema executa quando achar oportuno (bateria, conectividade, horário). Não é um timer preciso — é uma <strong>sugestão</strong>.</p>
+
+  <pre style="font-family: monospace; font-size: 13px; line-height: 1.7; padding: 16px; background: #1a1a2e; color: #e0e0e0; border-radius: 8px; overflow-x: auto;">
+<span style="color: #888;">// Registrar no App init:</span>
+<span style="color: #6bcb77;">BGTaskScheduler</span>.shared.register(
+    forTaskWithIdentifier: <span style="color: #ce9178;">"com.wirc.feed-refresh"</span>,
+    using: <span style="color: #ffd93d;">nil</span>
+) { task <span style="color: #ffd93d;">in</span>
+    <span style="color: #888;">// Fetch all subscriptions, convert to WOM, save</span>
+    <span style="color: #ffd93d;">await</span> appState.refreshAllFeeds()
+    task.setTaskCompleted(success: <span style="color: #ffd93d;">true</span>)
+    <span style="color: #888;">// Re-schedule for next time</span>
+    appState.scheduleNextRefresh()
+}
+
+<span style="color: #888;">// Schedule next refresh (call after each successful run):</span>
+<span style="color: #ffd93d;">let</span> request = BGAppRefreshTaskRequest(
+    identifier: <span style="color: #ce9178;">"com.wirc.feed-refresh"</span>
+)
+request.earliestBeginDate = Date().addingTimeInterval(<span style="color: #b5cea8;">30</span> * <span style="color: #b5cea8;">60</span>)
+<span style="color: #ffd93d;">try</span> BGTaskScheduler.shared.submit(request)
+
+<span style="color: #888;">// Também fazemos fetch em:
+// - App launch (viewDidAppear / onAppear do FeedView)
+// - Pull-to-refresh no FeedView
+// BGTask é só o bônus — o usuário nunca depende dele</span>
+</pre>
+</div>
+
+<div class="section">
+  <h3>Settings — Nova Seção "Feeds"</h3>
+  <p>O SettingsView ganha uma nova seção abaixo de "Servers":</p>
+  <pre style="font-family: monospace; font-size: 13px; line-height: 1.7; padding: 16px; background: #1a1a2e; color: #e0e0e0; border-radius: 8px; overflow-x: auto;">
+<span style="color: #6bcb77;">SettingsView</span>
+ ├── <span style="color: #ffd93d;">Servers</span> section          <span style="color: #888;">// (existente)</span>
+ ├── <span style="color: #ffd93d;">Feeds</span> section            <span style="color: #888;">// NOVA</span>
+ │   ├── Lista de subscriptions
+ │   │   ├── Nome do feed + source type badge
+ │   │   ├── Tags (chips editáveis)
+ │   │   ├── Last fetched + status
+ │   │   └── Swipe to delete
+ │   ├── Botão "Add Feed"
+ │   │   └── Sheet: AddFeedView
+ │   │       ├── TextField: URL
+ │   │       ├── Botão "Auto-discover"
+ │   │       ├── Picker: Source type (manual override)
+ │   │       └── Botão "Subscribe"
+ │   └── Botão "Import OPML"
+ │       └── File picker (.opml / .xml)
+ └── <span style="color: #ffd93d;">Debug</span> section</pre>
+</div>
+
+<div class="section">
+  <h3>AppState — Novas Responsabilidades</h3>
+  <pre style="font-family: monospace; font-size: 13px; line-height: 1.7; padding: 16px; background: #1a1a2e; color: #e0e0e0; border-radius: 8px; overflow-x: auto;">
+<span style="color: #888;">// AppState ganha:</span>
+<span style="color: #ffd93d;">let</span> <span style="color: #4ec9b0;">feedStore</span>: FeedSubscriptionStore    <span style="color: #888;">// CRUD de subscriptions (JSON file)</span>
+<span style="color: #ffd93d;">let</span> <span style="color: #4ec9b0;">feedFetcher</span>: FeedFetcher           <span style="color: #888;">// HTTP I/O + auto-discovery</span>
+<span style="color: #ffd93d;">let</span> <span style="color: #4ec9b0;">feedParser</span>: FeedParser.Type        <span style="color: #888;">// enum static</span>
+<span style="color: #ffd93d;">let</span> <span style="color: #4ec9b0;">feedAdapter</span>: FeedToWOMAdapter       <span style="color: #888;">// FeedItem → WOMObject</span>
+<span style="color: #ffd93d;">let</span> <span style="color: #4ec9b0;">womFileStore</span>: JSONFileStore         <span style="color: #888;">// Persistent WOM store</span>
+
+<span style="color: #888;">// Novos métodos:</span>
+<span style="color: #ffd93d;">func</span> <span style="color: #6bcb77;">addFeed</span>(url: String, sourceType: FeedSourceType?) <span style="color: #ffd93d;">async throws</span>
+<span style="color: #ffd93d;">func</span> <span style="color: #6bcb77;">removeFeed</span>(<span style="color: #4ec9b0;">_</span> subscription: FeedSubscription) <span style="color: #ffd93d;">async</span>
+<span style="color: #ffd93d;">func</span> <span style="color: #6bcb77;">importOPML</span>(<span style="color: #4ec9b0;">data</span>: Data) <span style="color: #ffd93d;">async throws</span> → Int  <span style="color: #888;">// returns count</span>
+<span style="color: #ffd93d;">func</span> <span style="color: #6bcb77;">refreshAllFeeds</span>() <span style="color: #ffd93d;">async</span>                   <span style="color: #888;">// fetch → parse → adapt → save</span>
+<span style="color: #ffd93d;">func</span> <span style="color: #6bcb77;">discoverFeedURL</span>(<span style="color: #4ec9b0;">from</span> url: String) <span style="color: #ffd93d;">async throws</span> → [String]
+
+<span style="color: #888;">// var feedObjects já existe e já filtra wom:Post.
+// Agora ela retorna posts de RSS + IRC channel messages (se tiverem type wom:Post).
+// A query não muda — o conteúdo que cresce.</span>
+</pre>
+</div>
+
+<div class="section">
+  <h3>JSONFileStore — Dívida Técnica do MVP Paga</h3>
+  <p>O WOM store atual é <code>InMemoryWOMStore</code>. Para feeds, precisamos de persistência. O <code>JSONFileStore</code> implementa o mesmo protocolo <code>WOMStore</code> mas salva em disco.</p>
+  <pre style="font-family: monospace; font-size: 13px; line-height: 1.7; padding: 16px; background: #1a1a2e; color: #e0e0e0; border-radius: 8px; overflow-x: auto;">
+<span style="color: #ffd93d;">final class</span> <span style="color: #6bcb77;">JSONFileStore</span>: WOMStore {
+    <span style="color: #888;">// Armazena cada WOMObject como um arquivo .json separado
+    // em ~/Documents/wirc/objects/{id}.json
+    // + índice em memória para queries rápidas
+    // load: lê todos os .json do diretório no init
+    // save: escreve arquivo individual + atualiza índice
+    // Dedenção por canonicalUrl no data dict (para feeds)</span>
+}
+</pre>
+</div>

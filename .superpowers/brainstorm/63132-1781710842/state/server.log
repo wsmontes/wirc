@@ -1,0 +1,9 @@
+{"type":"server-started","port":63351,"host":"127.0.0.1","url_host":"localhost","url":"http://localhost:63351/?key=212556365cd2d7aa96ee8fafcd3a787e35280dd8094d2affa6644b5c80a6b545","screen_dir":"/Users/wagnermontes/Documents/GitHub/wirc/.superpowers/brainstorm/63132-1781710842/content","state_dir":"/Users/wagnermontes/Documents/GitHub/wirc/.superpowers/brainstorm/63132-1781710842/state","idle_timeout_ms":14400000}
+{"type":"screen-added","file":"/Users/wagnermontes/Documents/GitHub/wirc/.superpowers/brainstorm/63132-1781710842/content/architecture-approaches.html"}
+{"source":"user-event","type":"click","text":"B\n    \n      Pipeline em Camadas\n      Camadas separadas que seguem o padrão existente do IRC: FeedFetcher → FeedParser → FeedToWOMAdapter → WOMStore.\n      \n        ProsSegue o padrão IRCClient → IRCToWOMAdapter → WOMStoreCada camada testável isoladamenteBom equilíbrio entre simplicidade e extensibilidade\n        Cons~5-6 arquivos novosUm pouco mais de código de coordenação","choice":"b","id":null,"timestamp":1781710897125}
+{"type":"screen-added","file":"/Users/wagnermontes/Documents/GitHub/wirc/.superpowers/brainstorm/63132-1781710842/content/design-section1.html"}
+{"type":"screen-added","file":"/Users/wagnermontes/Documents/GitHub/wirc/.superpowers/brainstorm/63132-1781710842/content/design-section2.html"}
+{"type":"screen-added","file":"/Users/wagnermontes/Documents/GitHub/wirc/.superpowers/brainstorm/63132-1781710842/content/design-section3.html"}
+{"type":"screen-added","file":"/Users/wagnermontes/Documents/GitHub/wirc/.superpowers/brainstorm/63132-1781710842/content/design-section4.html"}
+{"type":"screen-added","file":"/Users/wagnermontes/Documents/GitHub/wirc/.superpowers/brainstorm/63132-1781710842/content/design-section5.html"}
+{"type":"screen-added","file":"/Users/wagnermontes/Documents/GitHub/wirc/.superpowers/brainstorm/63132-1781710842/content/waiting.html"}

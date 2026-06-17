@@ -45,7 +45,8 @@ final class IRCToWOMAdapter {
         case .nickInUse:
             return []
 
-        case .connected, .disconnected, .rawLine, .error, .ctcpQuery:
+        case .connected, .disconnected, .rawLine, .error, .ctcpQuery,
+             .listStart, .listItem, .listEnd:
             return []
         }
     }

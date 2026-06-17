@@ -161,6 +161,14 @@ enum IRCParser {
         case "376", "422": // RPL_ENDOFMOTD
             return .motdEnd
 
+        case "321": // RPL_LISTSTART
+            return .listStart
+        case "322": // RPL_LIST
+            let channel = params.count >= 2 ? params[1] : (params.first ?? "")
+            let users = Int(params.count >= 3 ? params[2] : "0") ?? 0
+            return .listItem(channel: channel, users: users, topic: trailing ?? "")
+        case "323": // RPL_LISTEND
+            return .listEnd
         case "433": // ERR_NICKNAMEINUSE
             let badNick = params.count >= 1 ? params[0] : (trailing ?? "unknown")
             return .nickInUse(badNick)

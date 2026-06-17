@@ -21,4 +21,7 @@ enum IRCEvent {
     case channelMode(channel: String, mode: String)
     case error(String)
     case ctcpQuery(nick: String, command: String, argument: String?)
+    case listStart
+    case listItem(channel: String, users: Int, topic: String)
+    case listEnd
 }

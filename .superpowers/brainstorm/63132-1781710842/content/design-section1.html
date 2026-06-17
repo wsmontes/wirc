@@ -1,0 +1,99 @@
+<h2>Design — Seção 1: Arquitetura &amp; Componentes</h2>
+<p class="subtitle">RSS Feed Reader como pipeline de 4 camadas, espelhando o padrão IRC existente</p>
+
+<div class="mockup">
+  <div class="mockup-header">Data Flow — RSS → WOM → UI</div>
+  <div class="mockup-body">
+    <pre style="font-family: monospace; font-size: 13px; line-height: 1.7; padding: 16px; background: #1a1a2e; color: #e0e0e0; border-radius: 8px;">
+<span style="color: #ff6b6b;">HTTP GET feed.xml</span>
+       │
+       ▼
+┌──────────────────────────────┐
+│  <span style="color: #ffd93d;">FeedFetcher</span>                  │  &lt;── Schedule (BGTask / manual / on-launch)
+│  • URLSession async fetch    │
+│  • ETag / Last-Modified      │
+│  • OPML parsing              │
+└──────────────┬───────────────┘
+               │ raw XML data
+               ▼
+┌──────────────────────────────┐
+│  <span style="color: #ffd93d;">FeedParser</span>                   │
+│  • RSS 2.0 parsing           │
+│  • Atom 1.0 parsing          │
+│  • XMLParser (Foundation)    │
+└──────────────┬───────────────┘
+               │ [FeedItem] (intermediate struct)
+               ▼
+┌──────────────────────────────┐
+│  <span style="color: #ffd93d;">FeedToWOMAdapter</span>            │
+│  • FeedItem → WOMObject      │
+│  • Type mapping per feed     │
+│  • Canonical URL preservation│
+└──────────────┬───────────────┘
+               │ [WOMObject]
+               ▼
+┌──────────────────────────────┐
+│  <span style="color: #ffd93d;">WOMStore</span> (JSONFileStore)    │
+│  • Persistent on disk        │
+│  • Query by WOM type         │
+│  • Dedup by canonical URL    │
+└──────────────┬───────────────┘
+               │
+               ▼
+┌──────────────────────────────┐
+│  <span style="color: #6bcb77;">FeedView</span> + <span style="color: #6bcb77;">FeedCard</span>          │
+│  • Renders wom:Post cards    │
+│  • Pull-to-refresh           │
+│  • Unread indicators         │
+└──────────────────────────────┘</pre>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Novos Arquivos</h3>
+  <table style="width:100%; border-collapse: collapse; margin-top: 12px;">
+    <tr style="background: rgba(255,255,255,0.05);">
+      <th style="text-align:left; padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.1);">Arquivo</th>
+      <th style="text-align:left; padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.1);">Responsabilidade</th>
+    </tr>
+    <tr>
+      <td style="padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.05);"><code>FeedFetcher.swift</code></td>
+      <td style="padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.05);">HTTP fetch com ETag, OPML import, URL auto-discovery</td>
+    </tr>
+    <tr>
+      <td style="padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.05);"><code>FeedParser.swift</code></td>
+      <td style="padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.05);">XMLParser-based RSS 2.0 + Atom 1.0 → [FeedItem]</td>
+    </tr>
+    <tr>
+      <td style="padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.05);"><code>FeedItem.swift</code></td>
+      <td style="padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.05);">Struct intermediário: title, link, description, pubDate, author, enclosure</td>
+    </tr>
+    <tr>
+      <td style="padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.05);"><code>FeedToWOMAdapter.swift</code></td>
+      <td style="padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.05);">FeedItem → WOMObject com type mapping por fonte</td>
+    </tr>
+    <tr>
+      <td style="padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.05);"><code>FeedSubscription.swift</code></td>
+      <td style="padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.05);">Model: feed URL, title, category/tags, lastFetched, ETag</td>
+    </tr>
+    <tr>
+      <td style="padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.05);"><code>FeedSubscriptionStore.swift</code></td>
+      <td style="padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.05);">CRUD de subscriptions, JSON file persistence</td>
+    </tr>
+    <tr>
+      <td style="padding: 8px;"><code>JSONFileStore.swift</code></td>
+      <td style="padding: 8px;">Implementação persistente do WOMStore (adiada do MVP)</td>
+    </tr>
+  </table>
+</div>
+
+<div class="section">
+  <h3>Modificações em Arquivos Existentes</h3>
+  <ul>
+    <li><strong>AppState.swift</strong> — Adicionar FeedSubscriptionStore, FeedFetcher, refresh scheduler</li>
+    <li><strong>FeedView.swift</strong> — Substituir placeholder por scroll view real com FeedCards</li>
+    <li><strong>FeedCard.swift</strong> — Renderizar diferentes WOM types (Post, YouTube video, podcast, etc.)</li>
+    <li><strong>SettingsView.swift</strong> — Nova seção "Feeds" com lista de subscriptions + botão Add Feed / Import OPML</li>
+    <li><strong>WOMObject.swift</strong> — Sem mudanças estruturais (data dict absorve variações)</li>
+  </ul>
+</div>

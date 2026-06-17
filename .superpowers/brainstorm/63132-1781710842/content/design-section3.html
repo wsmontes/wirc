@@ -1,0 +1,79 @@
+<h2>Design — Seção 3: FeedFetcher, FeedParser &amp; Auto-Discovery</h2>
+<p class="subtitle">As duas primeiras camadas do pipeline + como adicionar feeds</p>
+
+<div class="section">
+  <h3>FeedFetcher</h3>
+  <p>Responsável por todo HTTP I/O. Usa <code>URLSession</code> (nativo do Foundation, sem dependências).</p>
+
+  <pre style="font-family: monospace; font-size: 13px; line-height: 1.7; padding: 16px; background: #1a1a2e; color: #e0e0e0; border-radius: 8px; overflow-x: auto;">
+<span style="color: #ffd93d;">final class</span> <span style="color: #6bcb77;">FeedFetcher</span> {
+    <span style="color: #888;">// MARK: - Feed Fetching</span>
+    <span style="color: #ffd93d;">func</span> <span style="color: #6bcb77;">fetch</span>(<span style="color: #4ec9b0;">subscription</span>: FeedSubscription) <span style="color: #ffd93d;">async throws</span> → (Data, HTTPURLResponse)
+    <span style="color: #888;">// Sends conditional GET with ETag + Last-Modified
+    // Returns 304 Not Modified → no new items</span>
+
+    <span style="color: #888;">// MARK: - URL Auto-Discovery</span>
+    <span style="color: #ffd93d;">func</span> <span style="color: #6bcb77;">discoverFeed</span>(<span style="color: #4ec9b0;">from</span> url: URL) <span style="color: #ffd93d;">async throws</span> → [URL]
+    <span style="color: #888;">// 1. Fetch the page HTML
+    // 2. Parse &lt;link rel="alternate" type="application/rss+xml"&gt;
+    // 3. Resolve YouTube @handle → channel ID → RSS URL
+    // 4. Return discovered feed URLs</span>
+
+    <span style="color: #888;">// MARK: - OPML Import</span>
+    <span style="color: #ffd93d;">func</span> <span style="color: #6bcb77;">parseOPML</span>(<span style="color: #4ec9b0;">_</span> data: Data) <span style="color: #ffd93d;">throws</span> → [OPMLOutline]
+    <span style="color: #888;">// Parse OPML XML → flat list of feed URLs with folder names as tags</span>
+}</pre>
+</div>
+
+<div class="section">
+  <h3>FeedParser — RSS 2.0 + Atom 1.0</h3>
+  <p>Usa <code>XMLParser</code> (Foundation SAX parser). Um parser unificado que detecta o formato pelo root element.</p>
+
+  <pre style="font-family: monospace; font-size: 13px; line-height: 1.7; padding: 16px; background: #1a1a2e; color: #e0e0e0; border-radius: 8px; overflow-x: auto;">
+<span style="color: #ffd93d;">enum</span> <span style="color: #6bcb77;">FeedParser</span> {
+    <span style="color: #ffd93d;">static func</span> <span style="color: #6bcb77;">parse</span>(<span style="color: #4ec9b0;">data</span>: Data, <span style="color: #4ec9b0;">sourceURL</span>: String) <span style="color: #ffd93d;">throws</span> → FeedParseResult
+}
+
+<span style="color: #ffd93d;">struct</span> <span style="color: #6bcb77;">FeedParseResult</span> {
+    <span style="color: #ffd93d;">let</span> <span style="color: #4ec9b0;">title</span>: String?           <span style="color: #888;">// feed-level title</span>
+    <span style="color: #ffd93d;">let</span> <span style="color: #4ec9b0;">description</span>: String?    <span style="color: #888;">// feed-level description</span>
+    <span style="color: #ffd93d;">let</span> <span style="color: #4ec9b0;">link</span>: String?           <span style="color: #888;">// feed-level homepage</span>
+    <span style="color: #ffd93d;">let</span> <span style="color: #4ec9b0;">items</span>: [FeedItem]       <span style="color: #888;">// parsed items</span>
+}
+
+<span style="color: #888;">// Suporte mínimo mas robusto:
+// RSS: title, link, description, pubDate, author, category, enclosure, guid
+// Atom: title, link[@rel=alternate], summary/content, published/updated,
+//        author/name, category[@term], link[@rel=enclosure]
+// Namespace extensions ignorados no MVP (mrss, itunes, etc.)
+// YouTube: enclosure vira enclosureURL; media:group ignorado no MVP</span>
+</pre>
+</div>
+
+<div class="mockup">
+  <div class="mockup-header">Auto-Discovery Flow — YouTube Example</div>
+  <div class="mockup-body">
+    <pre style="font-family: monospace; font-size: 13px; line-height: 1.7; padding: 16px; background: #1a1a2e; color: #e0e0e0; border-radius: 8px;">
+<span style="color: #888;">User pastes:</span>  <span style="color: #4ec9b0;">https://www.youtube.com/@3blue1brown</span>
+                     │
+                     ▼
+<span style="color: #ffd93d;">discoverFeed(from:)</span>
+  1. Fetch page HTML
+  2. Find: <span style="color: #6bcb77;">&lt;meta itemprop="channelId" content="UCYO_jab_esuFRV4b17AJtAw"&gt;</span>
+  3. Build: <span style="color: #6bcb77;">https://www.youtube.com/feeds/videos.xml?channel_id=UCYO_jab...</span>
+                     │
+                     ▼
+<span style="color: #888;">Returns:</span>  [<span style="color: #4ec9b0;">URL("https://www.youtube.com/feeds/videos.xml?channel_id=...")</span>]
+
+<span style="color: #888;">User pastes:</span>  <span style="color: #4ec9b0;">https://example.com/blog</span>
+                     │
+                     ▼
+<span style="color: #ffd93d;">discoverFeed(from:)</span>
+  1. Fetch page HTML
+  2. Find: <span style="color: #6bcb77;">&lt;link rel="alternate" type="application/rss+xml" href="/feed.xml"&gt;</span>
+  3. Resolve relative URL → absolute
+                     │
+                     ▼
+<span style="color: #888;">Returns:</span>  [<span style="color: #4ec9b0;">URL("https://example.com/feed.xml")</span>]</pre>
+  </div>
+</div>

@@ -40,6 +40,7 @@
 		AAAAAAAAAABBBBBBBBCCCCCCCC /* FeedItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBBBBBBBCCCCCCCCDDDDDDDD /* FeedItem.swift */; };
 		B28C05DA310EF2AE7F9492A2 /* SuggestedChannels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0498ACC5E264A6704F285BBE /* SuggestedChannels.swift */; };
 		B9D9F45CF4E0337214450B94 /* SuggestedChannels.json in Resources */ = {isa = PBXBuildFile; fileRef = 2B02469B01F721B6169799B0 /* SuggestedChannels.json */; };
+		CAFEBABECAFEBABECAFEBABE /* SuggestedServers.json in Resources */ = {isa = PBXBuildFile; fileRef = 2C3C4C5C6C7C8C9CD0D1D2D3 /* SuggestedServers.json */; };
 		D3A953C8893F023EFB20D6CB /* InMemoryWOMStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A9D83E615CA39680B6D1405 /* InMemoryWOMStore.swift */; };
 		D79DDF4532539CA96597B082 /* MastodonClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 098C33EE3740C35AC65780A5 /* MastodonClient.swift */; };
 		D88E678DCB7158297CD4F64B /* IRCMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DD2E68D088CDE5CE20AE674 /* IRCMessage.swift */; };
@@ -64,6 +65,7 @@
 		116B884F1396D33A37753847 /* WOMContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WOMContent.swift; sourceTree = "<group>"; };
 		1F1B694593898DDB87326792 /* ConversationListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationListView.swift; sourceTree = "<group>"; };
 		2B02469B01F721B6169799B0 /* SuggestedChannels.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = SuggestedChannels.json; sourceTree = "<group>"; };
+		2C3C4C5C6C7C8C9CD0D1D2D3 /* SuggestedServers.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = SuggestedServers.json; sourceTree = "<group>"; };
 		2D5B69B87A544419FE5C2911 /* RemoteIdentity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteIdentity.swift; sourceTree = "<group>"; };
 		2EDEE90879321C092799188C /* SuggestedServers.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SuggestedServers.swift; path = SuggestedServers.swift; sourceTree = "<group>"; };
 		354688CFC206205439A3FFFF /* AddServerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddServerView.swift; sourceTree = "<group>"; };
@@ -239,6 +241,7 @@
 				BF814FAA578F93CB5FC90BB5 /* IRCParser.swift */,
 				D6A2821582A3BC105EEF454C /* IRCToWOMAdapter.swift */,
 				2B02469B01F721B6169799B0 /* SuggestedChannels.json */,
+				2C3C4C5C6C7C8C9CD0D1D2D3 /* SuggestedServers.json */,
 				0498ACC5E264A6704F285BBE /* SuggestedChannels.swift */,
 				B62E6C1D03888795A63181F4 /* WOMToIRCAdapter.swift */,
 				066959F884124BB54D566DB8 /* ServerOrchestrator.swift */,
@@ -343,6 +346,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				B9D9F45CF4E0337214450B94 /* SuggestedChannels.json in Resources */,
+				CAFEBABECAFEBABECAFEBABE /* SuggestedServers.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

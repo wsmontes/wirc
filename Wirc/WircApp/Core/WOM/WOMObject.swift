@@ -26,7 +26,8 @@ struct WOMObject: Codable, Identifiable, Equatable {
         attributedTo: WOMReference? = nil,
         content: WOMContent? = nil,
         data: [String: String] = [:],
-        provenance: WOMProvenance? = nil
+        provenance: WOMProvenance? = nil,
+        attachments: [WOMReference] = []
     ) {
         self.wom = "0.1"
         self.id = id
@@ -37,7 +38,7 @@ struct WOMObject: Codable, Identifiable, Equatable {
         self.data = data
         self.provenance = provenance
         self.relationships = []
-        self.attachments = []
+        self.attachments = attachments
         self.schema = nil
         self.context = nil
         self.name = nil
