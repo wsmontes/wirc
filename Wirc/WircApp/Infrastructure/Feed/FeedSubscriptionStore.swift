@@ -3,7 +3,7 @@ import Foundation
 /// Persists FeedSubscriptions as a single JSON array file.
 /// Thread-safe via a serial queue.
 final class FeedSubscriptionStore {
-    private(set) var subscriptions: [FeedSubscription] = []
+    private var subscriptions: [FeedSubscription] = []
     private let fileURL: URL
     private let queue = DispatchQueue(label: "wirc.subscriptionstore")
 
@@ -47,6 +47,11 @@ final class FeedSubscriptionStore {
         queue.sync {
             subscriptions.first { $0.id == id }
         }
+    }
+
+    /// Thread-safe accessor for all subscriptions.
+    func getAll() -> [FeedSubscription] {
+        queue.sync { subscriptions }
     }
 
     // MARK: - Persistence

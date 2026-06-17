@@ -224,7 +224,13 @@ private final class FeedParserDelegate: NSObject, XMLParserDelegate {
     // MARK: - Commit item
 
     private func commitItem() {
-        guard let title = currentTitle, let link = currentLink else {
+        guard let title = currentTitle else {
+            resetItemState()
+            return
+        }
+        // Use explicit link, or fall back to guid/id when no link element exists
+        let link = currentLink ?? currentID
+        guard let link else {
             resetItemState()
             return
         }

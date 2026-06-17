@@ -470,7 +470,13 @@ final class AppState {
     }
 
     func refreshAllFeeds() async {
-        for sub in feedStore.subscriptions {
+        // Reset error counts for paused feeds so they are retried on manual refresh
+        for sub in feedStore.getAll() where sub.errorCount >= maxConsecutiveErrors {
+            var reset = sub
+            reset.errorCount = 0
+            feedStore.update(reset)
+        }
+        for sub in feedStore.getAll() {
             await refreshFeed(sub)
         }
     }
@@ -526,10 +532,9 @@ final class AppState {
             }
             feedStore.update(sub)
 
-            // Convert items to WOM and save
+            // Convert items to WOM and save (dedup + save happen atomically inside convert)
             let objects = await adapter.convert(items: result.items, subscription: sub, store: store)
             if !objects.isEmpty {
-                try? await store.saveMany(objects)
                 womObjects.append(contentsOf: objects)
             }
         } catch {

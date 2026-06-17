@@ -42,14 +42,22 @@ struct WircApp: App {
         ) { task in
             guard let refreshTask = task as? BGAppRefreshTask else { return }
 
+            var completed = false
+
             Task {
                 await appState.refreshAllFeeds()
-                refreshTask.setTaskCompleted(success: true)
-                appState.scheduleNextRefresh()
+                if !completed {
+                    completed = true
+                    refreshTask.setTaskCompleted(success: true)
+                    appState.scheduleNextRefresh()
+                }
             }
 
             refreshTask.expirationHandler = {
-                refreshTask.setTaskCompleted(success: false)
+                if !completed {
+                    completed = true
+                    refreshTask.setTaskCompleted(success: false)
+                }
             }
         }
     }

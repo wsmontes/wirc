@@ -34,7 +34,7 @@ struct FeedView: View {
     }
 
     private var hasFeedsConfigured: Bool {
-        !appState.feedStore.subscriptions.isEmpty ||
+        !appState.feedStore.getAll().isEmpty ||
         !appState.mastodonAccounts.isEmpty
     }
 

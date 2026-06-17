@@ -94,10 +94,18 @@ final class FeedFetcher: @unchecked Sendable {
 
         // Scan for <link rel="alternate" type="application/rss+xml" href="...">
         // and <link rel="alternate" type="application/atom+xml" href="...">
+        // Try all attribute orderings because different servers emit them differently.
         let patterns = [
+            // rel before type before href
             #"<link[^>]*rel=["']alternate["'][^>]*type=["']application/(?:rss|atom)\+xml["'][^>]*href=["']([^"']+)["']"#,
+            // type before rel before href
             #"<link[^>]*type=["']application/(?:rss|atom)\+xml["'][^>]*rel=["']alternate["'][^>]*href=["']([^"']+)["']"#,
-            #"<link[^>]*href=["']([^"']+(?:rss|atom|feed|xml)[^"']*)["'][^>]*>"#  // fallback: href with feed-ish path
+            // href before rel before type
+            #"<link[^>]*href=["']([^"']+)["'][^>]*rel=["']alternate["'][^>]*type=["']application/(?:rss|atom)\+xml["'][^>]*"#,
+            // href before type before rel
+            #"<link[^>]*href=["']([^"']+)["'][^>]*type=["']application/(?:rss|atom)\+xml["'][^>]*rel=["']alternate["'][^>]*"#,
+            // fallback: href with feed-ish path
+            #"<link[^>]*href=["']([^"']+(?:rss|atom|feed|xml)[^"']*)["'][^>]*>"#
         ]
 
         for pattern in patterns {
@@ -125,15 +133,21 @@ final class FeedFetcher: @unchecked Sendable {
         guard let html = String(data: data, encoding: .utf8) else { return [] }
 
         // Look for <meta itemprop="channelId" content="UC...">
-        let pattern = #"<meta[^>]*itemprop=["']channelId["'][^>]*content=["']([^"']+)["']"#
-        guard let regex = try? NSRegularExpression(pattern: pattern, options: .caseInsensitive) else { return [] }
-        let range = NSRange(html.startIndex..<html.endIndex, in: html)
-        if let match = regex.firstMatch(in: html, options: [], range: range),
-           match.numberOfRanges >= 2,
-           let r = Range(match.range(at: 1), in: html) {
-            let channelId = String(html[r])
-            if let feedURL = URL(string: "https://www.youtube.com/feeds/videos.xml?channel_id=\(channelId)") {
-                return [feedURL]
+        // YouTube may emit attributes in either order, so try both patterns.
+        let patterns = [
+            #"<meta[^>]*itemprop=["']channelId["'][^>]*content=["']([^"']+)["']"#,
+            #"<meta[^>]*content=["']([^"']+)["'][^>]*itemprop=["']channelId["']"#
+        ]
+        for pattern in patterns {
+            guard let regex = try? NSRegularExpression(pattern: pattern, options: .caseInsensitive) else { continue }
+            let range = NSRange(html.startIndex..<html.endIndex, in: html)
+            if let match = regex.firstMatch(in: html, options: [], range: range),
+               match.numberOfRanges >= 2,
+               let r = Range(match.range(at: 1), in: html) {
+                let channelId = String(html[r])
+                if let feedURL = URL(string: "https://www.youtube.com/feeds/videos.xml?channel_id=\(channelId)") {
+                    return [feedURL]
+                }
             }
         }
 

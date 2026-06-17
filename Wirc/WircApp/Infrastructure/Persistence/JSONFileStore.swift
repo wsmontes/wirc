@@ -1,4 +1,5 @@
 import Foundation
+import os.log
 
 /// Persistent WOMStore backed by individual JSON files on disk.
 /// One file per WOMObject: ~/Documents/wirc/objects/{id}.json
@@ -62,14 +63,29 @@ final class JSONFileStore: WOMStore, @unchecked Sendable {
                     continuation.resume(throwing: JSONFileStoreError.deallocated)
                     return
                 }
-                do {
-                    for obj in objects {
+                // Track successfully written object IDs so we can index them
+                // even if a later write fails (partial success).
+                var writtenIDs: [String] = []
+                var writeError: Error?
+                for obj in objects {
+                    do {
                         try self.writeObject(obj)
-                        self.index[obj.id] = obj
+                        writtenIDs.append(obj.id)
+                    } catch {
+                        writeError = error
+                        break
                     }
-                    continuation.resume()
-                } catch {
+                }
+                // Index every object that was successfully written to disk
+                for obj in objects where writtenIDs.contains(obj.id) {
+                    self.index[obj.id] = obj
+                }
+                if let error = writeError {
+                    os_log(.error, "JSONFileStore.saveMany: partial write failure after %d/%d objects: %{public}@",
+                           writtenIDs.count, objects.count, error.localizedDescription)
                     continuation.resume(throwing: error)
+                } else {
+                    continuation.resume()
                 }
             }
         }
@@ -111,6 +127,31 @@ final class JSONFileStore: WOMStore, @unchecked Sendable {
 
     func all() async throws -> [WOMObject] {
         queue.sync { Array(index.values) }
+    }
+
+    /// Atomically checks for an existing object with the same canonical URL
+    /// and saves only if none exists. Returns true if saved, false if duplicate.
+    func saveIfNew(_ object: WOMObject, byCanonicalURL canonicalURL: String) async throws -> Bool {
+        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Bool, Error>) in
+            queue.async(flags: .barrier) { [weak self] in
+                guard let self else {
+                    continuation.resume(throwing: JSONFileStoreError.deallocated)
+                    return
+                }
+                // Atomically check for duplicate inside the barrier
+                if index.values.contains(where: { $0.data["canonicalUrl"] == canonicalURL }) {
+                    continuation.resume(returning: false)
+                    return
+                }
+                do {
+                    try self.writeObject(object)
+                    self.index[object.id] = object
+                    continuation.resume(returning: true)
+                } catch {
+                    continuation.resume(throwing: error)
+                }
+            }
+        }
     }
 
     // MARK: - Dedup

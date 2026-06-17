@@ -54,12 +54,12 @@ struct SettingsView: View {
 
                 // RSS/Atom Feeds
                 Section("Feeds") {
-                    if appState.feedStore.subscriptions.isEmpty {
+                    if appState.feedStore.getAll().isEmpty {
                         Text("No feeds subscribed")
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
                     } else {
-                        ForEach(appState.feedStore.subscriptions) { sub in
+                        ForEach(appState.feedStore.getAll()) { sub in
                             HStack {
                                 VStack(alignment: .leading, spacing: 2) {
                                     Text(sub.title)
@@ -96,8 +96,9 @@ struct SettingsView: View {
                             }
                         }
                         .onDelete { indexSet in
+                            let allSubs = appState.feedStore.getAll()
                             for idx in indexSet {
-                                let sub = appState.feedStore.subscriptions[idx]
+                                let sub = allSubs[idx]
                                 appState.removeFeed(sub)
                             }
                         }

@@ -1,21 +1,34 @@
 import Foundation
+import os.log
 
 /// Converts parsed FeedItems into WOMObjects.
 /// Type mapping is driven by the subscription's sourceType.
 /// Mirrors IRCToWOMAdapter in pattern.
 final class FeedToWOMAdapter: @unchecked Sendable {
 
-    /// Convert feed items to WOM objects, skipping items already in the store (dedup by canonicalUrl).
+    /// Convert feed items to WOM objects, saving each one atomically via the store's
+    /// dedup-aware `saveIfNew`. Returns only the objects that were newly saved
+    /// (skipping duplicates). This avoids the TOCTOU race between dedup check and save.
     func convert(
         items: [FeedItem],
         subscription: FeedSubscription,
         store: WOMStore
     ) async -> [WOMObject] {
-        let existingURLs = await existingCanonicalURLs(in: store)
-        return items.compactMap { item in
-            guard !existingURLs.contains(item.link) else { return nil }
-            return convertItem(item, subscription: subscription)
+        var savedObjects: [WOMObject] = []
+        for item in items {
+            let object = convertItem(item, subscription: subscription)
+            let canonicalURL = object.data["canonicalUrl"] ?? item.link
+            do {
+                let isNew = try await store.saveIfNew(object, byCanonicalURL: canonicalURL)
+                if isNew {
+                    savedObjects.append(object)
+                }
+            } catch {
+                os_log(.error, "FeedToWOMAdapter: saveIfNew failed for %{public}@: %{public}@",
+                       canonicalURL, error.localizedDescription)
+            }
         }
+        return savedObjects
     }
 
     /// Convert a single FeedItem with no dedup check (for direct use).
@@ -24,11 +37,6 @@ final class FeedToWOMAdapter: @unchecked Sendable {
     }
 
     // MARK: - Private
-
-    private func existingCanonicalURLs(in store: WOMStore) async -> Set<String> {
-        guard let all = try? await store.all() else { return [] }
-        return Set(all.compactMap { $0.data["canonicalUrl"] })
-    }
 
     private func convertItem(_ item: FeedItem, subscription: FeedSubscription) -> WOMObject {
         let types = womTypes(for: subscription.sourceType)

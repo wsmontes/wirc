@@ -30,4 +30,12 @@ final class InMemoryWOMStore: WOMStore, @unchecked Sendable {
     func all() async throws -> [WOMObject] {
         return Array(storage.values)
     }
+
+    func saveIfNew(_ object: WOMObject, byCanonicalURL canonicalURL: String) async throws -> Bool {
+        if storage.values.contains(where: { $0.data["canonicalUrl"] == canonicalURL }) {
+            return false
+        }
+        storage[object.id] = object
+        return true
+    }
 }
