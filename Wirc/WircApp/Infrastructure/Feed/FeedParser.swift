@@ -7,9 +7,14 @@ enum FeedParser {
         let delegate = FeedParserDelegate(sourceURL: sourceURL)
         let parser = XMLParser(data: data)
         parser.delegate = delegate
+        parser.shouldResolveExternalEntities = false
 
         guard parser.parse() else {
             throw parser.parserError ?? FeedError.parseFailed("XML parse error for \(sourceURL)")
+        }
+
+        guard delegate.format != .unknown else {
+            throw FeedError.parseFailed("Unknown feed format: \(sourceURL)")
         }
 
         return FeedParseResult(
@@ -35,7 +40,7 @@ private final class FeedParserDelegate: NSObject, XMLParserDelegate {
     var items: [FeedItem] = []
 
     // State
-    private var format: FeedFormat = .unknown
+    private(set) var format: FeedFormat = .unknown
     private var currentElementPath: [String] = []
     private var currentText: String = ""
 
@@ -65,6 +70,12 @@ private final class FeedParserDelegate: NSObject, XMLParserDelegate {
     private let isoFormatter: ISO8601DateFormatter = {
         let f = ISO8601DateFormatter()
         f.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        return f
+    }()
+
+    private let isoWithoutFractionalFormatter: ISO8601DateFormatter = {
+        let f = ISO8601DateFormatter()
+        f.formatOptions = [.withInternetDateTime]
         return f
     }()
 
@@ -123,9 +134,6 @@ private final class FeedParserDelegate: NSObject, XMLParserDelegate {
             currentEnclosureURL = attributes["url"]
             currentEnclosureType = attributes["type"]
         }
-        if name == "link", currentElementPath.contains("item") {
-            // RSS <link> inside <item> — text will be captured in foundCharacters
-        }
     }
 
     private func handleRSSEnd(_ name: String, path: String) {
@@ -144,13 +152,13 @@ private final class FeedParserDelegate: NSObject, XMLParserDelegate {
         case "pubDate":
             if let d = parseRSSDate(currentText.trimmed) { currentPublishedAt = d }
         case "guid":
-            currentID = currentText.trimmed
+            if path.hasSuffix(".item.guid") { currentID = currentText.trimmed }
         case "author":
             if path.hasSuffix(".item.author") { currentAuthor = currentText.trimmed }
         case "category":
             if path.hasSuffix(".item.category") { currentCategory = currentText.trimmed }
         case "duration":
-            currentDuration = currentText.trimmed
+            if path.hasSuffix(".item.duration") { currentDuration = currentText.trimmed }
         case "item":
             commitItem()
         default:
@@ -162,9 +170,14 @@ private final class FeedParserDelegate: NSObject, XMLParserDelegate {
 
     private func handleAtomStart(_ name: String, attributes: [String: String],
                                   namespaceURI: String?) {
+        if name == "category", let term = attributes["term"], !term.isEmpty {
+            currentCategory = term
+            return
+        }
+
         if name == "link" {
             currentLinkRel = attributes["rel"] ?? "alternate"
-            let href = attributes["href"] ?? ""
+            guard let href = attributes["href"], !href.isEmpty else { return }
             if currentLinkRel == "alternate" {
                 currentLink = href
             } else if currentLinkRel == "enclosure" {
@@ -252,16 +265,16 @@ private final class FeedParserDelegate: NSObject, XMLParserDelegate {
 
     private func parseRSSDate(_ s: String) -> Date? {
         if let d = rssDateFormatter.date(from: s) { return d }
-        // Try ISO as fallback
-        return isoFormatter.date(from: s)
+        // Try ISO with fractional seconds as fallback
+        if let d = isoFormatter.date(from: s) { return d }
+        // Try ISO without fractional seconds as third fallback
+        return isoWithoutFractionalFormatter.date(from: s)
     }
 
     private func parseISODate(_ s: String) -> Date? {
         if let d = isoFormatter.date(from: s) { return d }
         // Fallback: try without fractional seconds
-        let f = ISO8601DateFormatter()
-        f.formatOptions = [.withInternetDateTime]
-        return f.date(from: s)
+        return isoWithoutFractionalFormatter.date(from: s)
     }
 }
 
