@@ -12,7 +12,9 @@ targets:
     type: application
     platform: iOS
     sources:
-      - WircApp
+      - path: WircApp
+        excludes:
+          - "**/.DS_Store"
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.wirc.wirc

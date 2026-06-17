@@ -21,6 +21,7 @@ final class AppState {
     // MARK: - Channel state (keyed by "server|#channel")
     var channelTopics: [String: ChannelTopic] = [:]
     var channelUsers: [String: [ChannelUser]] = [:]
+    var joinedChannels: [UUID: [String]] = [:]  // serverId → [channel names]
 
     // MARK: - Debug logs
     var rawEvents: [DebugRawEvent] = []
@@ -94,13 +95,19 @@ final class AppState {
     // MARK: - Channel operations
 
     func joinChannel(_ channel: String, serverId: UUID) {
-        clients[serverId]?.join(channel: channel)
+        let ch = channel.hasPrefix("#") ? channel : "#\(channel)"
+        clients[serverId]?.join(channel: ch)
+        if !(joinedChannels[serverId]?.contains(ch) ?? false) {
+            joinedChannels[serverId, default: []].append(ch)
+        }
     }
 
     func partChannel(_ channel: String, serverId: UUID) {
-        clients[serverId]?.part(channel: channel)
-        let key = channelKey(serverId: serverId, channel: channel)
+        let ch = channel.hasPrefix("#") ? channel : "#\(channel)"
+        clients[serverId]?.part(channel: ch)
+        let key = channelKey(serverId: serverId, channel: ch)
         channelUsers.removeValue(forKey: key)
+        joinedChannels[serverId]?.removeAll { $0 == ch }
     }
 
     // MARK: - Messages
@@ -132,9 +139,18 @@ final class AppState {
         switch event {
         case .connected:
             connectionStates[serverId] = .online
+            // Track auto-join channels
+            if let cfg = servers.first(where: { $0.id == serverId }) {
+                for ch in cfg.autoJoinChannels {
+                    if !(joinedChannels[serverId]?.contains(ch) ?? false) {
+                        joinedChannels[serverId, default: []].append(ch)
+                    }
+                }
+            }
         case .disconnected:
             connectionStates[serverId] = .disconnected
             channelUsers.removeAll()
+            joinedChannels.removeValue(forKey: serverId)
         case .rawLine(let line):
             rawEvents.append(DebugRawEvent(timestamp: Date(), server: config.host, raw: line, parsedAs: "raw"))
         case .error(let msg):
@@ -161,6 +177,11 @@ final class AppState {
             channelTopics[key] = ct
         case .join(let channel, let nick):
             let key = channelKey(serverId: serverId, channel: channel)
+            // Track joined channel
+            if !(joinedChannels[serverId]?.contains(channel) ?? false) {
+                joinedChannels[serverId, default: []].append(channel)
+            }
+            // Add user
             if !(channelUsers[key]?.contains(where: { $0.nick == nick }) ?? false) {
                 let user = ChannelUser(nick: nick, prefix: "")
                 channelUsers[key, default: []].append(user)
@@ -216,11 +237,23 @@ final class AppState {
 
     func conversations(forServer server: String) -> [Conversation] {
         var channelSet = Set<String>()
+
+        // Include joined channels (even if empty of messages)
+        for (serverId, channels) in joinedChannels {
+            guard let cfg = servers.first(where: { $0.id == serverId }),
+                  cfg.host == server else { continue }
+            for ch in channels {
+                channelSet.insert(ch)
+            }
+        }
+
+        // Also include channels that have messages
         for obj in womObjects where obj.type.contains("wom:Message") && obj.data["server"] == server {
             if let channel = obj.data["channel"], !channel.isEmpty {
                 channelSet.insert(channel)
             }
         }
+
         return channelSet.map { .channel($0) }.sorted { $0.name < $1.name }
     }
 

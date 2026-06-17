@@ -114,12 +114,64 @@ struct JoinChannelSheet: View {
     @Binding var serverId: UUID?
     @Binding var channel: String
 
+    @State private var searchText = ""
+
+    private var filteredChannels: [SuggestedChannel] {
+        let channels = SuggestedChannelsLoader.channels
+        guard !searchText.isEmpty else {
+            return Array(channels.prefix(30))
+        }
+        let q = searchText.lowercased()
+        return channels.filter {
+            $0.name.lowercased().contains(q) || $0.description.lowercased().contains(q)
+        }
+    }
+
     var body: some View {
         NavigationStack {
-            Form {
-                TextField("#channel", text: $channel)
-                    .autocapitalization(.none)
-                    .autocorrectionDisabled()
+            List {
+                // Manual entry
+                Section("Enter Channel") {
+                    TextField("#channel", text: $channel)
+                        .autocapitalization(.none)
+                        .autocorrectionDisabled()
+                }
+
+                // Suggested channels
+                Section("Suggested (\(filteredChannels.count))") {
+                    HStack {
+                        Image(systemName: "magnifyingglass")
+                            .foregroundStyle(.secondary)
+                        TextField("Filter channels...", text: $searchText)
+                            .autocapitalization(.none)
+                            .autocorrectionDisabled()
+                    }
+
+                    ForEach(filteredChannels) { ch in
+                        Button {
+                            channel = ch.name
+                            if let id = serverId {
+                                appState.joinChannel(ch.name, serverId: id)
+                                dismiss()
+                            }
+                        } label: {
+                            HStack {
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(ch.name)
+                                        .font(.body)
+                                        .foregroundStyle(.primary)
+                                    Text(ch.description)
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                }
+                                Spacer()
+                                Image(systemName: "arrow.right.circle")
+                                    .font(.caption)
+                                    .foregroundStyle(.tertiary)
+                            }
+                        }
+                    }
+                }
             }
             .navigationTitle("Join Channel")
             .navigationBarTitleDisplayMode(.inline)
@@ -138,6 +190,5 @@ struct JoinChannelSheet: View {
                 }
             }
         }
-        .presentationDetents([.height(150)])
     }
 }

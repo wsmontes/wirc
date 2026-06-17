@@ -31,6 +31,8 @@
 		83D3F1EA012B94B9F965D8C1 /* WOMContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 116B884F1396D33A37753847 /* WOMContent.swift */; };
 		97C3D31649C0B6A7776D3892 /* FeedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA35FC732F83C26AF70D03B1 /* FeedView.swift */; };
 		A31014B086E449E4EB6AF1E5 /* MessageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36941508DA40D61ED2A49585 /* MessageView.swift */; };
+		B28C05DA310EF2AE7F9492A2 /* SuggestedChannels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0498ACC5E264A6704F285BBE /* SuggestedChannels.swift */; };
+		B9D9F45CF4E0337214450B94 /* SuggestedChannels.json in Resources */ = {isa = PBXBuildFile; fileRef = 2B02469B01F721B6169799B0 /* SuggestedChannels.json */; };
 		D3A953C8893F023EFB20D6CB /* InMemoryWOMStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A9D83E615CA39680B6D1405 /* InMemoryWOMStore.swift */; };
 		D88E678DCB7158297CD4F64B /* IRCMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DD2E68D088CDE5CE20AE674 /* IRCMessage.swift */; };
 		DC9D1DFA06EEFA62B253FD57 /* IRCConnectionConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6326E3AE770420F6AF2E043E /* IRCConnectionConfig.swift */; };
@@ -42,9 +44,11 @@
 /* Begin PBXFileReference section */
 		02BFA0A70998650F4CAD3670 /* FeedCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedCard.swift; sourceTree = "<group>"; };
 		02F21BC17F83816701A37D7B /* WOMIDGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WOMIDGenerator.swift; sourceTree = "<group>"; };
+		0498ACC5E264A6704F285BBE /* SuggestedChannels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SuggestedChannels.swift; sourceTree = "<group>"; };
 		110725662E9CAF4F796B6DDC /* RawEventLogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RawEventLogView.swift; sourceTree = "<group>"; };
 		116B884F1396D33A37753847 /* WOMContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WOMContent.swift; sourceTree = "<group>"; };
 		1F1B694593898DDB87326792 /* ConversationListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationListView.swift; sourceTree = "<group>"; };
+		2B02469B01F721B6169799B0 /* SuggestedChannels.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = SuggestedChannels.json; sourceTree = "<group>"; };
 		2D5B69B87A544419FE5C2911 /* RemoteIdentity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteIdentity.swift; sourceTree = "<group>"; };
 		354688CFC206205439A3FFFF /* AddServerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddServerView.swift; sourceTree = "<group>"; };
 		36941508DA40D61ED2A49585 /* MessageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageView.swift; sourceTree = "<group>"; };
@@ -183,6 +187,8 @@
 				3DD2E68D088CDE5CE20AE674 /* IRCMessage.swift */,
 				BF814FAA578F93CB5FC90BB5 /* IRCParser.swift */,
 				D6A2821582A3BC105EEF454C /* IRCToWOMAdapter.swift */,
+				2B02469B01F721B6169799B0 /* SuggestedChannels.json */,
+				0498ACC5E264A6704F285BBE /* SuggestedChannels.swift */,
 				B62E6C1D03888795A63181F4 /* WOMToIRCAdapter.swift */,
 			);
 			path = IRC;
@@ -233,6 +239,7 @@
 			buildConfigurationList = 9A2DF018FD118A326CDAA451 /* Build configuration list for PBXNativeTarget "Wirc" */;
 			buildPhases = (
 				94DCB8527FE70EE357B02D57 /* Sources */,
+				114F80F3B6AFE4A33D80D1EA /* Resources */,
 			);
 			buildRules = (
 			);
@@ -279,6 +286,17 @@
 		};
 /* End PBXProject section */
 
+/* Begin PBXResourcesBuildPhase section */
+		114F80F3B6AFE4A33D80D1EA /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B9D9F45CF4E0337214450B94 /* SuggestedChannels.json in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		94DCB8527FE70EE357B02D57 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -303,6 +321,7 @@
 				7EC94869472B0565F65A371D /* RemoteIdentity.swift in Sources */,
 				4DA3E8A6D23BBF6ED1126E17 /* SettingsView.swift in Sources */,
 				5ACE5505CCF4639B50B95A91 /* SocialSignal.swift in Sources */,
+				B28C05DA310EF2AE7F9492A2 /* SuggestedChannels.swift in Sources */,
 				208A7FE391E119C11444ECB8 /* TrustRelation.swift in Sources */,
 				83D3F1EA012B94B9F965D8C1 /* WOMContent.swift in Sources */,
 				728523B504672CB8A4ECDE94 /* WOMIDGenerator.swift in Sources */,
