@@ -35,7 +35,7 @@ final class FeedToWOMAdapter {
         let objectID = WOMIDGenerator.generate(type: "post")
 
         var data: [String: String] = [
-            "network": "rss",
+            "network": subscription.sourceType.rawValue,
             "canonicalUrl": item.link,
             "feedTitle": subscription.title,
             "feedURL": subscription.feedURL,
@@ -77,11 +77,12 @@ final class FeedToWOMAdapter {
                 text: item.description ?? ""
             ),
             data: data,
+            attachments: attachments,
             provenance: WOMProvenance(
                 origin: "remotePeer",
                 source: WOMReference(
                     id: subscription.feedURL,
-                    type: ["rss:Feed"]
+                    type: provenanceTypes(for: subscription.sourceType)
                 ),
                 createdAt: Date(),
                 confidence: 1.0,
@@ -103,5 +104,18 @@ final class FeedToWOMAdapter {
             break // just wom:Post
         }
         return types
+    }
+
+    private func provenanceTypes(for sourceType: FeedSourceType) -> [String] {
+        switch sourceType {
+        case .youtube:
+            return ["youtube:Channel"]
+        case .podcast:
+            return ["podcast:Feed"]
+        case .github:
+            return ["github:Repo"]
+        case .rss, .atom:
+            return ["rss:Feed"]
+        }
     }
 }
