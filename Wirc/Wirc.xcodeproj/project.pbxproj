@@ -42,6 +42,7 @@
 		AAAAAAAAAABBBBBBBBCCCCCCCC /* FeedItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBBBBBBBCCCCCCCCDDDDDDDD /* FeedItem.swift */; };
 		444444445555555566666666 /* FeedSubscription.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDEEEEEEEEFFFFFFFF /* FeedSubscription.swift */; };
 			E7D6C5B4A3F2918071655443 /* JSONFileStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7B8C9D0E1F2233445566778 /* JSONFileStore.swift */; };
+			F1F1F1F1F2F2F2F2F3F3F3F3 /* FeedSubscriptionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4F4F4F4F5F5F5F5F6F6F6F6 /* FeedSubscriptionStore.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -82,6 +83,7 @@
 		BBBBBBBBCCCCCCCCDDDDDDDD /* FeedItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedItem.swift; sourceTree = "<group>"; };
 		DDDDDDDDEEEEEEEEFFFFFFFF /* FeedSubscription.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedSubscription.swift; sourceTree = "<group>"; };
 			A7B8C9D0E1F2233445566778 /* JSONFileStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSONFileStore.swift; sourceTree = "<group>"; };
+			F4F4F4F4F5F5F5F5F6F6F6F6 /* FeedSubscriptionStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedSubscriptionStore.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -98,6 +100,7 @@
 			children = (
 				BBBBBBBBCCCCCCCCDDDDDDDD /* FeedItem.swift */,
 				DDDDDDDDEEEEEEEEFFFFFFFF /* FeedSubscription.swift */,
+				F4F4F4F4F5F5F5F5F6F6F6F6 /* FeedSubscriptionStore.swift */,
 			);
 			path = Feed;
 			sourceTree = "<group>";
@@ -328,6 +331,7 @@
 				97C3D31649C0B6A7776D3892 /* FeedView.swift in Sources */,
 				AAAAAAAAAABBBBBBBBCCCCCCCC /* FeedItem.swift in Sources */,
 				444444445555555566666666 /* FeedSubscription.swift in Sources */,
+				F1F1F1F1F2F2F2F2F3F3F3F3 /* FeedSubscriptionStore.swift in Sources */,
 				DF00A7A6ADD9370AF764D3D9 /* IRCClient.swift in Sources */,
 				DC9D1DFA06EEFA62B253FD57 /* IRCConnectionConfig.swift in Sources */,
 				EFAE2659F2ED47FD1DE8817C /* IRCEvent.swift in Sources */,
