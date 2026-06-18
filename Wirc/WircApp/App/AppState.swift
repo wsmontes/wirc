@@ -40,6 +40,9 @@ final class AppState {
     // MARK: - Server Orchestrator
     var orchestrator = ServerOrchestrator(servers: SuggestedServersLoader.servers)
 
+    // MARK: - IRC Automation
+    let automation = IRCAutomation()
+
     // MARK: - IRC Channel Manager
     let channelManager: IRCChannelManager
 
@@ -219,6 +222,8 @@ final class AppState {
     // MARK: - Messages
 
     func sendMessage(_ text: String, channel: String, serverId: UUID) {
+        // Flood protection
+        guard automation.checkFlood(serverId: serverId) else { return }
         guard let config = servers.first(where: { $0.id == serverId }) else { return }
         let objectId = WOMIDGenerator.generate(type: "message")
         let womObj = WOMObject(
@@ -264,6 +269,10 @@ final class AppState {
         switch event {
         case .connected:
             connectionStates[serverId] = .online
+            // Auto-identify with NickServ
+            if let client = clients[serverId], let cfg = servers.first(where: { $0.id == serverId }) {
+                automation.autoIdentify(serverHost: cfg.host, client: client)
+            }
             // Join all pending channels
             if let pending = joinedChannels[serverId] {
                 for ch in pending {
@@ -289,6 +298,9 @@ final class AppState {
         case .error(let msg):
             rawEvents.append(DebugRawEvent(timestamp: Date(), server: config.host, raw: msg, parsedAs: "error"))
         case .names(let channel, let names):
+            // Record joined channels for reconnect restoration
+            let chList = joinedChannels[serverId] ?? []
+            automation.recordJoinedChannels(serverId: serverId, channels: chList)
             let users = names.map { raw -> ChannelUser in
                 let prefixChars: Set<Character> = ["@", "+", "&", "~", "%"]
                 if let first = raw.first, prefixChars.contains(first) {

@@ -26,6 +26,8 @@ enum IRCCommand: Equatable {
     case raw(String)                               // /raw irc line (admin)
     case reconnect                                 // /reconnect
     case disconnect                                // /disconnect
+    case alias(String, String?)                    // /alias name [expansion]
+    case unalias(String)                           // /unalias name
 }
 
 /// Parses slash commands from user input.
@@ -147,6 +149,13 @@ enum IRCCommandParser {
 
         case "reconnect":
             return .reconnect
+
+        case "alias":
+            let parts = splitFirst(args)
+            return .alias(parts.first ?? args, parts.rest)
+
+        case "unalias":
+            return .unalias(args)
 
         case "motd":
             return .motd

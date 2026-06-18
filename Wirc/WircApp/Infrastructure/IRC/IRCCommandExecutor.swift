@@ -154,6 +154,17 @@ enum IRCCommandExecutor {
         case .disconnect:
             client.disconnect()
             return "Disconnected"
+
+        case .alias(let name, let expansion):
+            if let exp = expansion {
+                return appState.automation.setAlias("\(name) \(exp)")
+            } else {
+                return appState.automation.aliases[name].map { "/\(name) → \($0)" } ?? "Unknown alias: /\(name)"
+            }
+
+        case .unalias(let name):
+            appState.automation.aliases.removeValue(forKey: name.lowercased())
+            return "Removed alias /\(name)"
         }
     }
 }

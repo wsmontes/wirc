@@ -303,8 +303,9 @@ struct IRCMessageDeckView: View {
         guard !text.isEmpty else { return }
         messageText = ""
 
-        // Parse slash commands
-        let cmd = IRCCommandParser.parse(text)
+        // Expand aliases before parsing
+        let expanded = appState.automation.expandAlias(text) ?? text
+        let cmd = IRCCommandParser.parse(expanded)
         let serverId = manager.activeChannel?.serverId ?? appState.servers.first?.id
 
         guard let sid = serverId else { return }
