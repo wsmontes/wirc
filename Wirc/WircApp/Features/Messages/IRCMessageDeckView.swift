@@ -107,7 +107,7 @@ struct IRCMessageDeckView: View {
 
     private var channelTabBar: some View {
         ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 2) {
+            LazyHStack(spacing: 2) {
                 // All tab
                 ChannelTab(
                     label: "All",
@@ -117,7 +117,7 @@ struct IRCMessageDeckView: View {
                     manager.setActiveChannel(nil)
                 }
 
-                // Individual channels
+                // Individual channels — LazyHStack only renders visible ones
                 ForEach(manager.channels) { ch in
                     ChannelTab(
                         label: ch.name,

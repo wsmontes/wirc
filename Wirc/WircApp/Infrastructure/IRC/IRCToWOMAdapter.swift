@@ -66,27 +66,38 @@ final class IRCToWOMAdapter {
         data["visibility"] = isChannel ? "channel" : "direct"
         if let raw = ircMsg.raw { data["raw"] = raw }
 
+        let sourceRef = WOMReference(
+            id: isChannel ? "irc://\(config.host)/\(ircMsg.channel ?? "")" : "irc://\(config.host)",
+            type: isChannel ? ["irc:Channel"] : ["irc:Server"]
+        )
+
+        let attributionRef = WOMReference(
+            id: "irc://\(config.host)/\(ircMsg.senderNick)",
+            type: ["wom:RemoteIdentity"],
+            name: ircMsg.senderNick
+        )
+
         return WOMObject(
             id: objectId,
             type: ["wom:Message"],
             createdAt: ircMsg.receivedAt,
-            attributedTo: WOMReference(
-                id: "irc://\(config.host)/\(ircMsg.senderNick)",
-                type: ["wom:RemoteIdentity"],
-                name: ircMsg.senderNick
-            ),
-            content: WOMContent(format: "text/plain", text: ircMsg.text),
+            schema: WOMSchema.message,
+            attributedTo: attributionRef,
+            content: WOMContent(format: "text/plain", text: ircMsg.text, language: "en"),
             data: data,
-            provenance: WOMProvenance(
-                origin: "remotePeer",
-                source: WOMReference(
-                    id: isChannel ? "irc://\(config.host)/\(ircMsg.channel ?? "")" : "irc://\(config.host)",
-                    type: isChannel ? ["irc:Channel"] : ["irc:Server"]
-                ),
-                createdAt: ircMsg.receivedAt,
-                confidence: 1.0,
-                reviewStatus: "none"
-            )
+            provenance: .remotePeer(source: sourceRef, actor: attributionRef, createdAt: ircMsg.receivedAt),
+            governance: defaultGovernance(visibility: isChannel ? "channel" : "direct"),
+            classification: WOMClassification(
+                semanticType: "social.message",
+                dataSubject: "remote_peer",
+                origin: WOMOrigin.remotePeer.rawValue,
+                sensitivity: isChannel ? WOMDataSensitivity.public.rawValue : WOMDataSensitivity.personal.rawValue
+            ),
+            bindings: WOMBindings(irc: WOMIRCBinding(
+                server: config.host,
+                channel: ircMsg.channel,
+                nick: ircMsg.senderNick
+            ))
         )
     }
 
@@ -171,12 +182,47 @@ final class IRCToWOMAdapter {
             "eventType": type
         ]
         for (k, v) in extra { data[k] = v }
+
+        let channel = extra["channel"]
+
         return WOMObject(
             id: WOMIDGenerator.generate(type: "event"),
             type: ["wom:TransportEnvelope", "wom:SystemEvent"],
             createdAt: Date(),
+            schema: WOMSchema.event,
             data: data,
-            provenance: WOMProvenance(origin: "remotePeer", confidence: 1.0)
+            provenance: .systemGenerated(
+                source: WOMReference(
+                    id: "irc://\(config.host)\(channel.map { "/\($0)" } ?? "")",
+                    type: channel != nil ? ["irc:Channel"] : ["irc:Server"]
+                )
+            ),
+            governance: WOMGovernance(
+                purpose: ["messaging"],
+                adsUse: WOMAdsUse.notAllowed.rawValue,
+                agentUse: "allowed",
+                sharing: channel != nil ? WOMSharing.groupOnly.rawValue : WOMSharing.localOnly.rawValue
+            ),
+            classification: WOMClassification(
+                semanticType: "irc.event",
+                dataSubject: "remote_peer",
+                origin: WOMOrigin.systemGenerated.rawValue,
+                sensitivity: WOMDataSensitivity.public.rawValue
+            ),
+            bindings: WOMBindings(irc: WOMIRCBinding(
+                server: config.host,
+                channel: channel
+            ))
+        )
+    }
+
+    private func defaultGovernance(visibility: String) -> WOMGovernance {
+        WOMGovernance(
+            purpose: ["messaging"],
+            adsUse: WOMAdsUse.notAllowed.rawValue,
+            agentUse: "allowed",
+            sharing: visibility == "channel" ? WOMSharing.groupOnly.rawValue : WOMSharing.directRecipient.rawValue,
+            retention: "forever"
         )
     }
 }

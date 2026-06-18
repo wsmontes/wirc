@@ -56,6 +56,10 @@ final class FeedToWOMAdapter: @unchecked Sendable {
         if let encURL = item.enclosureURL { data["enclosureURL"] = encURL }
         if let encType = item.enclosureType { data["enclosureType"] = encType }
 
+        // Determine content format
+        let contentFormat: String = item.description?.contains("<") == true ? "text/html" : "text/plain"
+
+        // Attachments from enclosures
         var attachments: [WOMReference] = []
         if let encURL = item.enclosureURL {
             var attType: [String] = ["wom:Media"]
@@ -71,30 +75,51 @@ final class FeedToWOMAdapter: @unchecked Sendable {
             ))
         }
 
+        // Source reference for provenance
+        let sourceRef = WOMReference(
+            id: subscription.feedURL,
+            type: provenanceTypes(for: subscription.sourceType)
+        )
+
+        // Attribution
+        let attributionRef = WOMReference(
+            id: subscription.feedURL,
+            type: ["wom:RemoteIdentity"],
+            name: item.author ?? subscription.title,
+            displayName: item.author,
+            url: subscription.feedURL
+        )
+
+        // Classification based on source type
+        let classification = WOMClassification(
+            semanticType: semanticType(for: subscription.sourceType),
+            dataSubject: "remote_peer",
+            origin: WOMOrigin.remotePeer.rawValue,
+            sensitivity: WOMDataSensitivity.public.rawValue,
+            category: WOMCategory(scheme: "wom.feed.sourceType", value: subscription.sourceType.rawValue),
+            topics: item.category.map { [$0] },
+            confidence: 1.0
+        )
+
         return WOMObject(
             id: objectID,
             type: types,
             createdAt: item.publishedAt ?? Date(),
-            attributedTo: WOMReference(
-                id: subscription.feedURL,
-                type: ["wom:RemoteIdentity"],
-                name: item.author ?? subscription.title
-            ),
+            schema: WOMSchema.post,
+            name: item.title,
+            attributedTo: attributionRef,
             content: WOMContent(
-                format: item.description?.contains("<") == true ? "text/html" : "text/plain",
+                format: contentFormat,
                 text: item.description ?? ""
             ),
             data: data,
-            provenance: WOMProvenance(
-                origin: "remotePeer",
-                source: WOMReference(
-                    id: subscription.feedURL,
-                    type: provenanceTypes(for: subscription.sourceType)
-                ),
-                createdAt: Date(),
-                confidence: 1.0,
-                reviewStatus: "none"
+            provenance: .remotePeer(
+                source: sourceRef,
+                actor: attributionRef,
+                createdAt: Date()
             ),
+            governance: defaultGovernance(for: subscription.sourceType),
+            classification: classification,
             attachments: attachments
         )
     }
@@ -125,5 +150,31 @@ final class FeedToWOMAdapter: @unchecked Sendable {
         case .rss, .atom:
             return ["rss:Feed"]
         }
+    }
+
+    private func semanticType(for sourceType: FeedSourceType) -> String {
+        switch sourceType {
+        case .youtube: return "social.video"
+        case .podcast: return "social.podcast"
+        case .github: return "development.release"
+        case .rss, .atom: return "social.post"
+        }
+    }
+
+    private func defaultGovernance(for sourceType: FeedSourceType) -> WOMGovernance {
+        let sharing: String
+        switch sourceType {
+        case .youtube, .podcast, .github:
+            sharing = WOMSharing.public.rawValue
+        case .rss, .atom:
+            sharing = WOMSharing.public.rawValue
+        }
+        return WOMGovernance(
+            purpose: ["curation"],
+            adsUse: WOMAdsUse.notAllowed.rawValue,
+            agentUse: "allowed",
+            sharing: sharing,
+            retention: "forever"
+        )
     }
 }

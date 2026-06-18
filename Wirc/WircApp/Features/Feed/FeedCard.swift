@@ -126,33 +126,10 @@ struct FeedCard: View {
             gitHubContent
         } else if isBoost {
             boostContent
-        } else if network == "irc" {
-            ircContent
         } else if network == "mastodon" {
             mastodonContent
         } else {
             rssContent
-        }
-    }
-
-    // MARK: - IRC message content
-
-    private var ircContent: some View {
-        VStack(alignment: .leading, spacing: DesignSystem.Spacing.xs) {
-            if let nick = post.attributedTo?.name ?? post.data["nick"] {
-                Text(nick)
-                    .font(DesignSystem.Fonts.senderName)
-                    .foregroundStyle(sourceColor)
-                    .padding(.horizontal, DesignSystem.Spacing.md)
-                    .padding(.top, DesignSystem.Spacing.md)
-            }
-            if let text = post.content?.text {
-                Text(text)
-                    .font(DesignSystem.Fonts.messageBody)
-                    .foregroundStyle(DesignSystem.Colors.ink)
-                    .lineLimit(12)
-                    .padding(.horizontal, DesignSystem.Spacing.md)
-            }
         }
     }
 

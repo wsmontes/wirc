@@ -47,32 +47,62 @@ final class MastodonToWOMAdapter {
             }
         }
 
+        let actorRef = WOMReference(
+            id: "mastodon://\(instanceURL)/@\(s.account.acct)",
+            type: ["wom:Person"],
+            name: "@\(s.account.acct)",
+            displayName: s.account.displayName.isEmpty ? nil : s.account.displayName
+        )
+
+        let authorRef = WOMReference(
+            id: "mastodon://\(instanceURL)/@\(s.account.acct)",
+            type: ["wom:RemoteIdentity", "wom:Person"],
+            name: s.account.displayName.isEmpty ? s.account.acct : s.account.displayName,
+            displayName: s.account.displayName.isEmpty ? nil : s.account.displayName
+        )
+
+        let visibility = s.visibility ?? "public"
+        let sharing: String = visibility == "public"
+            ? WOMSharing.public.rawValue
+            : (visibility == "unlisted" ? WOMSharing.groupOnly.rawValue : WOMSharing.friendsOnly.rawValue)
+
         return WOMObject(
             id: "mastodon://\(instanceURL)/status/\(s.id)",
             type: ["wom:Post"],
             createdAt: s.parsedDate ?? Date(),
-            attributedTo: WOMReference(
-                id: "mastodon://\(instanceURL)/@\(s.account.acct)",
-                type: ["wom:RemoteIdentity", "wom:Person"],
-                name: s.account.displayName.isEmpty ? s.account.acct : s.account.displayName
+            schema: WOMSchema.post,
+            attributedTo: authorRef,
+            content: WOMContent(
+                format: "text/html",
+                text: plainText,
+                language: s.language
             ),
-            content: WOMContent(format: "text/html", text: plainText),
             data: data,
-            provenance: WOMProvenance(
-                origin: "remotePeer",
-                actor: WOMReference(
-                    id: "mastodon://\(instanceURL)/@\(s.account.acct)",
-                    type: ["wom:Person"],
-                    name: "@\(s.account.acct)"
-                ),
-                source: WOMReference(
-                    id: instanceURL,
-                    type: ["mastodon:Instance"]
-                ),
-                createdAt: s.parsedDate ?? Date(),
-                confidence: 1.0,
-                reviewStatus: "none"
+            provenance: .remotePeer(
+                source: WOMReference(id: instanceURL, type: ["mastodon:Instance"]),
+                actor: actorRef,
+                createdAt: s.parsedDate ?? Date()
             ),
+            governance: WOMGovernance(
+                purpose: ["messaging", "curation"],
+                adsUse: WOMAdsUse.notAllowed.rawValue,
+                agentUse: "allowed",
+                sharing: sharing,
+                retention: "forever"
+            ),
+            classification: WOMClassification(
+                semanticType: "social.post",
+                dataSubject: "remote_peer",
+                origin: WOMOrigin.remotePeer.rawValue,
+                sensitivity: visibility == "public"
+                    ? WOMDataSensitivity.public.rawValue
+                    : WOMDataSensitivity.personal.rawValue,
+                category: WOMCategory(scheme: "wom.social.protocol", value: "mastodon")
+            ),
+            bindings: WOMBindings(activitypub: WOMActivityPubBinding(
+                id: s.uri,
+                actor: "mastodon://\(instanceURL)/@\(s.account.acct)"
+            )),
             attachments: attachments
         )
     }
@@ -108,30 +138,57 @@ final class MastodonToWOMAdapter {
         }
 
         let author = reblog.account
+        let authorAcct = author?.acct ?? "unknown"
+
+        let actorRef = WOMReference(
+            id: "mastodon://\(instanceURL)/@\(status.account.acct)",
+            type: ["wom:Person"],
+            name: "@\(status.account.acct)",
+            displayName: status.account.displayName.isEmpty ? nil : status.account.displayName
+        )
+
+        let authorRef = WOMReference(
+            id: author.map { "mastodon://\(instanceURL)/@\($0.acct)" } ?? "unknown",
+            type: ["wom:RemoteIdentity"],
+            name: author.map { $0.displayName.isEmpty ? "@\($0.acct)" : $0.displayName },
+            displayName: author?.displayName
+        )
 
         return WOMObject(
             id: "mastodon://\(instanceURL)/status/\(status.id)",
             type: ["wom:Post", "wom:Boost"],
             createdAt: status.parsedDate ?? Date(),
-            attributedTo: WOMReference(
-                id: author.map { "mastodon://\(instanceURL)/@\($0.acct)" } ?? "unknown",
-                type: ["wom:RemoteIdentity"],
-                name: author.map { $0.displayName.isEmpty ? "@\($0.acct)" : $0.displayName }
+            schema: WOMSchema.post,
+            attributedTo: authorRef,
+            content: WOMContent(
+                format: "text/html",
+                text: plainText,
+                language: status.language
             ),
-            content: WOMContent(format: "text/html", text: plainText),
             data: data,
-            provenance: WOMProvenance(
-                origin: "remotePeer",
-                actor: WOMReference(
-                    id: "mastodon://\(instanceURL)/@\(status.account.acct)",
-                    type: ["wom:Person"],
-                    name: "@\(status.account.acct)"
-                ),
+            provenance: .remotePeer(
                 source: WOMReference(id: instanceURL, type: ["mastodon:Instance"]),
-                createdAt: status.parsedDate ?? Date(),
-                confidence: 1.0,
-                reviewStatus: "none"
+                actor: actorRef,
+                createdAt: status.parsedDate ?? Date()
             ),
+            governance: WOMGovernance(
+                purpose: ["curation"],
+                adsUse: WOMAdsUse.notAllowed.rawValue,
+                agentUse: "allowed",
+                sharing: WOMSharing.public.rawValue,
+                retention: "forever"
+            ),
+            classification: WOMClassification(
+                semanticType: "social.boost",
+                dataSubject: "remote_peer",
+                origin: WOMOrigin.remotePeer.rawValue,
+                sensitivity: WOMDataSensitivity.public.rawValue,
+                category: WOMCategory(scheme: "wom.social.protocol", value: "mastodon")
+            ),
+            bindings: WOMBindings(activitypub: WOMActivityPubBinding(
+                id: reblog.url ?? status.uri,
+                actor: author.map { "mastodon://\(instanceURL)/@\($0.acct)" }
+            )),
             attachments: attachments
         )
     }
