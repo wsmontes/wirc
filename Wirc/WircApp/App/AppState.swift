@@ -40,6 +40,9 @@ final class AppState {
     // MARK: - Server Orchestrator
     var orchestrator = ServerOrchestrator(servers: SuggestedServersLoader.servers)
 
+    // MARK: - IRC Channel Manager
+    let channelManager: IRCChannelManager
+
     // MARK: - Feed (RSS/Atom)
     let feedStore = FeedSubscriptionStore()
     private let feedFetcher = FeedFetcher()
@@ -85,6 +88,7 @@ final class AppState {
     // MARK: - Init
 
     init() {
+        channelManager = IRCChannelManager(store: store)
         loadServers()
         loadMastodonAccounts()
         // Preload ~200 default feeds if feed store is empty (first launch)

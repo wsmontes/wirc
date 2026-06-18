@@ -12,6 +12,11 @@ struct WircApp: App {
                         Label("Stream", systemImage: "waveform")
                     }
 
+                IRCMessageDeckView()
+                    .tabItem {
+                        Label("Messages", systemImage: "bubble.left.and.bubble.right")
+                    }
+
                 LibraryView()
                     .tabItem {
                         Label("Library", systemImage: "archivebox")
