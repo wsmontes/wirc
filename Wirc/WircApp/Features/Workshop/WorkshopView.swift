@@ -50,23 +50,6 @@ struct WorkshopView: View {
 
     private var transportsSection: some View {
         Section {
-            // IRC
-            NavigationLink {
-                IRCTransportDetail()
-            } label: {
-                HStack(spacing: DesignSystem.Spacing.md) {
-                    Image(systemName: "number")
-                        .foregroundStyle(DesignSystem.Colors.irc)
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("IRC")
-                            .font(.system(size: 15, weight: .medium))
-                        Text("\(appState.servers.count) server\(appState.servers.count == 1 ? "" : "s")")
-                            .font(DesignSystem.Fonts.caption())
-                            .foregroundStyle(DesignSystem.Colors.pencil)
-                    }
-                }
-            }
-
             // Mastodon
             NavigationLink {
                 MastodonTransportDetail()
@@ -231,88 +214,6 @@ struct WorkshopView: View {
 }
 
 // MARK: - IRC Transport Detail
-
-struct IRCTransportDetail: View {
-    @Environment(AppState.self) private var appState
-    @State private var showAddServer = false
-
-    var body: some View {
-        List {
-            ForEach(appState.servers) { server in
-                Section {
-                    HStack {
-                        VStack(alignment: .leading, spacing: DesignSystem.Spacing.xs) {
-                            Text(server.name.isEmpty ? server.host : server.name)
-                                .font(.system(size: 15, weight: .medium))
-                            Text("\(server.host):\(server.port) as \(server.nickname)")
-                                .font(DesignSystem.Fonts.data(11))
-                                .foregroundStyle(DesignSystem.Colors.pencil)
-                            if !server.autoJoinChannels.isEmpty {
-                                Text("Channels: \(server.autoJoinChannels.joined(separator: ", "))")
-                                    .font(DesignSystem.Fonts.data(11))
-                                    .foregroundStyle(DesignSystem.Colors.pencil)
-                            }
-                        }
-                        Spacer()
-                        let status = appState.connectionStates[server.id] ?? .disconnected
-                        Circle()
-                            .fill(statusColor(status))
-                            .frame(width: 8, height: 8)
-                    }
-                    HStack {
-                        Button(statusLabel(server.id)) {
-                            toggleConnection(server.id)
-                        }
-                        .buttonStyle(.bordered)
-                        .tint(statusTint(server.id))
-                        Spacer()
-                        Button("Remove", role: .destructive) {
-                            appState.disconnect(from: server.id)
-                            if let idx = appState.servers.firstIndex(where: { $0.id == server.id }) {
-                                appState.servers.remove(at: idx)
-                            }
-                        }
-                        .buttonStyle(.bordered)
-                    }
-                }
-            }
-
-            Button { showAddServer = true } label: {
-                Label("Add IRC Server", systemImage: "plus")
-            }
-        }
-        .navigationTitle("IRC Servers")
-        .sheet(isPresented: $showAddServer) {
-            AddServerView { config in
-                appState.servers.append(config)
-            }
-        }
-    }
-
-    private func statusColor(_ s: AppState.ConnectionStatus) -> Color {
-        switch s { case .disconnected: return .gray; case .connecting: return .orange; case .online: return DesignSystem.Colors.github }
-    }
-    private func statusLabel(_ id: UUID) -> String {
-        switch appState.connectionStates[id] ?? .disconnected {
-        case .disconnected: return "Connect"
-        case .connecting: return "Connecting..."
-        case .online: return "Disconnect"
-        }
-    }
-    private func statusTint(_ id: UUID) -> Color {
-        switch appState.connectionStates[id] ?? .disconnected {
-        case .disconnected: return DesignSystem.Colors.github
-        case .connecting: return .orange
-        case .online: return DesignSystem.Colors.signal
-        }
-    }
-    private func toggleConnection(_ id: UUID) {
-        switch appState.connectionStates[id] ?? .disconnected {
-        case .disconnected: appState.connect(to: id)
-        case .connecting, .online: appState.disconnect(from: id)
-        }
-    }
-}
 
 // MARK: - Mastodon Transport Detail (stub)
 

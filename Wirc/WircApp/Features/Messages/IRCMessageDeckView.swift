@@ -152,13 +152,32 @@ struct IRCMessageDeckView: View {
         ScrollViewReader { proxy in
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 4) {
-                    // Pagination trigger at top
-                    if !manager.visibleMessages.isEmpty {
-                        Color.clear
-                            .frame(height: 1)
-                            .onAppear {
-                                Task { await manager.loadOlderMessages() }
+                    // Pagination: manual load button at top
+                    if !manager.visibleMessages.isEmpty && !manager.isLoadingOlder {
+                        Button {
+                            Task { await manager.loadOlderMessages() }
+                        } label: {
+                            HStack {
+                                Spacer()
+                                if manager.isLoadingOlder {
+                                    ProgressView()
+                                } else {
+                                    Text("Load earlier messages")
+                                        .font(DesignSystem.Fonts.data(10))
+                                        .foregroundStyle(DesignSystem.Colors.pencil)
+                                }
+                                Spacer()
                             }
+                            .padding(.vertical, DesignSystem.Spacing.sm)
+                        }
+                        .buttonStyle(.plain)
+                    } else if manager.isLoadingOlder {
+                        HStack {
+                            Spacer()
+                            ProgressView()
+                            Spacer()
+                        }
+                        .padding(.vertical, DesignSystem.Spacing.sm)
                     }
 
                     ForEach(manager.visibleMessages.reversed()) { object in

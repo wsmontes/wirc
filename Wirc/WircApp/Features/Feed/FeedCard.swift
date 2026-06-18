@@ -363,7 +363,6 @@ struct FeedCard: View {
 
     private var hasFooter: Bool {
         switch network.lowercased() {
-        case "irc": return post.data["channel"] != nil
         case "mastodon": return true
         default: return post.data["feedTitle"] != nil
         }
@@ -371,11 +370,6 @@ struct FeedCard: View {
 
     private var footerArea: some View {
         HStack(spacing: DesignSystem.Spacing.sm) {
-            if network == "irc", let channel = post.data["channel"] {
-                Text(channel)
-                    .font(DesignSystem.Fonts.footer)
-                    .foregroundStyle(DesignSystem.Colors.pencil)
-            }
             if network == "mastodon" {
                 if let replies = post.data["repliesCount"], let n = Int(replies), n > 0 {
                     Label("\(n)", systemImage: "bubble.right")
