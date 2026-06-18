@@ -325,10 +325,15 @@ struct IRCMessageDeckView: View {
             }
 
         case .me(let action):
-            // Send CTCP ACTION to channel
-            let target = manager.activeChannel?.name ?? ""
+            // Send CTCP ACTION — to active channel, broadcast targets, or first available
             let nick = appState.serverConfig(for: sid)?.nickname ?? "user"
-            if !target.isEmpty {
+            let targets: [String] = {
+                if let ch = manager.activeChannel?.name { return [ch] }
+                if manager.hasBroadcastTargets { return manager.broadcastTargets.map { $0.name } }
+                if let first = manager.channels.first { return [first.name] }
+                return []
+            }()
+            for target in targets {
                 clientsSendCTCPAction(action, to: target, serverId: sid)
             }
             // Save locally

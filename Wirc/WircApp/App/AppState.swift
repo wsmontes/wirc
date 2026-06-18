@@ -176,6 +176,7 @@ final class AppState {
         clients[configId]?.disconnect()
         clients[configId] = nil
         connectionStates[configId] = .disconnected
+        automation.onManualDisconnect(serverId: configId)
     }
 
     // MARK: - Channel operations
@@ -289,10 +290,13 @@ final class AppState {
                     }
                 }
             }
-        case .disconnected:
+        case .disconnected(let reason):
             connectionStates[serverId] = .disconnected
             channelUsers.removeAll()
-            joinedChannels.removeValue(forKey: serverId)
+            // Keep joinedChannels for reconnect restoration
+            if reason != nil {
+                automation.onDisconnect(serverId: serverId)
+            }
         case .rawLine(let line):
             rawEvents.append(DebugRawEvent(timestamp: Date(), server: config.host, raw: line, parsedAs: "raw"))
         case .error(let msg):
