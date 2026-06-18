@@ -78,6 +78,11 @@ final class IRCClient: @unchecked Sendable {
         write("TOPIC \(channel) :\(topic)", tag: 0)
     }
 
+    /// Send a raw IRC line directly (for commands not yet wrapped).
+    func sendRaw(_ line: String) {
+        write(line, tag: 0)
+    }
+
     // MARK: - Private: Network State
 
     private func handleNWState(_ s: NWConnection.State) {

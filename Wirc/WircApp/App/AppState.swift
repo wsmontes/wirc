@@ -115,6 +115,47 @@ final class AppState {
         servers = saved
     }
 
+    // MARK: - IRC Helpers for CommandExecutor
+
+    func client(for serverId: UUID) -> IRCClient? { clients[serverId] }
+    func serverConfig(for serverId: UUID) -> IRCConnectionConfig? {
+        servers.first(where: { $0.id == serverId })
+    }
+
+    /// Save a sent DM as a WOM object so it appears in the timeline.
+    func saveSentDM(text: String, to nick: String, server: String, serverId: UUID) {
+        let objectId = WOMIDGenerator.generate(type: "message")
+        let obj = WOMObject(
+            id: objectId,
+            type: ["wom:Message"],
+            createdAt: Date(),
+            schema: WOMSchema.message,
+            attributedTo: WOMReference(id: "local:user", type: ["wom:Person"], name: localNick(for: serverId)),
+            content: WOMContent(format: "text/plain", text: text),
+            data: ["network": "irc", "server": server, "recipient": nick, "visibility": "direct"],
+            provenance: .localUser(),
+            governance: defaultGovernance(visibility: "direct"),
+            bindings: WOMBindings(irc: WOMIRCBinding(server: server, nick: localNick(for: serverId)))
+        )
+        Task {
+            try? await store.save(obj)
+            womObjects.append(obj)
+        }
+    }
+
+    private func localNick(for serverId: UUID) -> String {
+        servers.first(where: { $0.id == serverId })?.nickname ?? "user"
+    }
+
+    private func defaultGovernance(visibility: String) -> WOMGovernance {
+        WOMGovernance(
+            purpose: ["messaging"],
+            adsUse: WOMAdsUse.notAllowed.rawValue,
+            agentUse: "allowed",
+            sharing: visibility == "channel" ? WOMSharing.groupOnly.rawValue : WOMSharing.directRecipient.rawValue
+        )
+    }
+
     // MARK: - Connection
 
     func connect(to configId: UUID) {

@@ -71,6 +71,8 @@
 		908719EFEBB845E18C6F2735 /* IRCChannelManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAD6B46A60924B6996B52D18 /* IRCChannelManager.swift */; };
 		DC6CAC5E814A45179FFEEBB2 /* IRCMessageDeckView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A068CB3873B445EF84C567BC /* IRCMessageDeckView.swift */; };
 		49564F780D13465BA3A7D819 /* IRCServerManagerSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 493BFE617DC14CC09BA5E57B /* IRCServerManagerSheet.swift */; };
+		F8BC07DB36074DAEB2B3476D /* IRCCommandParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49C7586EAB014C1C95E1D168 /* IRCCommandParser.swift */; };
+		2A8449521C34403EA7FFE62F /* IRCCommandExecutor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7350D5AC7904A30B36086CF /* IRCCommandExecutor.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -140,6 +142,8 @@
 		AAD6B46A60924B6996B52D18 /* IRCChannelManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WircApp/Infrastructure/IRC/IRCChannelManager.swift; sourceTree = SOURCE_ROOT; };
 		A068CB3873B445EF84C567BC /* IRCMessageDeckView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WircApp/Features/Messages/IRCMessageDeckView.swift; sourceTree = SOURCE_ROOT; };
 		493BFE617DC14CC09BA5E57B /* IRCServerManagerSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WircApp/Features/Messages/IRCServerManagerSheet.swift; sourceTree = SOURCE_ROOT; };
+		49C7586EAB014C1C95E1D168 /* IRCCommandParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WircApp/Infrastructure/IRC/IRCCommandParser.swift; sourceTree = SOURCE_ROOT; };
+		B7350D5AC7904A30B36086CF /* IRCCommandExecutor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WircApp/Infrastructure/IRC/IRCCommandExecutor.swift; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -316,6 +320,7 @@
 				2B676B37B716809668A31008 /* SuggestedServers.swift */,
 				B62E6C1D03888795A63181F4 /* WOMToIRCAdapter.swift */,
 							AAD6B46A60924B6996B52D18 /* IRCChannelManager.swift */,
+				49C7586EAB014C1C95E1D168 /* IRCCommandParser.swift */,
 			);
 			path = IRC;
 			sourceTree = "<group>";
@@ -480,6 +485,8 @@
 				798F1A5BB0ECD2C6DB4C27EB /* JSONFileStore.swift in Sources */,
 				B36A1CC39ECE5F3BDBBE957B /* MastodonClient.swift in Sources */,
 				6373D6852F0496AFEA75A677 /* MastodonModels.swift in Sources */,
+				2A8449521C34403EA7FFE62F /* IRCCommandExecutor.swift in Sources */,
+				F8BC07DB36074DAEB2B3476D /* IRCCommandParser.swift in Sources */,
 				908719EFEBB845E18C6F2735 /* IRCChannelManager.swift in Sources */,
 				DC6CAC5E814A45179FFEEBB2 /* IRCMessageDeckView.swift in Sources */,
 				49564F780D13465BA3A7D819 /* IRCServerManagerSheet.swift in Sources */,

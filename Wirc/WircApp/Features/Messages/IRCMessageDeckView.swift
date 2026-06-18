@@ -199,32 +199,51 @@ struct IRCMessageDeckView: View {
     @ViewBuilder
     private func deckMessageRow(_ object: WOMObject) -> some View {
         let isLocal = object.provenance?.isLocalUser ?? false
+        let isAction = object.data["isAction"] == "true"
         let nick = object.attributedTo?.name ?? object.data["nick"] ?? "unknown"
         let text = object.content?.text ?? ""
         let channel = object.data["channel"]
+        let isDM = object.data["visibility"] == "direct" || object.data["recipient"] != nil
         let network = object.data["network"] ?? "irc"
 
+        // Mention detection
+        let localNick = appState.serverConfig(for: manager.activeChannel?.serverId ?? appState.servers.first?.id ?? UUID())?.nickname ?? ""
+        let mentionsMe = !isLocal && !localNick.isEmpty && text.localizedCaseInsensitiveContains(localNick)
+
         VStack(alignment: .leading, spacing: 1) {
-            // Channel label (All mode only)
+            // Channel label (All mode only) or DM indicator
             if manager.isAllMode, let ch = channel {
-                Text(ch)
+                Text(isDM ? "DM" : ch)
                     .font(.system(size: 9, weight: .medium, design: .monospaced))
-                    .foregroundStyle(DesignSystem.Colors.forSource(network))
+                    .foregroundStyle(isDM ? DesignSystem.Colors.mastodon : DesignSystem.Colors.forSource(network))
             }
 
-            HStack(alignment: .firstTextBaseline, spacing: 6) {
-                Text(nick)
-                    .font(.system(size: 11, weight: .bold, design: .monospaced))
-                    .foregroundStyle(isLocal ? DesignSystem.Colors.signal : DesignSystem.Colors.forSource(network))
-                    .frame(width: 72, alignment: .trailing)
-                    .lineLimit(1)
+            if isAction {
+                // /me action — italic rendering
+                HStack(spacing: 6) {
+                    Text(text)
+                        .font(DesignSystem.Fonts.messageBody)
+                        .italic()
+                        .foregroundStyle(DesignSystem.Colors.pencil)
+                }
+            } else {
+                HStack(alignment: .firstTextBaseline, spacing: 6) {
+                    Text(nick)
+                        .font(.system(size: 11, weight: .bold, design: .monospaced))
+                        .foregroundStyle(isLocal ? DesignSystem.Colors.signal : DesignSystem.Colors.forSource(network))
+                        .frame(width: 72, alignment: .trailing)
+                        .lineLimit(1)
 
-                Text(text)
-                    .font(DesignSystem.Fonts.messageBody)
-                    .foregroundStyle(DesignSystem.Colors.ink)
+                    Text(text)
+                        .font(DesignSystem.Fonts.messageBody)
+                        .foregroundStyle(mentionsMe ? DesignSystem.Colors.signal : DesignSystem.Colors.ink)
+                        .fontWeight(mentionsMe ? .bold : .regular)
+                }
             }
         }
         .padding(.vertical, 2)
+        .background(mentionsMe ? DesignSystem.Colors.signal.opacity(0.08) : Color.clear)
+        .clipShape(RoundedRectangle(cornerRadius: 4))
         .id(object.id)
     }
 
@@ -284,19 +303,56 @@ struct IRCMessageDeckView: View {
         guard !text.isEmpty else { return }
         messageText = ""
 
-        if let ch = manager.activeChannel {
-            // Single channel
-            appState.sendMessage(text, channel: ch.name, serverId: ch.serverId)
-        } else if manager.hasBroadcastTargets {
-            // Broadcast to selected targets
-            for target in manager.broadcastTargets {
-                appState.sendMessage(text, channel: target.name, serverId: target.serverId)
+        // Parse slash commands
+        let cmd = IRCCommandParser.parse(text)
+        let serverId = manager.activeChannel?.serverId ?? appState.servers.first?.id
+
+        guard let sid = serverId else { return }
+
+        // Handle plain messages vs commands
+        switch cmd {
+        case .message:
+            if let ch = manager.activeChannel {
+                appState.sendMessage(text, channel: ch.name, serverId: ch.serverId)
+            } else if manager.hasBroadcastTargets {
+                for target in manager.broadcastTargets {
+                    appState.sendMessage(text, channel: target.name, serverId: target.serverId)
+                }
+            } else {
+                showBroadcastPicker = true
+                messageText = text
             }
-        } else {
-            // All mode, no broadcast set — open picker
-            showBroadcastPicker = true
-            messageText = text // restore text
+
+        case .me(let action):
+            // Send CTCP ACTION to channel
+            let target = manager.activeChannel?.name ?? ""
+            let nick = appState.serverConfig(for: sid)?.nickname ?? "user"
+            if !target.isEmpty {
+                clientsSendCTCPAction(action, to: target, serverId: sid)
+            }
+            // Save locally
+            let objId = WOMIDGenerator.generate(type: "message")
+            let obj = WOMObject(
+                id: objId, type: ["wom:Message", "wom:Action"], createdAt: Date(),
+                attributedTo: WOMReference(id: "local:user", type: ["wom:Person"], name: nick),
+                content: WOMContent(format: "text/plain", text: "* \(nick) \(action)"),
+                data: ["network": "irc", "server": appState.serverConfig(for: sid)?.host ?? "", "isAction": "true"],
+                provenance: .localUser()
+            )
+            Task {
+                try? await appState.store.save(obj)
+                appState.womObjects.append(obj)
+            }
+
+        default:
+            // Execute IRC command
+            _ = IRCCommandExecutor.execute(cmd, serverId: sid, appState: appState)
         }
+    }
+
+    private func clientsSendCTCPAction(_ action: String, to target: String, serverId: UUID) {
+        guard let client = appState.client(for: serverId) else { return }
+        client.sendMessage("\u{01}ACTION \(action)\u{01}", to: target)
     }
 
     private func refreshChannelList() {
