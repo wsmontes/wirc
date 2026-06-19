@@ -67,6 +67,26 @@ private final class FeedParserDelegate: NSObject, XMLParserDelegate {
         return f
     }()
 
+    // Additional RSS date formats for feeds that deviate from RFC 2822
+    private let rssDateFormatters: [DateFormatter] = {
+        let formats = [
+            "EEE, dd MMM yyyy HH:mm:ss Z",   // RFC 2822
+            "EEE, dd MMM yy HH:mm:ss Z",     // RFC 2822 with 2-digit year
+            "dd MMM yyyy HH:mm:ss Z",        // no weekday
+            "EEE, dd MMM yyyy HH:mm:ss z",   // lowercase timezone
+            "yyyy-MM-dd'T'HH:mm:ssZ",        // ISO 8601 no fractional
+            "yyyy-MM-dd'T'HH:mm:ss.SSSZ",    // ISO 8601 with fractional
+            "yyyy-MM-dd HH:mm:ss Z",         // ISO-like with space
+            "MMM dd, yyyy HH:mm:ss Z",       // month first variant
+        ]
+        return formats.map { fmt in
+            let f = DateFormatter()
+            f.locale = Locale(identifier: "en_US_POSIX")
+            f.dateFormat = fmt
+            return f
+        }
+    }()
+
     private let isoFormatter: ISO8601DateFormatter = {
         let f = ISO8601DateFormatter()
         f.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
@@ -270,10 +290,11 @@ private final class FeedParserDelegate: NSObject, XMLParserDelegate {
     // MARK: - Date parsing
 
     private func parseRSSDate(_ s: String) -> Date? {
-        if let d = rssDateFormatter.date(from: s) { return d }
-        // Try ISO with fractional seconds as fallback
+        for fmt in rssDateFormatters {
+            if let d = fmt.date(from: s) { return d }
+        }
+        // Try ISO formatters as fallback
         if let d = isoFormatter.date(from: s) { return d }
-        // Try ISO without fractional seconds as third fallback
         return isoWithoutFractionalFormatter.date(from: s)
     }
 

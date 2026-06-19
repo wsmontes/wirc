@@ -15,8 +15,8 @@ final class FeedToWOMAdapter: @unchecked Sendable {
         store: WOMStore
     ) async -> [WOMObject] {
         var savedObjects: [WOMObject] = []
-        for item in items {
-            let object = convertItem(item, subscription: subscription)
+        for (idx, item) in items.enumerated() {
+            let object = convertItem(item, subscription: subscription, index: idx)
             let canonicalURL = object.data["canonicalUrl"] ?? item.link
             do {
                 let isNew = try await store.saveIfNew(object, byCanonicalURL: canonicalURL)
@@ -33,12 +33,12 @@ final class FeedToWOMAdapter: @unchecked Sendable {
 
     /// Convert a single FeedItem with no dedup check (for direct use).
     func convertSingle(item: FeedItem, subscription: FeedSubscription) -> WOMObject {
-        convertItem(item, subscription: subscription)
+        convertItem(item, subscription: subscription, index: 0)
     }
 
     // MARK: - Private
 
-    private func convertItem(_ item: FeedItem, subscription: FeedSubscription) -> WOMObject {
+    private func convertItem(_ item: FeedItem, subscription: FeedSubscription, index: Int = 0) -> WOMObject {
         let types = womTypes(for: subscription.sourceType)
         let objectID = WOMIDGenerator.generate(type: "post")
 
@@ -104,7 +104,7 @@ final class FeedToWOMAdapter: @unchecked Sendable {
         return WOMObject(
             id: objectID,
             type: types,
-            createdAt: item.publishedAt ?? Date(),
+            createdAt: item.publishedAt ?? Date(timeIntervalSinceNow: Double(-index * 30)), // stagger by 30s per item to mix chronologically
             schema: WOMSchema.post,
             name: item.title,
             attributedTo: attributionRef,
