@@ -57,55 +57,59 @@ struct LibraryView: View {
     }
 
     var body: some View {
-        NavigationStack {
-            VStack(spacing: 0) {
-                // Filter chips
-                filterBar
-                    .padding(.horizontal, DesignSystem.Spacing.lg)
-                    .padding(.vertical, DesignSystem.Spacing.sm)
+        VStack(spacing: 0) {
+            // Search bar
+            HStack(spacing: DesignSystem.Spacing.sm) {
+                Image(systemName: "magnifyingglass")
+                    .foregroundStyle(DesignSystem.Colors.pencil)
+                TextField("Search objects...", text: $searchText)
+                    .textFieldStyle(.plain)
+                    .font(DesignSystem.Fonts.messageBody)
+                if !searchText.isEmpty {
+                    Button { searchText = "" } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundStyle(DesignSystem.Colors.pencil)
+                    }
+                }
+            }
+            .padding(DesignSystem.Spacing.sm)
+            .background(DesignSystem.Colors.border.opacity(0.3))
+            .clipShape(RoundedRectangle(cornerRadius: DesignSystem.Radius.chip))
+            .padding(.horizontal, DesignSystem.Spacing.lg)
+            .padding(.vertical, DesignSystem.Spacing.sm)
 
-                if groupedObjects.isEmpty {
-                    emptyState
-                } else {
-                    List {
-                        ForEach(groupedObjects, id: \.date) { group in
-                            Section {
-                                ForEach(group.objects) { object in
-                                    LibraryRow(object: object)
-                                        .onTapGesture {
-                                            inspectedObject = object
-                                            showInspector = true
-                                        }
-                                }
-                            } header: {
-                                Text(group.date, style: .date)
-                                    .font(DesignSystem.Fonts.dateHeader)
-                                    .foregroundStyle(DesignSystem.Colors.pencil)
+            // Filter chips
+            filterBar
+                .padding(.horizontal, DesignSystem.Spacing.lg)
+
+            if groupedObjects.isEmpty {
+                emptyState
+            } else {
+                List {
+                    ForEach(groupedObjects, id: \.date) { group in
+                        Section {
+                            ForEach(group.objects) { object in
+                                LibraryRow(object: object)
+                                    .onTapGesture {
+                                        inspectedObject = object
+                                        showInspector = true
+                                    }
                             }
+                        } header: {
+                            Text(group.date, style: .date)
+                                .font(DesignSystem.Fonts.dateHeader)
+                                .foregroundStyle(DesignSystem.Colors.pencil)
                         }
                     }
-                    .listStyle(.insetGrouped)
-                    .scrollContentBackground(.hidden)
                 }
+                .listStyle(.insetGrouped)
+                .scrollContentBackground(.hidden)
             }
-            .background(DesignSystem.Colors.page)
-            .searchable(text: $searchText, prompt: "Search objects...")
-            .navigationTitle("Library")
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Menu {
-                        Button { exportAll() } label: {
-                            Label("Export All", systemImage: "square.and.arrow.up")
-                        }
-                    } label: {
-                        Image(systemName: "ellipsis.circle")
-                    }
-                }
-            }
-            .sheet(isPresented: $showInspector) {
-                if let obj = inspectedObject {
-                    ObjectInspectorSheet(object: obj)
-                }
+        }
+        .background(DesignSystem.Colors.page)
+        .sheet(isPresented: $showInspector) {
+            if let obj = inspectedObject {
+                ObjectInspectorSheet(object: obj)
             }
         }
     }

@@ -14,35 +14,23 @@ struct WorkshopView: View {
     @State private var retention: String = "forever"
 
     var body: some View {
-        NavigationStack {
-            List {
-                // MARK: Transports
-                transportsSection
-
-                // MARK: Governance Defaults
-                governanceSection
-
-                // MARK: Data
-                dataSection
-
-                // MARK: About
-                aboutSection
-            }
-            .listStyle(.insetGrouped)
-            .scrollContentBackground(.hidden)
-            .background(DesignSystem.Colors.page)
-            .navigationTitle("Workshop")
-            .sheet(isPresented: $showAddServer) {
-                AddServerView { config in
-                    appState.irc.servers.append(config)
-                }
-            }
-            .sheet(isPresented: $showAddFeed) {
-                AddFeedView()
-            }
-            .sheet(isPresented: $showDebug) {
-                DebugView()
-            }
+        List {
+            transportsSection
+            governanceSection
+            dataSection
+            aboutSection
+        }
+        .listStyle(.insetGrouped)
+        .scrollContentBackground(.hidden)
+        .background(DesignSystem.Colors.page)
+        .sheet(isPresented: $showAddServer) {
+            AddServerView { config in appState.irc.servers.append(config) }
+        }
+        .sheet(isPresented: $showAddFeed) {
+            AddFeedView()
+        }
+        .sheet(isPresented: $showDebug) {
+            DebugView()
         }
     }
 
