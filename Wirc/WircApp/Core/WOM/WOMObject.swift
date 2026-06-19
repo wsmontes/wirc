@@ -59,6 +59,11 @@ struct WOMObject: Codable, Identifiable, Equatable {
 
     var governance: WOMGovernance?
 
+    // MARK: - Space & Time (§10 of WIRC_SPEC)
+
+    var location: WOMLocation?
+    var temporal: WOMTemporal?
+
     // MARK: - Domain-specific layers (§14, §17, §19)
 
     var measurement: WOMMeasurement?
@@ -160,6 +165,24 @@ struct WOMAvailability: Codable, Equatable {
     var url: String?
     var validFrom: Date?
     var validUntil: Date?
+}
+
+/// Location per WIRC_SPEC §10.
+struct WOMLocation: Codable, Equatable {
+    var type: String?            // "point", "polyline", "polygon"
+    var coordinates: [Double]?   // [lon, lat] for point
+    var radius: Double?          // relevance radius in meters
+    var relevanceScale: String?  // "here", "block", "neighborhood", "city", "region", "global"
+    var name: String?            // human-readable place name
+}
+
+/// Temporal context per WIRC_SPEC §10.
+struct WOMTemporal: Codable, Equatable {
+    var type: String?            // "ephemeral", "instantaneous", "eventual", "durable", "permanent", "historical", "recurring"
+    var startsAt: Date?
+    var endsAt: Date?
+    var expiresAt: Date?
+    var recurrence: String?      // e.g. "RRULE:FREQ=WEEKLY;BYDAY=TU"
 }
 
 /// Measurement per WOM 0.6 §14.
