@@ -5,15 +5,15 @@ struct MessageView: View {
     @Environment(AppState.self) private var appState
     let serverId: UUID
     let serverHost: String
-    let conversation: AppState.Conversation
+    let conversation: IRCManager.Conversation
 
     @State private var messageText = ""
     @State private var showUserList = false
 
     private var channel: String { conversation.name }
     private var userKey: String { "\(serverHost)|\(channel.lowercased())" }
-    private var users: [AppState.ChannelUser] { appState.channelUsers[userKey] ?? [] }
-    private var topic: AppState.ChannelTopic? { appState.channelTopics[userKey] }
+    private var users: [IRCManager.ChannelUser] { appState.irc.channelUsers[userKey] ?? [] }
+    private var topic: IRCManager.ChannelTopic? { appState.irc.channelTopics[userKey] }
 
     private var messages: [WOMObject] {
         appState.messagesFor(server: serverHost, channel: channel)
@@ -157,7 +157,7 @@ struct MessageView: View {
                         }
                         Divider()
                         Button(role: .destructive) {
-                            appState.partChannel(channel, serverId: serverId)
+                            appState.irc.partChannel(channel, serverId: serverId)
                         } label: {
                             Label("Leave Channel", systemImage: "rectangle.portrait.and.arrow.right")
                         }
@@ -282,11 +282,11 @@ struct SystemEventPill: View {
 // MARK: - User List View
 
 struct UserListView: View {
-    let users: [AppState.ChannelUser]
+    let users: [IRCManager.ChannelUser]
     let channel: String
     @Environment(\.dismiss) private var dismiss
 
-    private var sortedUsers: [AppState.ChannelUser] {
+    private var sortedUsers: [IRCManager.ChannelUser] {
         users.sorted { u1, u2 in
             let rank: [Character: Int] = ["~": 0, "&": 1, "@": 2, "%": 3, "+": 4]
             let r1 = (u1.prefix.first.flatMap { rank[$0] }) ?? 99

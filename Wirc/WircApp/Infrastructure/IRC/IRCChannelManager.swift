@@ -34,7 +34,7 @@ final class IRCChannelManager {
     func refreshChannelList(
         servers: [IRCConnectionConfig],
         joinedChannels: [UUID: [String]],
-        channelUsers: [String: [AppState.ChannelUser]]
+        channelUsers: [String: [IRCManager.ChannelUser]]
     ) {
         var newChannels: [ChannelHandle] = []
         for server in servers {

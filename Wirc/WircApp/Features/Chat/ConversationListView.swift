@@ -20,7 +20,7 @@ struct ConversationListView: View {
         NavigationStack(path: $navPath) {
             List {
                 scanAllButton
-                if !appState.orchestrator.globalChannels.isEmpty { orchestratorChannels }
+                if !appState.irc.orchestrator.globalChannels.isEmpty { orchestratorChannels }
                 userServers
             }
             .navigationTitle("Chat")
@@ -37,16 +37,16 @@ struct ConversationListView: View {
 
     private var scanAllButton: some View {
         Section {
-            Button { appState.orchestrator.startScan() } label: {
+            Button { appState.irc.orchestrator.startScan() } label: {
                 HStack {
                     Spacer()
                     VStack(spacing: 8) {
-                        if appState.orchestrator.isScanning {
+                        if appState.irc.orchestrator.isScanning {
                             ProgressView().scaleEffect(1.5)
-                            Text(appState.orchestrator.scanProgress).font(.headline).multilineTextAlignment(.center)
-                        } else if !appState.orchestrator.globalChannels.isEmpty {
+                            Text(appState.irc.orchestrator.scanProgress).font(.headline).multilineTextAlignment(.center)
+                        } else if !appState.irc.orchestrator.globalChannels.isEmpty {
                             Image(systemName: "globe.americas.fill").font(.largeTitle).foregroundStyle(.blue)
-                            Text("\(appState.orchestrator.globalChannels.count) channels").font(.headline)
+                            Text("\(appState.irc.orchestrator.globalChannels.count) channels").font(.headline)
                             Text("Tap to re-scan all \(SuggestedServersLoader.servers.count) servers").font(.caption).foregroundStyle(.secondary)
                         } else {
                             Image(systemName: "antenna.radiowaves.left.and.right").font(.largeTitle).foregroundStyle(.blue)
@@ -64,8 +64,8 @@ struct ConversationListView: View {
     // MARK: - Orchestrator Channels
 
     private var orchestratorChannels: some View {
-        Section("All Servers · \(appState.orchestrator.globalChannels.count) channels") {
-            ForEach(appState.orchestrator.globalChannels.prefix(1000)) { gc in
+        Section("All Servers · \(appState.irc.orchestrator.globalChannels.count) channels") {
+            ForEach(appState.irc.orchestrator.globalChannels.prefix(1000)) { gc in
                 Button {
                     navPath.append(ChatRoute.globalChannel(
                         serverHost: gc.serverHost,
@@ -93,19 +93,19 @@ struct ConversationListView: View {
     // MARK: - User Configured Servers
 
     private var userServers: some View {
-        ForEach(appState.servers) { server in
+        ForEach(appState.irc.servers) { server in
             Section {
                 HStack {
-                    Circle().fill(dot(appState.connectionStates[server.id] ?? .disconnected)).frame(width: 8, height: 8)
+                    Circle().fill(dot(appState.irc.connectionStates[server.id] ?? .disconnected)).frame(width: 8, height: 8)
                     Text(server.host).font(.caption).foregroundStyle(.secondary)
                     Spacer()
-                    if case .online = appState.connectionStates[server.id] ?? .disconnected {
+                    if case .online = appState.irc.connectionStates[server.id] ?? .disconnected {
                         Button {
                             selectedServerId = server.id; joinChannel = ""; showJoinSheet = true
                         } label: { Image(systemName: "plus.circle").font(.caption) }
                     }
                 }
-                let list = appState.conversations(forServer: server.host)
+                let list = appState.irc.conversations(forServer: server.host)
                 if list.isEmpty {
                     Text("No channels joined").font(.caption).foregroundStyle(.tertiary)
                 } else {
@@ -119,7 +119,7 @@ struct ConversationListView: View {
                                 Spacer()
                                 if case .channel(let ch) = conv {
                                     let k = "\(server.host)|\(ch.lowercased())"
-                                    if let c = appState.channelUsers[k]?.count, c > 0 {
+                                    if let c = appState.irc.channelUsers[k]?.count, c > 0 {
                                         Text("\(c)").font(.caption2).foregroundStyle(.tertiary)
                                             .padding(.horizontal, 6).padding(.vertical, 2)
                                             .background(Color(.systemGray5)).clipShape(Capsule())
@@ -145,7 +145,7 @@ struct ConversationListView: View {
         }
     }
 
-    private func dot(_ s: AppState.ConnectionStatus) -> Color {
+    private func dot(_ s: IRCManager.ConnectionStatus) -> Color {
         switch s { case .disconnected: .gray; case .connecting: .orange; case .online: .green }
     }
 }
@@ -174,7 +174,7 @@ struct GlobalJoinView: View {
 
     private func connect() {
         let id: UUID
-        if let existing = appState.servers.first(where: { $0.host == host && $0.port == port }) {
+        if let existing = appState.irc.servers.first(where: { $0.host == host && $0.port == port }) {
             id = existing.id
         } else {
             let cfg = IRCConnectionConfig(
@@ -182,7 +182,7 @@ struct GlobalJoinView: View {
                 nickname: "virc_\(Int.random(in: 100...999))",
                 autoJoinChannels: []
             )
-            appState.servers.append(cfg)
+            appState.irc.servers.append(cfg)
             id = cfg.id
         }
         serverId = id
@@ -208,7 +208,7 @@ struct JoinSheet: View {
                 ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Join") {
-                        if let id = serverId, !channel.isEmpty { appState.joinChannel(channel, serverId: id) }
+                        if let id = serverId, !channel.isEmpty { appState.irc.joinChannel(channel, serverId: id) }
                         dismiss()
                     }.disabled(serverId == nil || channel.isEmpty)
                 }

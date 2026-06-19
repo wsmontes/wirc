@@ -11,15 +11,15 @@ struct SettingsView: View {
             List {
                 // IRC Servers
                 Section("IRC Servers") {
-                    ForEach(appState.servers) { server in
+                    ForEach(appState.irc.servers) { server in
                         ServerRow(server: server)
                     }
                     .onDelete { indexSet in
                         for idx in indexSet {
-                            let server = appState.servers[idx]
-                            appState.disconnect(from: server.id)
+                            let server = appState.irc.servers[idx]
+                            appState.irc.disconnect(from: server.id)
                         }
-                        appState.servers.remove(atOffsets: indexSet)
+                        appState.irc.servers.remove(atOffsets: indexSet)
                     }
                     Button { showingAddServer = true } label: {
                         Label("Add IRC Server", systemImage: "plus")
@@ -54,12 +54,12 @@ struct SettingsView: View {
 
                 // RSS/Atom Feeds
                 Section("Feeds") {
-                    if appState.feedStore.getAll().isEmpty {
+                    if appState.feed.subscriptionStore.getAll().isEmpty {
                         Text("No feeds subscribed")
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
                     } else {
-                        ForEach(appState.feedStore.getAll()) { sub in
+                        ForEach(appState.feed.subscriptionStore.getAll()) { sub in
                             HStack {
                                 VStack(alignment: .leading, spacing: 2) {
                                     Text(sub.title)
@@ -96,7 +96,7 @@ struct SettingsView: View {
                             }
                         }
                         .onDelete { indexSet in
-                            let allSubs = appState.feedStore.getAll()
+                            let allSubs = appState.feed.subscriptionStore.getAll()
                             for idx in indexSet {
                                 let sub = allSubs[idx]
                                 appState.removeFeed(sub)
@@ -126,7 +126,7 @@ struct SettingsView: View {
             }
             .navigationTitle("Settings")
             .sheet(isPresented: $showingAddServer) {
-                AddServerView { config in appState.servers.append(config) }
+                AddServerView { config in appState.irc.servers.append(config) }
             }
             .sheet(isPresented: $showingAddMastodon) {
                 AddMastodonView { name, url, token in
@@ -191,8 +191,8 @@ struct ServerRow: View {
     @Environment(AppState.self) private var appState
     let server: IRCConnectionConfig
 
-    private var status: AppState.ConnectionStatus {
-        appState.connectionStates[server.id] ?? .disconnected
+    private var status: IRCManager.ConnectionStatus {
+        appState.irc.connectionStates[server.id] ?? .disconnected
     }
 
     var body: some View {
@@ -231,9 +231,9 @@ struct ServerRow: View {
     private func toggleConnection() {
         switch status {
         case .disconnected:
-            appState.connect(to: server.id)
+            appState.irc.connect(to: server.id)
         case .connecting, .online:
-            appState.disconnect(from: server.id)
+            appState.irc.disconnect(from: server.id)
         }
     }
 }

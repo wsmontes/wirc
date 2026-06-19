@@ -74,6 +74,8 @@
 		F8BC07DB36074DAEB2B3476D /* IRCCommandParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49C7586EAB014C1C95E1D168 /* IRCCommandParser.swift */; };
 		2A8449521C34403EA7FFE62F /* IRCCommandExecutor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7350D5AC7904A30B36086CF /* IRCCommandExecutor.swift */; };
 		33B1FDEE49A64552BF250756 /* IRCAutomation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 420B4F345DB84D65AAF16EFB /* IRCAutomation.swift */; };
+		7726A1A5D37A495D834F3925 /* IRCManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 600D88F1A2974B558DCE36E4 /* IRCManager.swift */; };
+		80B7B7475A35415CA8E8666D /* FeedManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 480FC6D050F34DC49D1FB6CF /* FeedManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -146,6 +148,8 @@
 		49C7586EAB014C1C95E1D168 /* IRCCommandParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WircApp/Infrastructure/IRC/IRCCommandParser.swift; sourceTree = SOURCE_ROOT; };
 		B7350D5AC7904A30B36086CF /* IRCCommandExecutor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WircApp/Infrastructure/IRC/IRCCommandExecutor.swift; sourceTree = SOURCE_ROOT; };
 		420B4F345DB84D65AAF16EFB /* IRCAutomation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WircApp/Infrastructure/IRC/IRCAutomation.swift; sourceTree = SOURCE_ROOT; };
+		600D88F1A2974B558DCE36E4 /* IRCManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WircApp/App/IRCManager.swift; sourceTree = SOURCE_ROOT; };
+		480FC6D050F34DC49D1FB6CF /* FeedManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WircApp/App/FeedManager.swift; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -199,6 +203,8 @@
 			isa = PBXGroup;
 			children = (
 				AEC539290F0DCC4E113874FF /* AppState.swift */,
+				480FC6D050F34DC49D1FB6CF /* FeedManager.swift */,
+				600D88F1A2974B558DCE36E4 /* IRCManager.swift */,
 				C6C049CD72667A707D2C2029 /* Info.plist */,
 				9FA00F37E1FF2C32DDF280ED /* WircApp.swift */,
 			);
@@ -488,6 +494,8 @@
 				798F1A5BB0ECD2C6DB4C27EB /* JSONFileStore.swift in Sources */,
 				B36A1CC39ECE5F3BDBBE957B /* MastodonClient.swift in Sources */,
 				6373D6852F0496AFEA75A677 /* MastodonModels.swift in Sources */,
+				80B7B7475A35415CA8E8666D /* FeedManager.swift in Sources */,
+				7726A1A5D37A495D834F3925 /* IRCManager.swift in Sources */,
 				33B1FDEE49A64552BF250756 /* IRCAutomation.swift in Sources */,
 				2A8449521C34403EA7FFE62F /* IRCCommandExecutor.swift in Sources */,
 				F8BC07DB36074DAEB2B3476D /* IRCCommandParser.swift in Sources */,

@@ -12,8 +12,8 @@ enum IRCCommandExecutor {
         serverId: UUID,
         appState: AppState
     ) -> String? {
-        guard let client = appState.client(for: serverId),
-              let config = appState.serverConfig(for: serverId) else {
+        guard let client = appState.irc.client(for: serverId),
+              let config = appState.irc.config(for: serverId) else {
             return "⚠️ Not connected to server"
         }
 
@@ -28,7 +28,7 @@ enum IRCCommandExecutor {
             return nil
 
         case .part(let channel, let reason):
-            let ch = channel ?? (appState.channelManager.activeChannel?.name ?? "")
+            let ch = channel ?? (appState.irc.channelManager.activeChannel?.name ?? "")
             if !ch.isEmpty {
                 client.part(channel: ch.hasPrefix("#") ? ch : "#\(ch)", reason: reason)
             }
@@ -47,10 +47,10 @@ enum IRCCommandExecutor {
         case .nick(let newNick):
             client.sendRaw("NICK \(newNick)")
             // Update local config
-            if let idx = appState.servers.firstIndex(where: { $0.id == serverId }) {
-                var updated = appState.servers[idx]
+            if let idx = appState.irc.servers.firstIndex(where: { $0.id == serverId }) {
+                var updated = appState.irc.servers[idx]
                 updated.nickname = newNick
-                appState.servers[idx] = updated
+                appState.irc.servers[idx] = updated
             }
             return "→ Nickname changed to \(newNick)"
 
@@ -94,7 +94,7 @@ enum IRCCommandExecutor {
 
         case .kick(let nick, let reason):
             // Find active channel
-            let channel = appState.channelManager.activeChannel?.name ?? ""
+            let channel = appState.irc.channelManager.activeChannel?.name ?? ""
             if !channel.isEmpty {
                 if let r = reason {
                     client.sendRaw("KICK \(channel) \(nick) :\(r)")
@@ -147,7 +147,7 @@ enum IRCCommandExecutor {
         case .reconnect:
             client.disconnect()
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                appState.connect(to: serverId)
+                appState.irc.connect(to: serverId)
             }
             return "Reconnecting..."
 
@@ -157,13 +157,13 @@ enum IRCCommandExecutor {
 
         case .alias(let name, let expansion):
             if let exp = expansion {
-                return appState.automation.setAlias("\(name) \(exp)")
+                return appState.irc.automation.setAlias("\(name) \(exp)")
             } else {
-                return appState.automation.aliases[name].map { "/\(name) → \($0)" } ?? "Unknown alias: /\(name)"
+                return appState.irc.automation.aliases[name].map { "/\(name) → \($0)" } ?? "Unknown alias: /\(name)"
             }
 
         case .unalias(let name):
-            appState.automation.aliases.removeValue(forKey: name.lowercased())
+            appState.irc.automation.aliases.removeValue(forKey: name.lowercased())
             return "Removed alias /\(name)"
         }
     }

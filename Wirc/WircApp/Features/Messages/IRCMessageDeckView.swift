@@ -12,7 +12,7 @@ struct IRCMessageDeckView: View {
     @State private var joinChannel = ""
     @State private var joinServerId: UUID?
 
-    private var manager: IRCChannelManager { appState.channelManager }
+    private var manager: IRCChannelManager { appState.irc.channelManager }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -32,7 +32,7 @@ struct IRCMessageDeckView: View {
         }
         .background(DesignSystem.Colors.page)
         .onAppear { refreshChannelList() }
-        .onChange(of: appState.joinedChannels) { _, _ in refreshChannelList() }
+        .onChange(of: appState.irc.joinedChannels) { _, _ in refreshChannelList() }
         .onChange(of: appState.womObjects.count) { _, _ in
             // Reload when new messages arrive (debounced by SwiftUI batching)
             Task { await manager.loadMessages() }
@@ -43,7 +43,7 @@ struct IRCMessageDeckView: View {
         .sheet(isPresented: $showJoinSheet) {
             JoinChannelSheet(serverId: $joinServerId, channel: $joinChannel) {
                 if let sid = joinServerId, !joinChannel.isEmpty {
-                    appState.joinChannel(joinChannel, serverId: sid)
+                    appState.irc.joinChannel(joinChannel, serverId: sid)
                 }
                 joinChannel = ""
                 showJoinSheet = false
@@ -59,13 +59,13 @@ struct IRCMessageDeckView: View {
     private var serverStatusBar: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: DesignSystem.Spacing.sm) {
-                ForEach(appState.servers) { server in
+                ForEach(appState.irc.servers) { server in
                     Button {
                         showServerManager = true
                     } label: {
                         HStack(spacing: 4) {
                             Circle()
-                                .fill(statusColor(appState.connectionStates[server.id] ?? .disconnected))
+                                .fill(statusColor(appState.irc.connectionStates[server.id] ?? .disconnected))
                                 .frame(width: 6, height: 6)
                             Text(server.name.isEmpty ? server.host : server.name)
                                 .font(DesignSystem.Fonts.caption())
@@ -79,7 +79,7 @@ struct IRCMessageDeckView: View {
                     .buttonStyle(.plain)
                 }
 
-                if appState.servers.isEmpty {
+                if appState.irc.servers.isEmpty {
                     Button {
                         showServerManager = true
                     } label: {
@@ -130,7 +130,7 @@ struct IRCMessageDeckView: View {
 
                 // Add button
                 Button {
-                    joinServerId = appState.servers.first?.id
+                    joinServerId = appState.irc.servers.first?.id
                     showJoinSheet = true
                 } label: {
                     Image(systemName: "plus")
@@ -207,7 +207,7 @@ struct IRCMessageDeckView: View {
         let network = object.data["network"] ?? "irc"
 
         // Mention detection
-        let localNick = appState.serverConfig(for: manager.activeChannel?.serverId ?? appState.servers.first?.id ?? UUID())?.nickname ?? ""
+        let localNick = appState.irc.config(for: manager.activeChannel?.serverId ?? appState.irc.servers.first?.id ?? UUID())?.nickname ?? ""
         let mentionsMe = !isLocal && !localNick.isEmpty && text.localizedCaseInsensitiveContains(localNick)
 
         VStack(alignment: .leading, spacing: 1) {
@@ -304,9 +304,9 @@ struct IRCMessageDeckView: View {
         messageText = ""
 
         // Expand aliases before parsing
-        let expanded = appState.automation.expandAlias(text) ?? text
+        let expanded = appState.irc.automation.expandAlias(text) ?? text
         let cmd = IRCCommandParser.parse(expanded)
-        let serverId = manager.activeChannel?.serverId ?? appState.servers.first?.id
+        let serverId = manager.activeChannel?.serverId ?? appState.irc.servers.first?.id
 
         guard let sid = serverId else { return }
 
@@ -326,7 +326,7 @@ struct IRCMessageDeckView: View {
 
         case .me(let action):
             // Send CTCP ACTION — to active channel, broadcast targets, or first available
-            let nick = appState.serverConfig(for: sid)?.nickname ?? "user"
+            let nick = appState.irc.config(for: sid)?.nickname ?? "user"
             let targets: [String] = {
                 if let ch = manager.activeChannel?.name { return [ch] }
                 if manager.hasBroadcastTargets { return manager.broadcastTargets.map { $0.name } }
@@ -342,7 +342,7 @@ struct IRCMessageDeckView: View {
                 id: objId, type: ["wom:Message", "wom:Action"], createdAt: Date(),
                 attributedTo: WOMReference(id: "local:user", type: ["wom:Person"], name: nick),
                 content: WOMContent(format: "text/plain", text: "* \(nick) \(action)"),
-                data: ["network": "irc", "server": appState.serverConfig(for: sid)?.host ?? "", "isAction": "true"],
+                data: ["network": "irc", "server": appState.irc.config(for: sid)?.host ?? "", "isAction": "true"],
                 provenance: .localUser()
             )
             Task {
@@ -357,20 +357,20 @@ struct IRCMessageDeckView: View {
     }
 
     private func clientsSendCTCPAction(_ action: String, to target: String, serverId: UUID) {
-        guard let client = appState.client(for: serverId) else { return }
+        guard let client = appState.irc.client(for: serverId) else { return }
         client.sendMessage("\u{01}ACTION \(action)\u{01}", to: target)
     }
 
     private func refreshChannelList() {
         manager.refreshChannelList(
-            servers: appState.servers,
-            joinedChannels: appState.joinedChannels,
-            channelUsers: appState.channelUsers
+            servers: appState.irc.servers,
+            joinedChannels: appState.irc.joinedChannels,
+            channelUsers: appState.irc.channelUsers
         )
         Task { await manager.loadMessages() }
     }
 
-    private func statusColor(_ s: AppState.ConnectionStatus) -> Color {
+    private func statusColor(_ s: IRCManager.ConnectionStatus) -> Color {
         switch s { case .disconnected: return .gray; case .connecting: return .orange; case .online: return DesignSystem.Colors.github }
     }
 }
@@ -469,7 +469,7 @@ struct JoinChannelSheet: View {
             Form {
                 Section("Server") {
                     Picker("Server", selection: $serverId) {
-                        ForEach(appState.servers) { server in
+                        ForEach(appState.irc.servers) { server in
                             Text(server.name.isEmpty ? server.host : server.name)
                                 .tag(Optional(server.id))
                         }

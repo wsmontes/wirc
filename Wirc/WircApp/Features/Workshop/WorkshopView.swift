@@ -34,7 +34,7 @@ struct WorkshopView: View {
             .navigationTitle("Workshop")
             .sheet(isPresented: $showAddServer) {
                 AddServerView { config in
-                    appState.servers.append(config)
+                    appState.irc.servers.append(config)
                 }
             }
             .sheet(isPresented: $showAddFeed) {
@@ -77,7 +77,7 @@ struct WorkshopView: View {
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Feeds")
                             .font(.system(size: 15, weight: .medium))
-                        Text("\(appState.feedStore.getAll().count) subscription\(appState.feedStore.getAll().count == 1 ? "" : "s")")
+                        Text("\(appState.feed.subscriptionStore.getAll().count) subscription\(appState.feed.subscriptionStore.getAll().count == 1 ? "" : "s")")
                             .font(DesignSystem.Fonts.caption())
                             .foregroundStyle(DesignSystem.Colors.pencil)
                     }
@@ -247,7 +247,7 @@ struct FeedTransportDetail: View {
 
     var body: some View {
         List {
-            let feeds = appState.feedStore.getAll()
+            let feeds = appState.feed.subscriptionStore.getAll()
             if feeds.isEmpty {
                 ContentUnavailableView("No feed subscriptions", systemImage: "dot.radiowaves.left.and.right")
             }
@@ -276,7 +276,7 @@ struct FeedTransportDetail: View {
                 }
             }
             .onDelete { indexSet in
-                let feeds = appState.feedStore.getAll()
+                let feeds = appState.feed.subscriptionStore.getAll()
                 for idx in indexSet {
                     appState.removeFeed(feeds[idx])
                 }
