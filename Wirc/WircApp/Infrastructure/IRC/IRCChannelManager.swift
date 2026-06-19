@@ -82,7 +82,7 @@ final class IRCChannelManager {
             }
 
             let sorted = filtered.sorted { $0.createdAt > $1.createdAt }
-            visibleMessages = Array(sorted.prefix(200))
+            visibleMessages = Array(sorted.prefix(50))
             oldestVisibleTimestamp = visibleMessages.last?.createdAt
         } catch {
             os_log(.error, "IRCChannelManager.loadMessages failed: %{public}@", error.localizedDescription)

@@ -35,6 +35,10 @@ final class IRCManager {
     var totalEventsReceived: Int = 0
     var privmsgCount: Int = 0
 
+    /// Batched WOM objects — flushed periodically to avoid UI overload.
+    private var womBatch: [WOMObject] = []
+    private var womBatchTimer: Timer?
+
     // MARK: - Types
     enum ConnectionStatus: Hashable { case disconnected, connecting, online }
 
@@ -261,10 +265,28 @@ final class IRCManager {
         default: lastEventType = "?"
         }
 
-        // Convert IRC event to WOM objects and emit
+        // Convert IRC event to WOM objects (messages immediately, system events batched)
         let objects = ircToWOM.convert(event, config: config)
-        if !objects.isEmpty {
+        guard !objects.isEmpty else { return }
+
+        // Messages (PRIVMSG, NOTICE) and own actions go immediately
+        let isMessage = objects.contains(where: { $0.type.contains("wom:Message") })
+        if isMessage {
             onWOMObjects?(objects)
+        } else {
+            // System events are batched to avoid UI overload
+            womBatch.append(contentsOf: objects)
+            if womBatchTimer == nil {
+                womBatchTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { [weak self] _ in
+                    guard let self else { return }
+                    self.womBatchTimer = nil
+                    if !self.womBatch.isEmpty {
+                        let batch = self.womBatch
+                        self.womBatch = []
+                        self.onWOMObjects?(batch)
+                    }
+                }
+            }
         }
     }
 
