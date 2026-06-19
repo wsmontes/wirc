@@ -246,6 +246,7 @@ struct IRCChatView: View {
     private func chatMessageRow(_ object: WOMObject) -> some View {
         let isLocal = object.provenance?.isLocalUser ?? false
         let isAction = object.data["isAction"] == "true"
+        let isBroadcast = object.data["isBroadcast"] == "true"
         let nick = object.attributedTo?.name ?? object.data["nick"] ?? "unknown"
         let text = object.content?.text ?? ""
         let channel = object.data["channel"]
@@ -257,9 +258,16 @@ struct IRCChatView: View {
 
         return VStack(alignment: .leading, spacing: 1) {
             if manager.isAllMode, let ch = channel {
-                Text(isDM ? "DM" : ch)
+                HStack(spacing: 4) {
+                    Text(isDM ? "DM" : ch)
+                        .font(.system(size: 9, weight: .medium, design: .monospaced))
+                        .foregroundStyle(isDM ? DesignSystem.Colors.mastodon : DesignSystem.Colors.forSource(network))
+                }
+            }
+            if isBroadcast, let count = object.data["targetCount"] {
+                Text("📢 to \(count) channels")
                     .font(.system(size: 9, weight: .medium, design: .monospaced))
-                    .foregroundStyle(isDM ? DesignSystem.Colors.mastodon : DesignSystem.Colors.forSource(network))
+                    .foregroundStyle(DesignSystem.Colors.signal)
             }
 
             if isAction {
@@ -531,13 +539,28 @@ struct IRCChatView: View {
         switch cmd {
         case .message:
             if let ch = manager.activeChannel {
+                // Single channel mode
                 appState.sendMessage(text, channel: ch.name, serverId: ch.serverId)
-            } else if manager.hasBroadcastTargets {
-                for target in manager.broadcastTargets {
+            } else {
+                // All mode — broadcast to selected targets or ALL joined channels
+                let targets = manager.hasBroadcastTargets
+                    ? Array(manager.broadcastTargets)
+                    : manager.channels
+                // Save as a single local WOM object for the timeline
+                let localObj = WOMObject(
+                    id: WOMIDGenerator.generate(type: "message"),
+                    type: ["wom:Message", "wom:Broadcast"],
+                    createdAt: Date(),
+                    attributedTo: WOMReference(id: "local:user", type: ["wom:Person"], name: appState.irc.config(for: sid)?.nickname ?? "user"),
+                    content: WOMContent(format: "text/plain", text: text),
+                    data: ["network": "irc", "isBroadcast": "true", "targetCount": "\(targets.count)"],
+                    provenance: .localUser()
+                )
+                Task { try? await appState.store.save(localObj); appState.womObjects.append(localObj) }
+                // Send to each target
+                for target in targets {
                     appState.sendMessage(text, channel: target.name, serverId: target.serverId)
                 }
-            } else if let first = manager.channels.first {
-                appState.sendMessage(text, channel: first.name, serverId: first.serverId)
             }
         case .me(let action):
             let nick = appState.irc.config(for: sid)?.nickname ?? "user"
