@@ -24,6 +24,8 @@ final class IRCChannelManager {
     private(set) var isLoadingOlder = false
     private let store: WOMStore
     private var oldestVisibleTimestamp: Date?
+    /// Reference to AppState's in-memory womObjects — avoids blocking store reads on main thread.
+    var allObjects: [WOMObject] = []
 
     init(store: WOMStore) {
         self.store = store
@@ -55,38 +57,34 @@ final class IRCChannelManager {
     func setActiveChannel(_ channel: ChannelHandle?) {
         activeChannel = channel
         oldestVisibleTimestamp = nil
-        Task { await loadMessages() }
+        loadMessages()
     }
 
     // MARK: - Message loading
 
-    func loadMessages() async {
-        do {
-            let all = try await store.all()
-            let filtered: [WOMObject]
+    func loadMessages() {
+        let all = allObjects
+        let filtered: [WOMObject]
 
-            if let ch = activeChannel {
-                filtered = all.filter { obj in
-                    (obj.type.contains("wom:Message") || obj.type.contains("wom:SystemEvent")) &&
-                    obj.data["server"] == ch.serverHost &&
-                    obj.data["channel"] == ch.name
-                }
-            } else {
-                let channelKeys = Set(channels.map { "\($0.serverHost)|\($0.name)" })
-                filtered = all.filter { obj in
-                    guard obj.type.contains("wom:Message") || obj.type.contains("wom:SystemEvent") else { return false }
-                    guard let server = obj.data["server"],
-                          let channel = obj.data["channel"] else { return false }
-                    return channelKeys.contains("\(server)|\(channel)")
-                }
+        if let ch = activeChannel {
+            filtered = all.filter { obj in
+                (obj.type.contains("wom:Message") || obj.type.contains("wom:SystemEvent")) &&
+                obj.data["server"] == ch.serverHost &&
+                obj.data["channel"] == ch.name
             }
-
-            let sorted = filtered.sorted { $0.createdAt > $1.createdAt }
-            visibleMessages = Array(sorted.prefix(50))
-            oldestVisibleTimestamp = visibleMessages.last?.createdAt
-        } catch {
-            os_log(.error, "IRCChannelManager.loadMessages failed: %{public}@", error.localizedDescription)
+        } else {
+            let channelKeys = Set(channels.map { "\($0.serverHost)|\($0.name)" })
+            filtered = all.filter { obj in
+                guard obj.type.contains("wom:Message") || obj.type.contains("wom:SystemEvent") else { return false }
+                guard let server = obj.data["server"],
+                      let channel = obj.data["channel"] else { return false }
+                return channelKeys.contains("\(server)|\(channel)")
+            }
         }
+
+        let sorted = filtered.sorted { $0.createdAt > $1.createdAt }
+        visibleMessages = Array(sorted.prefix(200))
+        oldestVisibleTimestamp = visibleMessages.last?.createdAt
     }
 
     func loadOlderMessages() async {
@@ -95,7 +93,7 @@ final class IRCChannelManager {
         defer { isLoadingOlder = false }
 
         do {
-            let all = try await store.all()
+            let all = allObjects
             let filtered: [WOMObject]
 
             if let ch = activeChannel {

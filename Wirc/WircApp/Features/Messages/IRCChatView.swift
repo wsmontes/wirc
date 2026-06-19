@@ -35,7 +35,7 @@ struct IRCChatView: View {
         .onChange(of: appState.irc.servers.count) { _, _ in refreshChannelList() }
         .onChange(of: appState.irc.joinedChannels) { _, _ in refreshChannelList() }
         .onChange(of: appState.womObjects.count) { _, _ in
-            Task { await manager.loadMessages() }
+            manager.loadMessages()
         }
         .sheet(isPresented: $showSheet) {
             channelSheet
@@ -558,7 +558,7 @@ struct IRCChatView: View {
 
     private func refreshChannelList() {
         manager.refreshChannelList(servers: appState.irc.servers, joinedChannels: appState.irc.joinedChannels, channelUsers: appState.irc.channelUsers)
-        Task { await manager.loadMessages() }
+        manager.loadMessages()
     }
 
     @State private var hasAutoScanned = false

@@ -42,6 +42,7 @@ final class AppState {
                 try? await self.store.saveMany(objects)
                 await MainActor.run {
                     self.womObjects.append(contentsOf: objects)
+                    self.irc.channelManager.allObjects = self.womObjects
                     for obj in objects where obj.type.contains("wom:Message") {
                         if let s = obj.data["server"], let ch = obj.data["channel"] {
                             self.irc.channelManager.incrementUnread(for: "\(s)|\(ch.lowercased())")
