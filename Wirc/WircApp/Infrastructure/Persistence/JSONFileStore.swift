@@ -184,13 +184,22 @@ final class JSONFileStore: WOMStore, @unchecked Sendable {
         try data.write(to: url, options: .atomic)
     }
 
+    private let maxIndexSize = 2000
+
     private func loadIndex() {
         guard let files = try? FileManager.default.contentsOfDirectory(
             at: objectsDir, includingPropertiesForKeys: nil
         ) else { return }
+        // Load all, then keep only the most recent to cap memory
+        var allObjects: [WOMObject] = []
         for url in files where url.pathExtension == "json" {
             guard let data = try? Data(contentsOf: url),
                   let obj = try? JSONDecoder().decode(WOMObject.self, from: data) else { continue }
+            allObjects.append(obj)
+        }
+        // Sort by date descending, keep most recent
+        allObjects.sort { $0.createdAt > $1.createdAt }
+        for obj in allObjects.prefix(maxIndexSize) {
             index[obj.id] = obj
         }
     }

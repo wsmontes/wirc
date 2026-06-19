@@ -16,8 +16,17 @@ final class AppState {
     let store: WOMStore = JSONFileStore()
 
     // MARK: - Debug logs
-    var rawEvents: [DebugRawEvent] = []
-    var womObjects: [WOMObject] = []
+    var rawEvents: [DebugRawEvent] = [] {
+        didSet { if rawEvents.count > 500 { rawEvents = Array(rawEvents.suffix(500)) } }
+    }
+    var womObjects: [WOMObject] = [] {
+        didSet {
+            // Cap in-memory objects to prevent unbounded growth
+            if womObjects.count > 2000 {
+                womObjects = Array(womObjects.suffix(2000))
+            }
+        }
+    }
 
     // MARK: - Mastodon
     var mastodonAccounts: [MastodonServerConfig] = [] { didSet { saveMastodonAccounts() } }
