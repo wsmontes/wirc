@@ -70,7 +70,9 @@ final class IRCChannelManager {
             filtered = all.filter { obj in
                 (obj.type.contains("wom:Message") || obj.type.contains("wom:SystemEvent")) &&
                 obj.data["server"] == ch.serverHost &&
-                obj.data["channel"] == ch.name
+                obj.data["channel"] == ch.name &&
+                obj.data["eventType"] != "names" &&
+                obj.data["eventType"] != "endOfNames"
             }
         } else {
             let channelKeys = Set(channels.map { "\($0.serverHost)|\($0.name)" })
@@ -106,7 +108,9 @@ final class IRCChannelManager {
             } else {
                 let channelKeys = Set(channels.map { "\($0.serverHost)|\($0.name)" })
                 filtered = all.filter { obj in
-                    guard (obj.type.contains("wom:Message") || obj.type.contains("wom:SystemEvent")), obj.createdAt < oldest else { return false }
+                    guard (obj.type.contains("wom:Message") || obj.type.contains("wom:SystemEvent")),
+                          obj.data["eventType"] != "names" && obj.data["eventType"] != "endOfNames",
+                          obj.createdAt < oldest else { return false }
                     guard let server = obj.data["server"],
                           let channel = obj.data["channel"] else { return false }
                     return channelKeys.contains("\(server)|\(channel)")
