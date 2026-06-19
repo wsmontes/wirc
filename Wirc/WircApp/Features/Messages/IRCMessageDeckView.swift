@@ -40,9 +40,9 @@ struct IRCMessageDeckView: View {
         }
         .background(DesignSystem.Colors.page)
         .onAppear { refreshChannelList() }
+        .onChange(of: appState.irc.servers.count) { _, _ in refreshChannelList() }
         .onChange(of: appState.irc.joinedChannels) { _, _ in refreshChannelList() }
         .onChange(of: appState.womObjects.count) { _, _ in
-            // Reload when new messages arrive (debounced by SwiftUI batching)
             Task { await manager.loadMessages() }
         }
         .sheet(isPresented: $showServerManager) {
@@ -411,24 +411,68 @@ struct IRCMessageDeckView: View {
 
     private var noChannelsState: some View {
         VStack(spacing: DesignSystem.Spacing.md) {
-            Spacer().frame(height: 60)
+            Spacer().frame(height: 40)
             Image(systemName: "number")
                 .font(.system(size: 32))
                 .foregroundStyle(DesignSystem.Colors.pencil)
             Text("No channels joined")
                 .font(.system(size: 15, weight: .medium))
                 .foregroundStyle(DesignSystem.Colors.ink)
-            Text("Tap the ⊕ button or use the server manager to join channels.")
+            Text("Connect to a server and join channels to start chatting.")
                 .font(DesignSystem.Fonts.caption())
                 .foregroundStyle(DesignSystem.Colors.pencil)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, DesignSystem.Spacing.xl)
+
+            // Server quick-actions
+            ForEach(appState.irc.servers) { server in
+                HStack {
+                    Circle()
+                        .fill(statusColor(appState.irc.connectionStates[server.id] ?? .disconnected))
+                        .frame(width: 8, height: 8)
+                    Text(server.name.isEmpty ? server.host : server.name)
+                        .font(DesignSystem.Fonts.data(13))
+                        .foregroundStyle(DesignSystem.Colors.ink)
+                    Spacer()
+                    Button(statusLabel(server.id)) {
+                        toggleQuickConnection(server.id)
+                    }
+                    .font(DesignSystem.Fonts.caption())
+                    .buttonStyle(.bordered)
+                    .tint(statusTint(server.id))
+                }
+                .padding(.horizontal, DesignSystem.Spacing.lg)
+            }
+
             Button {
                 showServerManager = true
             } label: {
-                Label("Open Server Manager", systemImage: "gear")
+                Label("Server Manager", systemImage: "gear")
                     .font(DesignSystem.Fonts.caption())
             }
             .buttonStyle(.bordered)
-            .tint(DesignSystem.Colors.signal)
+            .tint(DesignSystem.Colors.pencil)
+        }
+    }
+
+    private func statusLabel(_ id: UUID) -> String {
+        switch appState.irc.connectionStates[id] ?? .disconnected {
+        case .disconnected: return "Connect"
+        case .connecting: return "Connecting..."
+        case .online: return "Disconnect"
+        }
+    }
+    private func statusTint(_ id: UUID) -> Color {
+        switch appState.irc.connectionStates[id] ?? .disconnected {
+        case .disconnected: return DesignSystem.Colors.github
+        case .connecting: return .orange
+        case .online: return DesignSystem.Colors.signal
+        }
+    }
+    private func toggleQuickConnection(_ id: UUID) {
+        switch appState.irc.connectionStates[id] ?? .disconnected {
+        case .disconnected: appState.irc.connect(to: id)
+        case .connecting, .online: appState.irc.disconnect(from: id)
         }
     }
 
