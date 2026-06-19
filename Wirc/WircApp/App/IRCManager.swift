@@ -47,10 +47,40 @@ final class IRCManager {
         var id: String { name }; let name: String; let users: Int; let topic: String
     }
 
+    // MARK: - Default servers
+    static let defaultServers: [(name: String, host: String, port: Int)] = [
+        ("libera.chat", "irc.libera.chat", 6667),
+        ("OFTC",        "irc.oftc.net",     6667),
+        ("dal.net",     "irc.dal.net",      6667),
+    ]
+
+    private static let nicknameKey = "wirc.defaultNickSuffix"
+    static var randomNickname: String {
+        if let saved = UserDefaults.standard.string(forKey: nicknameKey), !saved.isEmpty { return "wirc_\(saved)" }
+        let suffix = String(UUID().uuidString.prefix(4)).lowercased()
+        UserDefaults.standard.set(suffix, forKey: nicknameKey)
+        return "wirc_\(suffix)"
+    }
+
     // MARK: - Init
     init(store: WOMStore) {
         channelManager = IRCChannelManager(store: store)
         loadServers()
+        // Insert default servers if not present
+        for (name, host, port) in Self.defaultServers {
+            if !servers.contains(where: { $0.host == host && $0.port == port }) {
+                servers.append(IRCConnectionConfig(name: name, host: host, port: port, nickname: Self.randomNickname))
+            }
+        }
+        // Auto-connect after UI renders
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in
+            guard let self else { return }
+            for server in self.servers {
+                if self.connectionStates[server.id] == nil || self.connectionStates[server.id] == .disconnected {
+                    self.connect(to: server.id)
+                }
+            }
+        }
     }
 
     // MARK: - Persistence
@@ -156,6 +186,11 @@ final class IRCManager {
                     clients[serverId]?.join(channel: c)
                 }
             }
+            // Auto-scan + auto-join on first connect
+            if orchestrator.globalChannels.isEmpty && !orchestrator.isScanning {
+                orchestrator.startScan()
+                scheduleAutoJoin()
+            }
         case .disconnected(let reason):
             connectionStates[serverId] = .disconnected
             channelUsers.removeAll()
@@ -209,5 +244,33 @@ final class IRCManager {
         if !objects.isEmpty {
             onWOMObjects?(objects)
         }
+    }
+
+    // MARK: - Auto-join
+
+    private var autoJoinTimer: DispatchWorkItem?
+    private func scheduleAutoJoin() {
+        autoJoinTimer?.cancel()
+        let work = DispatchWorkItem { [weak self] in
+            guard let self else { return }
+            if self.orchestrator.isScanning {
+                self.scheduleAutoJoin() // retry in 3s
+                return
+            }
+            guard !self.orchestrator.globalChannels.isEmpty else { return }
+            // For each default server, find top 5 channels and join
+            for (_, host, _) in Self.defaultServers {
+                guard let sid = self.servers.first(where: { $0.host == host })?.id else { continue }
+                let top = self.orchestrator.globalChannels
+                    .filter { $0.serverHost == host }
+                    .sorted { $0.users > $1.users }
+                    .prefix(5)
+                for ch in top where !(self.joinedChannels[sid]?.contains(ch.name) ?? false) {
+                    self.joinChannel(ch.name, serverId: sid)
+                }
+            }
+        }
+        autoJoinTimer = work
+        DispatchQueue.main.asyncAfter(deadline: .now() + 10, execute: work)
     }
 }

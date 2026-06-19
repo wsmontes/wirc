@@ -40,7 +40,14 @@ final class AppState {
             guard let self else { return }
             Task {
                 try? await self.store.saveMany(objects)
-                await MainActor.run { self.womObjects.append(contentsOf: objects) }
+                await MainActor.run {
+                    self.womObjects.append(contentsOf: objects)
+                    for obj in objects where obj.type.contains("wom:Message") {
+                        if let s = obj.data["server"], let ch = obj.data["channel"] {
+                            self.irc.channelManager.incrementUnread(for: "\(s)|\(ch.lowercased())")
+                        }
+                    }
+                }
             }
         }
         loadMastodonAccounts()

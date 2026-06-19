@@ -16,6 +16,7 @@ struct WircApp: App {
                     .tabItem {
                         Label("Messages", systemImage: "bubble.left.and.bubble.right")
                     }
+                    .badge(appState.irc.channelManager.totalUnread)
 
                 LibraryView()
                     .tabItem {

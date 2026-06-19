@@ -129,4 +129,17 @@ final class IRCChannelManager {
     }
 
     var hasBroadcastTargets: Bool { !broadcastTargets.isEmpty }
+
+    // MARK: - Unread tracking
+    var unreadCounts: [String: Int] = [:]
+    var totalUnread: Int { unreadCounts.values.reduce(0, +) }
+
+    func incrementUnread(for channelKey: String) {
+        guard activeChannel?.id != channelKey else { return }
+        unreadCounts[channelKey, default: 0] += 1
+    }
+
+    func markRead(_ channelKey: String) {
+        unreadCounts[channelKey] = 0
+    }
 }
