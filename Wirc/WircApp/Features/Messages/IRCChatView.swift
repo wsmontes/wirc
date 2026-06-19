@@ -87,6 +87,10 @@ struct IRCChatView: View {
                             .font(DesignSystem.Fonts.data(10))
                             .foregroundStyle(DesignSystem.Colors.pencil)
                     }
+                    // Debug: message counts
+                    Text("📨\(appState.womObjects.filter{$0.type.contains("wom:Message")}.count)/👁\(manager.visibleMessages.count)")
+                        .font(.system(size: 9))
+                        .foregroundStyle(DesignSystem.Colors.signal)
                 }
             }
             .buttonStyle(.plain)
