@@ -81,6 +81,7 @@
 		0069F910B3BC49ADB0D5765C /* WOMLite.swift in Sources */ = {isa = PBXBuildFile; fileRef = 050F28D0ABBA449DBA830635 /* WOMLite.swift */; };
 		1A062B1DC318475687DB5656 /* WOMCanonicalizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = F94568BD4F954D1C91215954 /* WOMCanonicalizer.swift */; };
 		1D0FF75EE99E46A3B0E77932 /* WOMCrypto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89CE585A7ABA472F9FB62C81 /* WOMCrypto.swift */; };
+		D6D4D2F2F8364DD2BFBCC460 /* IRCChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A7C88E8A20D471BB406539B /* IRCChatView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -160,6 +161,7 @@
 		050F28D0ABBA449DBA830635 /* WOMLite.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WircApp/Core/WOM/WOMLite.swift; sourceTree = SOURCE_ROOT; };
 		F94568BD4F954D1C91215954 /* WOMCanonicalizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WircApp/Core/WOM/WOMCanonicalizer.swift; sourceTree = SOURCE_ROOT; };
 		89CE585A7ABA472F9FB62C81 /* WOMCrypto.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WircApp/Core/WOM/WOMCrypto.swift; sourceTree = SOURCE_ROOT; };
+		5A7C88E8A20D471BB406539B /* IRCChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WircApp/Features/Messages/IRCChatView.swift; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -403,6 +405,7 @@
 		B418644AD4F24461B3A9FA14 /* Messages */ = {
 			isa = PBXGroup;
 			children = (
+				5A7C88E8A20D471BB406539B /* IRCChatView.swift */,
 				A068CB3873B445EF84C567BC /* IRCMessageDeckView.swift */,
 				493BFE617DC14CC09BA5E57B /* IRCServerManagerSheet.swift */,
 			);
@@ -509,6 +512,7 @@
 				798F1A5BB0ECD2C6DB4C27EB /* JSONFileStore.swift in Sources */,
 				B36A1CC39ECE5F3BDBBE957B /* MastodonClient.swift in Sources */,
 				6373D6852F0496AFEA75A677 /* MastodonModels.swift in Sources */,
+				D6D4D2F2F8364DD2BFBCC460 /* IRCChatView.swift in Sources */,
 				1D0FF75EE99E46A3B0E77932 /* WOMCrypto.swift in Sources */,
 				1A062B1DC318475687DB5656 /* WOMCanonicalizer.swift in Sources */,
 				0069F910B3BC49ADB0D5765C /* WOMLite.swift in Sources */,

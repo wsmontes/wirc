@@ -12,7 +12,7 @@ struct WircApp: App {
                         Label("Stream", systemImage: "waveform")
                     }
 
-                IRCMessageDeckView()
+                IRCChatView()
                     .tabItem {
                         Label("Messages", systemImage: "bubble.left.and.bubble.right")
                     }
