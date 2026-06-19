@@ -56,9 +56,17 @@ final class IRCManager {
 
     // MARK: - Default servers
     static let defaultServers: [(name: String, host: String, port: Int)] = [
-        ("libera.chat", "irc.libera.chat", 6667),
-        ("OFTC",        "irc.oftc.net",     6667),
-        ("dal.net",     "irc.dal.net",      6667),
+        ("libera.chat",  "irc.libera.chat",       6667),
+        ("OFTC",         "irc.oftc.net",           6667),
+        ("dal.net",      "irc.dal.net",            6667),
+        ("EFNet",        "irc.choopa.net",         6667),
+        ("Undernet",     "irc.undernet.org",       6667),
+        ("IRCnet",       "open.ircnet.net",        6667),
+        ("Rizon",        "irc.rizon.net",          6667),
+        ("Snoonet",      "irc.snoonet.org",        6667),
+        ("QuakeNet",     "adrift.sg.quakenet.org", 6667),
+        ("BrasIRC",      "irc.brasirc.com.br",     6667),
+        ("RusNet",       "irc.rus-net.org",        6667),
     ]
 
     private static let nicknameKey = "wirc.defaultNickSuffix"
