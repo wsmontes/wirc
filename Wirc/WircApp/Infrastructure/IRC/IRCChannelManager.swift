@@ -71,13 +71,12 @@ final class IRCChannelManager {
                 (obj.type.contains("wom:Message") || obj.type.contains("wom:SystemEvent")) &&
                 obj.data["server"] == ch.serverHost &&
                 obj.data["channel"] == ch.name &&
-                obj.data["eventType"] != "names" &&
-                obj.data["eventType"] != "endOfNames"
+                isDisplayableEvent(obj)
             }
         } else {
             let channelKeys = Set(channels.map { "\($0.serverHost)|\($0.name)" })
             filtered = all.filter { obj in
-                guard obj.type.contains("wom:Message") || obj.type.contains("wom:SystemEvent") else { return false }
+                guard obj.type.contains("wom:Message") || (obj.type.contains("wom:SystemEvent") && isDisplayableEvent(obj)) else { return false }
                 guard let server = obj.data["server"],
                       let channel = obj.data["channel"] else { return false }
                 return channelKeys.contains("\(server)|\(channel)")
@@ -109,7 +108,7 @@ final class IRCChannelManager {
                 let channelKeys = Set(channels.map { "\($0.serverHost)|\($0.name)" })
                 filtered = all.filter { obj in
                     guard (obj.type.contains("wom:Message") || obj.type.contains("wom:SystemEvent")),
-                          obj.data["eventType"] != "names" && obj.data["eventType"] != "endOfNames",
+                          (obj.type.contains("wom:Message") || isDisplayableEvent(obj)),
                           obj.createdAt < oldest else { return false }
                     guard let server = obj.data["server"],
                           let channel = obj.data["channel"] else { return false }
@@ -131,6 +130,15 @@ final class IRCChannelManager {
     }
 
     var hasBroadcastTargets: Bool { !broadcastTargets.isEmpty }
+
+    /// Only show meaningful system events in the timeline.
+    private func isDisplayableEvent(_ obj: WOMObject) -> Bool {
+        let type = obj.data["eventType"] ?? obj.data["event"] ?? ""
+        switch type {
+        case "join", "part", "quit", "kick", "nick", "topic", "mode": return true
+        default: return false
+        }
+    }
 
     // MARK: - Unread tracking
     var unreadCounts: [String: Int] = [:]
