@@ -28,6 +28,10 @@ final class IRCManager {
     let channelManager: IRCChannelManager
     let orchestrator = ServerOrchestrator(servers: SuggestedServersLoader.servers)
 
+    // MARK: - WOM pipeline
+    private let ircToWOM = IRCToWOMAdapter()
+    var onWOMObjects: (([WOMObject]) -> Void)?
+
     // MARK: - Types
     enum ConnectionStatus: Hashable { case disconnected, connecting, online }
 
@@ -198,6 +202,12 @@ final class IRCManager {
             serverChannelList[serverId, default: []].append(ListedChannel(name: channel, users: users, topic: topic))
         case .listEnd: isListing[serverId] = false
         default: break
+        }
+
+        // Convert IRC event to WOM objects and emit
+        let objects = ircToWOM.convert(event, config: config)
+        if !objects.isEmpty {
+            onWOMObjects?(objects)
         }
     }
 }

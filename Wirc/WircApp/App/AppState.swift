@@ -35,6 +35,14 @@ final class AppState {
     init() {
         irc = IRCManager(store: store)
         feed = FeedManager()
+        // Wire IRC events → WOM pipeline
+        irc.onWOMObjects = { [weak self] objects in
+            guard let self else { return }
+            Task {
+                try? await self.store.saveMany(objects)
+                await MainActor.run { self.womObjects.append(contentsOf: objects) }
+            }
+        }
         loadMastodonAccounts()
         let loaded = DefaultFeedsLoader.loadIfEmpty(into: feed.subscriptionStore)
         if loaded > 0 {
