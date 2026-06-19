@@ -222,7 +222,11 @@ struct IRCChatView: View {
                         }
 
                         ForEach(manager.visibleMessages.reversed()) { object in
-                            chatMessageRow(object)
+                            if object.type.contains("wom:SystemEvent") {
+                                systemEventRow(object)
+                            } else {
+                                chatMessageRow(object)
+                            }
                         }
                     }
                 }
