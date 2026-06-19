@@ -178,27 +178,52 @@ struct IRCChatView: View {
         ScrollViewReader { proxy in
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 4) {
-                    if !manager.visibleMessages.isEmpty && !manager.isLoadingOlder {
-                        Button {
-                            Task { await manager.loadOlderMessages() }
-                        } label: {
-                            HStack {
-                                Spacer()
-                                Text("Load earlier messages")
+                    if manager.visibleMessages.isEmpty {
+                        // Show system events while waiting for messages
+                        let sysEvents = appState.womObjects.filter {
+                            $0.type.contains("wom:SystemEvent") && $0.type.contains("wom:TransportEnvelope")
+                        }.sorted { $0.createdAt > $1.createdAt }.prefix(20)
+
+                        if !sysEvents.isEmpty {
+                            ForEach(Array(sysEvents)) { obj in
+                                systemEventRow(obj)
+                            }
+                        } else {
+                            VStack(spacing: DesignSystem.Spacing.md) {
+                                Spacer().frame(height: 80)
+                                ProgressView()
+                                Text("Waiting for messages...")
+                                    .font(DesignSystem.Fonts.caption())
+                                    .foregroundStyle(DesignSystem.Colors.pencil)
+                                Text("Joined \(manager.activeChannel?.name ?? "channels"). Messages appear when someone speaks.")
                                     .font(DesignSystem.Fonts.data(10))
                                     .foregroundStyle(DesignSystem.Colors.pencil)
-                                Spacer()
+                                    .multilineTextAlignment(.center)
                             }
-                            .padding(.vertical, DesignSystem.Spacing.sm)
                         }
-                        .buttonStyle(.plain)
-                    } else if manager.isLoadingOlder {
-                        HStack { Spacer(); ProgressView(); Spacer() }
-                            .padding(.vertical, DesignSystem.Spacing.sm)
-                    }
+                    } else {
+                        if !manager.isLoadingOlder {
+                            Button {
+                                Task { await manager.loadOlderMessages() }
+                            } label: {
+                                HStack {
+                                    Spacer()
+                                    Text("Load earlier messages")
+                                        .font(DesignSystem.Fonts.data(10))
+                                        .foregroundStyle(DesignSystem.Colors.pencil)
+                                    Spacer()
+                                }
+                                .padding(.vertical, DesignSystem.Spacing.sm)
+                            }
+                            .buttonStyle(.plain)
+                        } else if manager.isLoadingOlder {
+                            HStack { Spacer(); ProgressView(); Spacer() }
+                                .padding(.vertical, DesignSystem.Spacing.sm)
+                        }
 
-                    ForEach(manager.visibleMessages.reversed()) { object in
-                        chatMessageRow(object)
+                        ForEach(manager.visibleMessages.reversed()) { object in
+                            chatMessageRow(object)
+                        }
                     }
                 }
                 .padding(.horizontal, DesignSystem.Spacing.md)
@@ -538,6 +563,27 @@ struct IRCChatView: View {
         if !appState.irc.servers.isEmpty && appState.irc.orchestrator.globalChannels.isEmpty {
             appState.irc.orchestrator.startScan()
         }
+    }
+
+    private func systemEventRow(_ object: WOMObject) -> some View {
+        let eventType = object.data["eventType"] ?? object.data["event"] ?? ""
+        let nick = object.data["nick"] ?? ""
+        let text: String = {
+            switch eventType {
+            case "join": return "→ \(nick) joined"
+            case "part": return "← \(nick) left" + (object.data["reason"].map { " (\($0))" } ?? "")
+            case "quit": return "← \(nick) quit"
+            case "kick": return "✕ \(nick) kicked"
+            case "nick": return "~ \(object.data["oldNick"] ?? "") → \(object.data["newNick"] ?? "")"
+            case "topic": return "# topic: \(object.data["topic"] ?? "")"
+            default: return "· \(eventType)"
+            }
+        }()
+        return Text(text)
+            .font(.system(size: 10, design: .monospaced))
+            .foregroundStyle(DesignSystem.Colors.pencil)
+            .frame(maxWidth: .infinity, alignment: .center)
+            .padding(.vertical, 1)
     }
 
     private func prefixColor(_ p: String) -> Color {
