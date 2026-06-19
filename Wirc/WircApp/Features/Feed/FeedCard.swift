@@ -2,7 +2,13 @@ import SwiftUI
 
 struct FeedCard: View {
     let post: WOMObject
+    @State private var isExpanded = false
     @State private var showInspector = false
+
+    private var cardURL: URL? {
+        let link = post.data["canonicalUrl"] ?? post.data["url"] ?? post.data["link"] ?? ""
+        return URL(string: link)
+    }
 
     // MARK: - Derived properties
 
@@ -33,14 +39,63 @@ struct FeedCard: View {
             hairline
             contentArea
             if hasFooter { footerArea }
+            if isExpanded { expandedActions }
         }
         .background(DesignSystem.Colors.surface)
         .clipShape(RoundedRectangle(cornerRadius: DesignSystem.Radius.card))
         .overlay(RoundedRectangle(cornerRadius: DesignSystem.Radius.card).stroke(DesignSystem.Colors.border, lineWidth: 0.5))
         .padding(.horizontal, DesignSystem.Spacing.lg)
         .padding(.vertical, DesignSystem.Spacing.sm)
+        .onTapGesture {
+            withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) { isExpanded.toggle() }
+        }
         .sheet(isPresented: $showInspector) {
             ObjectInspectorSheet(object: post)
+        }
+    }
+
+    // MARK: - Expanded Actions
+
+    private var expandedActions: some View {
+        VStack(spacing: 0) {
+            Divider().padding(.vertical, DesignSystem.Spacing.sm)
+            HStack(spacing: DesignSystem.Spacing.lg) {
+                if let url = cardURL {
+                    Button { UIApplication.shared.open(url) } label: {
+                        VStack(spacing: 2) {
+                            Image(systemName: "safari").font(.title3)
+                            Text("Open").font(.system(size: 10))
+                        }
+                    }
+                    Button {
+                        let avc = UIActivityViewController(activityItems: [url], applicationActivities: nil)
+                        if let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                           let root = scene.windows.first?.rootViewController {
+                            root.present(avc, animated: true)
+                        }
+                    } label: {
+                        VStack(spacing: 2) {
+                            Image(systemName: "square.and.arrow.up").font(.title3)
+                            Text("Share").font(.system(size: 10))
+                        }
+                    }
+                    Button { UIPasteboard.general.string = url.absoluteString } label: {
+                        VStack(spacing: 2) {
+                            Image(systemName: "doc.on.doc").font(.title3)
+                            Text("Copy").font(.system(size: 10))
+                        }
+                    }
+                }
+                Button { showInspector = true } label: {
+                    VStack(spacing: 2) {
+                        Image(systemName: "info.circle").font(.title3)
+                        Text("Inspect").font(.system(size: 10))
+                    }
+                }
+            }
+            .foregroundStyle(DesignSystem.Colors.pencil)
+            .padding(.horizontal, DesignSystem.Spacing.md)
+            .padding(.bottom, DesignSystem.Spacing.sm)
         }
     }
 
