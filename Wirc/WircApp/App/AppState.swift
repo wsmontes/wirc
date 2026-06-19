@@ -52,12 +52,11 @@ final class AppState {
         }
         loadMastodonAccounts()
         let loaded = DefaultFeedsLoader.loadIfEmpty(into: feed.subscriptionStore)
-        if loaded > 0 {
-            Task { [weak self] in
-                guard let self else { return }
-                await self.feed.refreshAllFeedsBatched(womStore: self.store) { newObjects in
-                    await MainActor.run { self.womObjects.append(contentsOf: newObjects) }
-                }
+        // Always refresh feeds on launch (even if store already had subscriptions)
+        Task { [weak self] in
+            guard let self else { return }
+            await self.feed.refreshAllFeedsBatched(womStore: self.store) { newObjects in
+                await MainActor.run { self.womObjects.append(contentsOf: newObjects) }
             }
         }
     }

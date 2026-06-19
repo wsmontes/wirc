@@ -186,11 +186,11 @@ final class IRCManager {
                     clients[serverId]?.join(channel: c)
                 }
             }
-            // Auto-scan + auto-join on first connect
+            // Auto-scan + auto-join on first connect (once per launch)
             if orchestrator.globalChannels.isEmpty && !orchestrator.isScanning {
                 orchestrator.startScan()
-                scheduleAutoJoin()
             }
+            scheduleAutoJoin()
         case .disconnected(let reason):
             connectionStates[serverId] = .disconnected
             channelUsers.removeAll()
@@ -248,17 +248,18 @@ final class IRCManager {
 
     // MARK: - Auto-join
 
-    private var autoJoinTimer: DispatchWorkItem?
+    private var autoJoinFired = false
     private func scheduleAutoJoin() {
-        autoJoinTimer?.cancel()
-        let work = DispatchWorkItem { [weak self] in
+        guard !autoJoinFired else { return }
+        autoJoinFired = true
+        DispatchQueue.main.asyncAfter(deadline: .now() + 12) { [weak self] in
             guard let self else { return }
             if self.orchestrator.isScanning {
-                self.scheduleAutoJoin() // retry in 3s
+                self.autoJoinFired = false
+                self.scheduleAutoJoin() // retry in 4s
                 return
             }
             guard !self.orchestrator.globalChannels.isEmpty else { return }
-            // For each default server, find top 5 channels and join
             for (_, host, _) in Self.defaultServers {
                 guard let sid = self.servers.first(where: { $0.host == host })?.id else { continue }
                 let top = self.orchestrator.globalChannels
@@ -270,7 +271,5 @@ final class IRCManager {
                 }
             }
         }
-        autoJoinTimer = work
-        DispatchQueue.main.asyncAfter(deadline: .now() + 10, execute: work)
     }
 }

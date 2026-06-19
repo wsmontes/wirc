@@ -425,6 +425,11 @@ struct IRCChatView: View {
                             .foregroundStyle(DesignSystem.Colors.ink)
                         Spacer()
                         if count > 0 { Text("\(count)").font(DesignSystem.Fonts.data(10)).foregroundStyle(DesignSystem.Colors.pencil) }
+                        let unread = manager.unreadCounts[key] ?? 0
+                        if unread > 0 {
+                            Circle().fill(DesignSystem.Colors.signal).frame(width: 7, height: 7)
+                            Text("\(unread)").font(DesignSystem.Fonts.data(9)).foregroundStyle(DesignSystem.Colors.signal)
+                        }
 
                         // Expand user list button
                         Button {
