@@ -31,6 +31,9 @@ final class IRCManager {
     // MARK: - WOM pipeline
     private let ircToWOM = IRCToWOMAdapter()
     var onWOMObjects: (([WOMObject]) -> Void)?
+    var lastEventType: String = "-"
+    var totalEventsReceived: Int = 0
+    var privmsgCount: Int = 0
 
     // MARK: - Types
     enum ConnectionStatus: Hashable { case disconnected, connecting, online }
@@ -237,6 +240,25 @@ final class IRCManager {
             serverChannelList[serverId, default: []].append(ListedChannel(name: channel, users: users, topic: topic))
         case .listEnd: isListing[serverId] = false
         default: break
+        }
+
+        // Track event stats
+        totalEventsReceived += 1
+        switch event {
+        case .message: privmsgCount += 1; lastEventType = "MSG"
+        case .join: lastEventType = "JOIN"
+        case .part: lastEventType = "PART"
+        case .quit: lastEventType = "QUIT"
+        case .names: lastEventType = "NAMES"
+        case .topic: lastEventType = "TOPIC"
+        case .notice: lastEventType = "NOTICE"
+        case .nickChange: lastEventType = "NICK"
+        case .kick: lastEventType = "KICK"
+        case .connected: lastEventType = "CONN"
+        case .disconnected: lastEventType = "DISC"
+        case .rawLine: lastEventType = "RAW"
+        case .error: lastEventType = "ERR"
+        default: lastEventType = "?"
         }
 
         // Convert IRC event to WOM objects and emit
