@@ -76,6 +76,11 @@
 		33B1FDEE49A64552BF250756 /* IRCAutomation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 420B4F345DB84D65AAF16EFB /* IRCAutomation.swift */; };
 		7726A1A5D37A495D834F3925 /* IRCManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 600D88F1A2974B558DCE36E4 /* IRCManager.swift */; };
 		80B7B7475A35415CA8E8666D /* FeedManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 480FC6D050F34DC49D1FB6CF /* FeedManager.swift */; };
+		FB209114BB2B49689C09A47C /* WOMProof.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BEF2CB2AA71421495E2154C /* WOMProof.swift */; };
+		DF7B718B2314401F989FFD58 /* WOMEncrypted.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CBD5F6BEFAF4DC0ADDAB214 /* WOMEncrypted.swift */; };
+		0069F910B3BC49ADB0D5765C /* WOMLite.swift in Sources */ = {isa = PBXBuildFile; fileRef = 050F28D0ABBA449DBA830635 /* WOMLite.swift */; };
+		1A062B1DC318475687DB5656 /* WOMCanonicalizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = F94568BD4F954D1C91215954 /* WOMCanonicalizer.swift */; };
+		1D0FF75EE99E46A3B0E77932 /* WOMCrypto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89CE585A7ABA472F9FB62C81 /* WOMCrypto.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -150,6 +155,11 @@
 		420B4F345DB84D65AAF16EFB /* IRCAutomation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WircApp/Infrastructure/IRC/IRCAutomation.swift; sourceTree = SOURCE_ROOT; };
 		600D88F1A2974B558DCE36E4 /* IRCManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WircApp/App/IRCManager.swift; sourceTree = SOURCE_ROOT; };
 		480FC6D050F34DC49D1FB6CF /* FeedManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WircApp/App/FeedManager.swift; sourceTree = SOURCE_ROOT; };
+		7BEF2CB2AA71421495E2154C /* WOMProof.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WircApp/Core/WOM/WOMProof.swift; sourceTree = SOURCE_ROOT; };
+		8CBD5F6BEFAF4DC0ADDAB214 /* WOMEncrypted.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WircApp/Core/WOM/WOMEncrypted.swift; sourceTree = SOURCE_ROOT; };
+		050F28D0ABBA449DBA830635 /* WOMLite.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WircApp/Core/WOM/WOMLite.swift; sourceTree = SOURCE_ROOT; };
+		F94568BD4F954D1C91215954 /* WOMCanonicalizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WircApp/Core/WOM/WOMCanonicalizer.swift; sourceTree = SOURCE_ROOT; };
+		89CE585A7ABA472F9FB62C81 /* WOMCrypto.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WircApp/Core/WOM/WOMCrypto.swift; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -187,6 +197,11 @@
 				BB33105D31E371B41A8F523F /* WOMProvenance.swift */,
 				483BB0DC491D7758B7C2E381 /* WOMReference.swift */,
 				906BE3C7E975E7E8264B40A1 /* WOMRelation.swift */,
+				89CE585A7ABA472F9FB62C81 /* WOMCrypto.swift */,
+				F94568BD4F954D1C91215954 /* WOMCanonicalizer.swift */,
+				050F28D0ABBA449DBA830635 /* WOMLite.swift */,
+				8CBD5F6BEFAF4DC0ADDAB214 /* WOMEncrypted.swift */,
+				7BEF2CB2AA71421495E2154C /* WOMProof.swift */,
 			);
 			path = WOM;
 			sourceTree = "<group>";
@@ -494,6 +509,11 @@
 				798F1A5BB0ECD2C6DB4C27EB /* JSONFileStore.swift in Sources */,
 				B36A1CC39ECE5F3BDBBE957B /* MastodonClient.swift in Sources */,
 				6373D6852F0496AFEA75A677 /* MastodonModels.swift in Sources */,
+				1D0FF75EE99E46A3B0E77932 /* WOMCrypto.swift in Sources */,
+				1A062B1DC318475687DB5656 /* WOMCanonicalizer.swift in Sources */,
+				0069F910B3BC49ADB0D5765C /* WOMLite.swift in Sources */,
+				DF7B718B2314401F989FFD58 /* WOMEncrypted.swift in Sources */,
+				FB209114BB2B49689C09A47C /* WOMProof.swift in Sources */,
 				80B7B7475A35415CA8E8666D /* FeedManager.swift in Sources */,
 				7726A1A5D37A495D834F3925 /* IRCManager.swift in Sources */,
 				33B1FDEE49A64552BF250756 /* IRCAutomation.swift in Sources */,

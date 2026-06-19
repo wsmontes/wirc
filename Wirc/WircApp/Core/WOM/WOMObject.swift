@@ -7,7 +7,7 @@ struct WOMObject: Codable, Identifiable, Equatable {
 
     // MARK: - Required (WOM 0.6 §6)
 
-    let wom: String             // "0.6"
+    let wom: String             // "0.7"
     let id: String
     var type: [String]          // ["wom:Message"], ["wom:Post"], etc.
     var createdAt: Date
@@ -19,6 +19,8 @@ struct WOMObject: Codable, Identifiable, Equatable {
     var name: String?
     var summary: String?
     var updatedAt: Date?
+    var expiresAt: Date?
+    var languages: [String]?
     var attributedTo: WOMReference?
     var content: WOMContent?
 
@@ -59,6 +61,12 @@ struct WOMObject: Codable, Identifiable, Equatable {
 
     var governance: WOMGovernance?
 
+    // MARK: - WOM 0.7 (§9–§12)
+
+    var address: String?          // pseudonymous author address
+    var _lite: WOMLite?           // compact transmission metadata
+    var _encrypted: WOMEncryptedPayload?  // encrypted content payload
+
     // MARK: - Space & Time (§10 of WIRC_SPEC)
 
     var location: WOMLocation?
@@ -78,8 +86,8 @@ struct WOMObject: Codable, Identifiable, Equatable {
 
     // MARK: - Integrity & transport (§11, §16)
 
-    var revision: [String: String]?
-    var proof: [String: String]?
+    var revision: WOMRevision?
+    var proof: WOMProof?
     var bindings: WOMBindings?
 
     // MARK: - Extension data
@@ -107,7 +115,7 @@ struct WOMObject: Codable, Identifiable, Equatable {
         attachments: [WOMReference] = [],
         relationships: [WOMRelation] = []
     ) {
-        self.wom = "0.6"
+        self.wom = "0.7"
         self.id = id
         self.type = type
         self.createdAt = createdAt
@@ -282,6 +290,16 @@ struct WOMArchive: Codable, Equatable {
     var custodialHistory: String?
     var accessCondition: String?    // open, restricted, closed, embargoed, owner_only
     var preservationSnapshots: [WOMReference]?
+}
+
+/// Version chain revision per WOM 0.7 §10.
+struct WOMRevision: Codable, Equatable {
+    var version: Int
+    var hash: String?            // "sha256:..."
+    var previousHash: String?
+    var previousSignature: String?
+    var updatedAt: Date?
+    var updatedBy: String?
 }
 
 /// Source protection per WOM 0.6 §18.
