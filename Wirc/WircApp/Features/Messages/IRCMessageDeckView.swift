@@ -410,48 +410,104 @@ struct IRCMessageDeckView: View {
     }
 
     private var noChannelsState: some View {
-        VStack(spacing: DesignSystem.Spacing.md) {
-            Spacer().frame(height: 40)
-            Image(systemName: "number")
-                .font(.system(size: 32))
-                .foregroundStyle(DesignSystem.Colors.pencil)
-            Text("No channels joined")
-                .font(.system(size: 15, weight: .medium))
-                .foregroundStyle(DesignSystem.Colors.ink)
-            Text("Connect to a server and join channels to start chatting.")
-                .font(DesignSystem.Fonts.caption())
-                .foregroundStyle(DesignSystem.Colors.pencil)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, DesignSystem.Spacing.xl)
+        ScrollView {
+            VStack(spacing: DesignSystem.Spacing.md) {
+                Spacer().frame(height: 40)
+                Image(systemName: "number")
+                    .font(.system(size: 32))
+                    .foregroundStyle(DesignSystem.Colors.pencil)
+                Text("No channels joined")
+                    .font(.system(size: 15, weight: .medium))
+                    .foregroundStyle(DesignSystem.Colors.ink)
 
-            // Server quick-actions
-            ForEach(appState.irc.servers) { server in
-                HStack {
-                    Circle()
-                        .fill(statusColor(appState.irc.connectionStates[server.id] ?? .disconnected))
-                        .frame(width: 8, height: 8)
-                    Text(server.name.isEmpty ? server.host : server.name)
-                        .font(DesignSystem.Fonts.data(13))
-                        .foregroundStyle(DesignSystem.Colors.ink)
-                    Spacer()
-                    Button(statusLabel(server.id)) {
-                        toggleQuickConnection(server.id)
+                // Server quick-actions
+                ForEach(appState.irc.servers) { server in
+                    HStack {
+                        Circle()
+                            .fill(statusColor(appState.irc.connectionStates[server.id] ?? .disconnected))
+                            .frame(width: 8, height: 8)
+                        VStack(alignment: .leading, spacing: 1) {
+                            Text(server.name.isEmpty ? server.host : server.name)
+                                .font(DesignSystem.Fonts.data(13))
+                                .foregroundStyle(DesignSystem.Colors.ink)
+                            Text(server.autoJoinChannels.isEmpty ? "No auto-join channels" : "Auto-join: \(server.autoJoinChannels.joined(separator: ", "))")
+                                .font(.system(size: 10))
+                                .foregroundStyle(DesignSystem.Colors.pencil)
+                        }
+                        Spacer()
+                        Button(statusLabel(server.id)) {
+                            toggleQuickConnection(server.id)
+                        }
+                        .font(DesignSystem.Fonts.caption())
+                        .buttonStyle(.bordered)
+                        .tint(statusTint(server.id))
                     }
-                    .font(DesignSystem.Fonts.caption())
-                    .buttonStyle(.bordered)
-                    .tint(statusTint(server.id))
+                    .padding(.horizontal, DesignSystem.Spacing.lg)
                 }
-                .padding(.horizontal, DesignSystem.Spacing.lg)
-            }
 
-            Button {
-                showServerManager = true
-            } label: {
-                Label("Server Manager", systemImage: "gear")
-                    .font(DesignSystem.Fonts.caption())
+                // Global channels from orchestrator
+                if !appState.irc.orchestrator.globalChannels.isEmpty {
+                    VStack(alignment: .leading, spacing: DesignSystem.Spacing.xs) {
+                        HStack {
+                            Text("Popular Channels")
+                                .font(DesignSystem.Fonts.caption())
+                                .foregroundStyle(DesignSystem.Colors.pencil)
+                            Spacer()
+                            if appState.irc.orchestrator.isScanning {
+                                ProgressView().scaleEffect(0.7)
+                            } else {
+                                Button("Scan") {
+                                    appState.irc.orchestrator.startScan()
+                                }
+                                .font(DesignSystem.Fonts.data(10))
+                            }
+                        }
+                        .padding(.horizontal, DesignSystem.Spacing.lg)
+
+                        ForEach(appState.irc.orchestrator.globalChannels.prefix(20)) { ch in
+                            Button {
+                                let sid = appState.irc.servers.first(where: { $0.host == ch.serverHost })?.id ?? appState.irc.servers.first?.id
+                                if let sid = sid {
+                                    appState.irc.joinChannel(ch.name, serverId: sid)
+                                }
+                            } label: {
+                                HStack {
+                                    Text(ch.name)
+                                        .font(DesignSystem.Fonts.data(13))
+                                        .foregroundStyle(DesignSystem.Colors.ink)
+                                    Spacer()
+                                    Text("\(ch.users)")
+                                        .font(DesignSystem.Fonts.data(10))
+                                        .foregroundStyle(DesignSystem.Colors.pencil)
+                                    Text(ch.serverHost)
+                                        .font(DesignSystem.Fonts.data(9))
+                                        .foregroundStyle(DesignSystem.Colors.pencil)
+                                }
+                                .padding(.horizontal, DesignSystem.Spacing.lg)
+                                .padding(.vertical, 4)
+                            }
+                        }
+                    }
+                    .padding(.top, DesignSystem.Spacing.md)
+                } else {
+                    Button {
+                        appState.irc.orchestrator.startScan()
+                    } label: {
+                        Label("Scan for channels", systemImage: "magnifyingglass")
+                            .font(DesignSystem.Fonts.caption())
+                    }
+                    .buttonStyle(.bordered)
+                }
+
+                Button {
+                    showServerManager = true
+                } label: {
+                    Label("Server Manager", systemImage: "gear")
+                        .font(DesignSystem.Fonts.caption())
+                }
+                .buttonStyle(.bordered)
+                .tint(DesignSystem.Colors.pencil)
             }
-            .buttonStyle(.bordered)
-            .tint(DesignSystem.Colors.pencil)
         }
     }
 
