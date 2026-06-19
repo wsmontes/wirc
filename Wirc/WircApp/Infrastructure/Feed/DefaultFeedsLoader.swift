@@ -22,17 +22,15 @@ enum DefaultFeedsLoader {
     @discardableResult
     static func loadIfEmpty(into store: FeedSubscriptionStore) -> Int {
         guard store.getAll().isEmpty else { return 0 }
-        var count = 0
-        for feed in feeds {
+        let subscriptions = feeds.map { feed in
             let sourceType = FeedSourceType(rawValue: feed.type) ?? .rss
-            let sub = FeedSubscription(
+            return FeedSubscription(
                 feedURL: feed.url,
                 title: feed.title,
                 sourceType: sourceType
             )
-            store.add(sub)
-            count += 1
         }
-        return count
+        store.addMany(subscriptions)
+        return subscriptions.count
     }
 }

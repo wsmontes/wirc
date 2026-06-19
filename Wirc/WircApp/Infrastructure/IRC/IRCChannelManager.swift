@@ -72,13 +72,12 @@ final class IRCChannelManager {
                     obj.data["channel"] == ch.name
                 }
             } else {
-                let channelIds = Set(channels.map { $0.id })
+                let channelKeys = Set(channels.map { "\($0.serverHost)|\($0.name)" })
                 filtered = all.filter { obj in
                     guard obj.type.contains("wom:Message") else { return false }
                     guard let server = obj.data["server"],
                           let channel = obj.data["channel"] else { return false }
-                    return channelIds.contains("\(server)|\(channel)") ||
-                           channelIds.contains(where: { $0.hasSuffix("|\(channel)") })
+                    return channelKeys.contains("\(server)|\(channel)")
                 }
             }
 
@@ -107,13 +106,12 @@ final class IRCChannelManager {
                     obj.createdAt < oldest
                 }
             } else {
-                let channelIds = Set(channels.map { $0.id })
+                let channelKeys = Set(channels.map { "\($0.serverHost)|\($0.name)" })
                 filtered = all.filter { obj in
                     guard obj.type.contains("wom:Message"), obj.createdAt < oldest else { return false }
                     guard let server = obj.data["server"],
                           let channel = obj.data["channel"] else { return false }
-                    return channelIds.contains("\(server)|\(channel)") ||
-                           channelIds.contains(where: { $0.hasSuffix("|\(channel)") })
+                    return channelKeys.contains("\(server)|\(channel)")
                 }
             }
 

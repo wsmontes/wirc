@@ -88,7 +88,7 @@ final class IRCClient: @unchecked Sendable {
     private func handleNWState(_ s: NWConnection.State) {
         switch s {
         case .ready:
-            state = .registering; emit(.connected); register(); readLoop()
+            state = .registering; register(); readLoop()
         case .failed(let e):
             state = .disconnected
             emit(.error("Connection failed: \(e.localizedDescription)"))
@@ -163,6 +163,7 @@ final class IRCClient: @unchecked Sendable {
             }
             if line.contains(" 001 ") {
                 if case .registering = state { state = .online; nickRetry = 0
+                    emit(.connected)
                     for ch in config.autoJoinChannels { join(channel: ch) }
                 }
             }

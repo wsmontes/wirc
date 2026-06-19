@@ -98,7 +98,7 @@ final class AppState {
         let loaded = DefaultFeedsLoader.loadIfEmpty(into: feedStore)
         if loaded > 0 {
             // Refresh all feeds in the background — batched to avoid UI block
-            Task { @MainActor [weak self] in
+            Task { [weak self] in
                 guard let self else { return }
                 await self.refreshAllFeedsBatched()
             }
@@ -292,7 +292,8 @@ final class AppState {
             }
         case .disconnected(let reason):
             connectionStates[serverId] = .disconnected
-            channelUsers.removeAll()
+            let serverPrefix = "\(config.host)|"
+            channelUsers = channelUsers.filter { !$0.key.hasPrefix(serverPrefix) }
             // Keep joinedChannels for reconnect restoration
             if reason != nil {
                 automation.onDisconnect(serverId: serverId)
@@ -528,7 +529,9 @@ final class AppState {
         var tempSub = FeedSubscription(feedURL: finalURL, sourceType: detectedType)
         do {
             let (data, _) = try await fetcher.fetch(subscription: tempSub)
-            let result = try FeedParser.parse(data: data, sourceURL: finalURL)
+            let result = try await Task.detached(priority: .utility) {
+                try FeedParser.parse(data: data, sourceURL: finalURL)
+            }.value
             tempSub.title = result.title ?? finalURL
         } catch {
             tempSub.title = finalURL // use URL as fallback title
@@ -630,7 +633,10 @@ final class AppState {
                 return
             }
 
-            let result = try FeedParser.parse(data: data, sourceURL: subscription.feedURL)
+            let sourceURL = subscription.feedURL
+            let result = try await Task.detached(priority: .utility) {
+                try FeedParser.parse(data: data, sourceURL: sourceURL)
+            }.value
 
             // Update subscription with parsed title and headers
             var sub = subscription
