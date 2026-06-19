@@ -58,6 +58,10 @@ struct StreamView: View {
             }
         }
         .background(DesignSystem.Colors.page)
+        .refreshable {
+            let newObjects = await appState.feed.refreshAllFeedsBatched(womStore: appState.store)
+            appState.womObjects.append(contentsOf: newObjects)
+        }
     }
 
     // MARK: - Filter Bar

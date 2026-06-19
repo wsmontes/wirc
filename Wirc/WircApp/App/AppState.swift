@@ -40,7 +40,9 @@ final class AppState {
         if loaded > 0 {
             Task { [weak self] in
                 guard let self else { return }
-                await self.feed.refreshAllFeedsBatched(womStore: self.store)
+                await self.feed.refreshAllFeedsBatched(womStore: self.store) { newObjects in
+                    await MainActor.run { self.womObjects.append(contentsOf: newObjects) }
+                }
             }
         }
     }
@@ -139,11 +141,17 @@ final class AppState {
     }
 
     // MARK: - Feed delegations
-    func addFeed(url: String, sourceType: FeedSourceType? = nil) async throws { try await feed.addFeed(url: url, sourceType: sourceType, womStore: store) }
+    func addFeed(url: String, sourceType: FeedSourceType? = nil) async throws {
+        let newObjects = try await feed.addFeed(url: url, sourceType: sourceType, womStore: store)
+        womObjects.append(contentsOf: newObjects)
+    }
     func removeFeed(_ sub: FeedSubscription) { feed.removeFeed(sub) }
     func discoverFeedURL(from url: String) async throws -> [String] { try await feed.discoverFeedURL(from: url) }
     func importOPML(data: Data) async throws -> Int { try await feed.importOPML(data: data) }
-    func refreshAllFeeds() async { await feed.refreshAllFeeds(womStore: store) }
+    func refreshAllFeeds() async {
+        let newObjects = await feed.refreshAllFeedsBatched(womStore: store)
+        womObjects.append(contentsOf: newObjects)
+    }
     func scheduleNextRefresh() { feed.scheduleNextRefresh() }
 
     // MARK: - Convenience delegations (for old views)

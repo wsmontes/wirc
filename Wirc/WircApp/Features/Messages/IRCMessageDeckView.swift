@@ -24,11 +24,19 @@ struct IRCMessageDeckView: View {
             channelTabBar
             Divider()
 
-            // Timeline
-            timelineView
+            // Timeline or empty state
+            if appState.irc.servers.isEmpty {
+                emptyState
+            } else if manager.channels.isEmpty && manager.visibleMessages.isEmpty {
+                noChannelsState
+            } else {
+                timelineView
+            }
 
-            // Input bar
-            inputBar
+            // Input bar (only when there are channels to send to)
+            if !appState.irc.servers.isEmpty {
+                inputBar
+            }
         }
         .background(DesignSystem.Colors.page)
         .onAppear { refreshChannelList() }
@@ -368,6 +376,60 @@ struct IRCMessageDeckView: View {
             channelUsers: appState.irc.channelUsers
         )
         Task { await manager.loadMessages() }
+    }
+
+    // MARK: - Empty States
+
+    private var emptyState: some View {
+        VStack(spacing: DesignSystem.Spacing.lg) {
+            Spacer()
+            Image(systemName: "bubble.left.and.bubble.right")
+                .font(.system(size: 48))
+                .foregroundStyle(DesignSystem.Colors.pencil)
+            Text("No IRC servers configured")
+                .font(.system(size: 17, weight: .semibold))
+                .foregroundStyle(DesignSystem.Colors.ink)
+            Text("Add a server to start chatting. You can connect to any IRC network — Libera.Chat, OFTC, or your own community server.")
+                .font(DesignSystem.Fonts.caption())
+                .foregroundStyle(DesignSystem.Colors.pencil)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, DesignSystem.Spacing.xl)
+            Button {
+                showServerManager = true
+            } label: {
+                Label("Add Server", systemImage: "plus")
+                    .font(.system(size: 15, weight: .medium))
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, DesignSystem.Spacing.xl)
+                    .padding(.vertical, DesignSystem.Spacing.md)
+                    .background(DesignSystem.Colors.signal)
+                    .clipShape(RoundedRectangle(cornerRadius: DesignSystem.Radius.chip))
+            }
+            Spacer()
+        }
+    }
+
+    private var noChannelsState: some View {
+        VStack(spacing: DesignSystem.Spacing.md) {
+            Spacer().frame(height: 60)
+            Image(systemName: "number")
+                .font(.system(size: 32))
+                .foregroundStyle(DesignSystem.Colors.pencil)
+            Text("No channels joined")
+                .font(.system(size: 15, weight: .medium))
+                .foregroundStyle(DesignSystem.Colors.ink)
+            Text("Tap the ⊕ button or use the server manager to join channels.")
+                .font(DesignSystem.Fonts.caption())
+                .foregroundStyle(DesignSystem.Colors.pencil)
+            Button {
+                showServerManager = true
+            } label: {
+                Label("Open Server Manager", systemImage: "gear")
+                    .font(DesignSystem.Fonts.caption())
+            }
+            .buttonStyle(.bordered)
+            .tint(DesignSystem.Colors.signal)
+        }
     }
 
     private func statusColor(_ s: IRCManager.ConnectionStatus) -> Color {
