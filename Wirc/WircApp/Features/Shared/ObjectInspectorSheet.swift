@@ -19,6 +19,25 @@ struct ObjectInspectorSheet: View {
                     LabeledContent("Created", value: object.createdAt.formatted(date: .abbreviated, time: .shortened))
                 }
 
+                // MARK: Content
+                Section("Content") {
+                    if let name = object.name {
+                        LabeledContent("Name", value: name)
+                    }
+                    if let text = object.content?.text {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Body").font(.caption).foregroundStyle(.secondary)
+                            Text(text).font(.body)
+                        }
+                    }
+                    if !object.attachments.isEmpty {
+                        LabeledContent("Attachments", value: "\(object.attachments.count) items")
+                        ForEach(object.attachments) { att in
+                            Text(att.id).font(.caption).foregroundStyle(.secondary)
+                        }
+                    }
+                }
+
                 // MARK: Origin
                 if let prov = object.provenance {
                     Section("Origin") {
@@ -108,7 +127,14 @@ struct ObjectInspectorSheet: View {
                             }
                         }
                     } else {
-                        Text("No binding").foregroundStyle(DesignSystem.Colors.pencil)
+                        if object.data["network"] != nil {
+                            Section("Transport") {
+                                if let network = object.data["network"] { LabeledContent("Network", value: network.capitalized) }
+                                if let feedURL = object.data["feedURL"] { LabeledContent("Feed URL", value: feedURL) }
+                                if let server = object.data["server"] { LabeledContent("Server", value: server) }
+                                if let channel = object.data["channel"] { LabeledContent("Channel", value: channel) }
+                            }
+                        }
                     }
                 }
 
