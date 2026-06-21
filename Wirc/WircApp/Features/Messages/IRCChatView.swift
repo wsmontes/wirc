@@ -11,14 +11,18 @@ struct IRCChatView: View {
     @State private var showChannelDropdown = false
     @State private var showBroadcastPicker = false
     @State private var expandedUsers: Set<String> = []
+    @State private var loadMessagesTask: Task<Void, Never>?
+    @State private var commandFeedback: String?
+    @State private var commandFeedbackTask: Task<Void, Never>?
 
     private var manager: IRCChannelManager { appState.irc.channelManager }
 
     var body: some View {
-        VStack(spacing: 0) {
-            // Header bar
-            headerBar
-            Divider()
+        ZStack(alignment: .top) {
+            VStack(spacing: 0) {
+                // Header bar
+                headerBar
+                Divider()
 
             // Timeline
             timelineView
@@ -35,7 +39,13 @@ struct IRCChatView: View {
         .onChange(of: appState.irc.servers.count) { _, _ in refreshChannelList() }
         .onChange(of: appState.irc.joinedChannels) { _, _ in refreshChannelList() }
         .onChange(of: appState.womObjects.count) { _, _ in
-            manager.loadMessages()
+            // Debounce: coalesce rapid-fire appends (e.g. feed batch of 50 items) into a single load
+            loadMessagesTask?.cancel()
+            loadMessagesTask = Task {
+                try? await Task.sleep(for: .milliseconds(120))
+                guard !Task.isCancelled else { return }
+                manager.loadMessages()
+            }
         }
         .sheet(isPresented: $showSheet) {
             channelSheet
@@ -45,7 +55,24 @@ struct IRCChatView: View {
         .sheet(isPresented: $showBroadcastPicker) {
             BroadcastPicker(manager: manager)
         }
+
+        // Command feedback toast
+        if let feedback = commandFeedback {
+            VStack {
+                Text(feedback)
+                    .font(DesignSystem.Fonts.caption())
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, DesignSystem.Spacing.md)
+                    .padding(.vertical, DesignSystem.Spacing.sm)
+                    .background(DesignSystem.Colors.ink.opacity(0.85))
+                    .clipShape(RoundedRectangle(cornerRadius: DesignSystem.Radius.chip))
+                    .padding(.top, 60)
+                Spacer()
+            }
+            .transition(.move(edge: .top).combined(with: .opacity))
+        }
     }
+}
 
     // MARK: - Header Bar (44pt)
 
@@ -235,11 +262,6 @@ struct IRCChatView: View {
                 .padding(.vertical, DesignSystem.Spacing.sm)
             }
             .defaultScrollAnchor(.bottom)
-            .onChange(of: manager.visibleMessages.count) { _, _ in
-                if let last = manager.visibleMessages.first {
-                    proxy.scrollTo(last.id, anchor: .bottom)
-                }
-            }
         }
     }
 
@@ -378,7 +400,7 @@ struct IRCChatView: View {
 
                 // Quick Join
                 Section("Quick Join") {
-                    QuickJoinField(servers: appState.irc.servers) { channel, serverId in
+                    QuickJoinField(servers: appState.irc.servers, activeServerId: manager.activeChannel?.serverId) { channel, serverId in
                         appState.irc.joinChannel(channel, serverId: serverId)
                     }
                 }
@@ -475,11 +497,11 @@ struct IRCChatView: View {
 
                         // Expand user list button
                         Button {
-                            if expandedUsers.contains(conv.name) { expandedUsers.remove(conv.name) }
-                            else { expandedUsers.insert(conv.name) }
+                            if expandedUsers.contains(key) { expandedUsers.remove(key) }
+                            else { expandedUsers.insert(key) }
                         } label: {
                             Image(systemName: "chevron.right")
-                                .rotationEffect(.degrees(expandedUsers.contains(conv.name) ? 90 : 0))
+                                .rotationEffect(.degrees(expandedUsers.contains(key) ? 90 : 0))
                                 .font(.caption2)
                         }
                         .buttonStyle(.plain)
@@ -487,7 +509,7 @@ struct IRCChatView: View {
                 }
 
                 // Expanded user list
-                if expandedUsers.contains(conv.name), let users = appState.irc.channelUsers[key] {
+                if expandedUsers.contains(key), let users = appState.irc.channelUsers[key] {
                     ForEach(users.prefix(50)) { user in
                         HStack(spacing: 2) {
                             Text(user.prefix)
@@ -575,7 +597,16 @@ struct IRCChatView: View {
                 provenance: .localUser())
             Task { try? await appState.store.save(obj); appState.womObjects.append(obj) }
         default:
-            _ = IRCCommandExecutor.execute(cmd, serverId: sid, appState: appState)
+            let result = IRCCommandExecutor.execute(cmd, serverId: sid, appState: appState)
+            if let feedback = result {
+                commandFeedback = feedback
+                commandFeedbackTask?.cancel()
+                commandFeedbackTask = Task {
+                    try? await Task.sleep(for: .seconds(3))
+                    guard !Task.isCancelled else { return }
+                    commandFeedback = nil
+                }
+            }
         }
     }
 
@@ -630,6 +661,7 @@ struct IRCChatView: View {
 
 struct QuickJoinField: View {
     let servers: [IRCConnectionConfig]
+    let activeServerId: UUID?
     let onJoin: (String, UUID) -> Void
     @State private var channel = ""
 
@@ -641,7 +673,9 @@ struct QuickJoinField: View {
                 .autocapitalization(.none)
                 .autocorrectionDisabled()
             Button("Join") {
-                guard !channel.isEmpty, let sid = servers.first(where: { $0.id == servers.first?.id })?.id ?? servers.first?.id else { return }
+                guard !channel.isEmpty else { return }
+                let sid = activeServerId ?? servers.first?.id
+                guard let sid = sid else { return }
                 let ch = channel.hasPrefix("#") ? channel : "#\(channel)"
                 onJoin(ch, sid)
                 channel = ""

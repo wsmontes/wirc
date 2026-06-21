@@ -11,54 +11,81 @@ struct IRCMessageDeckView: View {
     @State private var showBroadcastPicker = false
     @State private var joinChannel = ""
     @State private var joinServerId: UUID?
+    @State private var loadMessagesTask: Task<Void, Never>?
+    @State private var commandFeedback: String?
+    @State private var commandFeedbackTask: Task<Void, Never>?
 
     private var manager: IRCChannelManager { appState.irc.channelManager }
 
     var body: some View {
-        VStack(spacing: 0) {
-            // Server status bar
-            serverStatusBar
-            Divider()
+        ZStack(alignment: .top) {
+            VStack(spacing: 0) {
+                // Server status bar
+                serverStatusBar
+                Divider()
 
-            // Channel tabs
-            channelTabBar
-            Divider()
+                // Channel tabs
+                channelTabBar
+                Divider()
 
-            // Timeline or empty state
-            if appState.irc.servers.isEmpty {
-                emptyState
-            } else if manager.channels.isEmpty && manager.visibleMessages.isEmpty {
-                noChannelsState
-            } else {
-                timelineView
-            }
-
-            // Input bar (only when there are channels to send to)
-            if !appState.irc.servers.isEmpty {
-                inputBar
-            }
-        }
-        .background(DesignSystem.Colors.page)
-        .onAppear { refreshChannelList() }
-        .onChange(of: appState.irc.servers.count) { _, _ in refreshChannelList() }
-        .onChange(of: appState.irc.joinedChannels) { _, _ in refreshChannelList() }
-        .onChange(of: appState.womObjects.count) { _, _ in
-            Task { await manager.loadMessages() }
-        }
-        .sheet(isPresented: $showServerManager) {
-            IRCServerManagerSheet()
-        }
-        .sheet(isPresented: $showJoinSheet) {
-            JoinChannelSheet(serverId: $joinServerId, channel: $joinChannel) {
-                if let sid = joinServerId, !joinChannel.isEmpty {
-                    appState.irc.joinChannel(joinChannel, serverId: sid)
+                // Timeline or empty state
+                if appState.irc.servers.isEmpty {
+                    emptyState
+                } else if manager.channels.isEmpty && manager.visibleMessages.isEmpty {
+                    noChannelsState
+                } else {
+                    timelineView
                 }
-                joinChannel = ""
-                showJoinSheet = false
+
+                // Input bar (only when there are channels to send to)
+                if !appState.irc.servers.isEmpty {
+                    inputBar
+                }
             }
-        }
-        .sheet(isPresented: $showBroadcastPicker) {
-            BroadcastPicker(manager: manager)
+            .background(DesignSystem.Colors.page)
+            .onAppear { refreshChannelList() }
+            .onChange(of: appState.irc.servers.count) { _, _ in refreshChannelList() }
+            .onChange(of: appState.irc.joinedChannels) { _, _ in refreshChannelList() }
+            .onChange(of: appState.womObjects.count) { _, _ in
+                // Debounce: coalesce rapid-fire appends into a single load
+                loadMessagesTask?.cancel()
+                loadMessagesTask = Task {
+                    try? await Task.sleep(for: .milliseconds(120))
+                    guard !Task.isCancelled else { return }
+                    manager.loadMessages()
+                }
+            }
+            .sheet(isPresented: $showServerManager) {
+                IRCServerManagerSheet()
+            }
+            .sheet(isPresented: $showJoinSheet) {
+                JoinChannelSheet(serverId: $joinServerId, channel: $joinChannel) {
+                    if let sid = joinServerId, !joinChannel.isEmpty {
+                        appState.irc.joinChannel(joinChannel, serverId: sid)
+                    }
+                    joinChannel = ""
+                    showJoinSheet = false
+                }
+            }
+            .sheet(isPresented: $showBroadcastPicker) {
+                BroadcastPicker(manager: manager)
+            }
+
+            // Command feedback toast
+            if let feedback = commandFeedback {
+                VStack {
+                    Text(feedback)
+                        .font(DesignSystem.Fonts.caption())
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, DesignSystem.Spacing.md)
+                        .padding(.vertical, DesignSystem.Spacing.sm)
+                        .background(DesignSystem.Colors.ink.opacity(0.85))
+                        .clipShape(RoundedRectangle(cornerRadius: DesignSystem.Radius.chip))
+                        .padding(.top, 60)
+                    Spacer()
+                }
+                .transition(.move(edge: .top).combined(with: .opacity))
+            }
         }
     }
 
@@ -196,11 +223,6 @@ struct IRCMessageDeckView: View {
                 .padding(.vertical, DesignSystem.Spacing.sm)
             }
             .defaultScrollAnchor(.bottom)
-            .onChange(of: manager.visibleMessages.count) { _, _ in
-                if let last = manager.visibleMessages.first {
-                    proxy.scrollTo(last.id, anchor: .bottom)
-                }
-            }
         }
     }
 
@@ -324,7 +346,22 @@ struct IRCMessageDeckView: View {
             if let ch = manager.activeChannel {
                 appState.sendMessage(text, channel: ch.name, serverId: ch.serverId)
             } else if manager.hasBroadcastTargets {
-                for target in manager.broadcastTargets {
+                let targets = Array(manager.broadcastTargets)
+                // Save as a single local WOM object for the timeline
+                let nick = appState.irc.config(for: sid)?.nickname ?? "user"
+                let config = appState.irc.config(for: sid)
+                let localObj = WOMObject(
+                    id: WOMIDGenerator.generate(type: "message"),
+                    type: ["wom:Message", "wom:Broadcast"],
+                    createdAt: Date(),
+                    attributedTo: WOMReference(id: "local:user", type: ["wom:Person"], name: nick),
+                    content: WOMContent(format: "text/plain", text: text),
+                    data: ["network": "irc", "server": config?.host ?? "", "isBroadcast": "true", "broadcastCount": "\(targets.count)"],
+                    provenance: .localUser()
+                )
+                Task { try? await appState.store.save(localObj); appState.womObjects.append(localObj) }
+                // Send to each target
+                for target in targets {
                     appState.sendMessage(text, channel: target.name, serverId: target.serverId)
                 }
             } else {
@@ -360,7 +397,16 @@ struct IRCMessageDeckView: View {
 
         default:
             // Execute IRC command
-            _ = IRCCommandExecutor.execute(cmd, serverId: sid, appState: appState)
+            let result = IRCCommandExecutor.execute(cmd, serverId: sid, appState: appState)
+            if let feedback = result {
+                commandFeedback = feedback
+                commandFeedbackTask?.cancel()
+                commandFeedbackTask = Task {
+                    try? await Task.sleep(for: .seconds(3))
+                    guard !Task.isCancelled else { return }
+                    commandFeedback = nil
+                }
+            }
         }
     }
 
