@@ -455,16 +455,31 @@ struct FeedCard: View {
 // MARK: - HTML stripping helper
 
 extension String {
-    /// Fast HTML tag stripper — uses regex only, never NSAttributedString
+    /// Fast HTML tag stripper — preserves paragraph structure by inserting
+    /// newlines for block elements before stripping tags.
+    /// Uses regex only, never NSAttributedString
     /// (which blocks the main thread when called during scroll rendering).
     var stripHTML: String {
-        replacingOccurrences(of: "<[^>]+>", with: "", options: .regularExpression)
-            .replacingOccurrences(of: "&amp;", with: "&")
-            .replacingOccurrences(of: "&lt;", with: "<")
-            .replacingOccurrences(of: "&gt;", with: ">")
-            .replacingOccurrences(of: "&quot;", with: "\"")
-            .replacingOccurrences(of: "&#39;", with: "'")
-            .replacingOccurrences(of: "&nbsp;", with: " ")
-            .trimmingCharacters(in: .whitespacesAndNewlines)
+        var result = self
+        // Insert newlines for block-level elements before stripping tags
+        result = result.replacingOccurrences(of: "<br\\s*/?>", with: "\n", options: .regularExpression)
+        result = result.replacingOccurrences(of: "<p[^>]*>", with: "\n", options: .regularExpression)
+        result = result.replacingOccurrences(of: "</p>", with: "\n")
+        result = result.replacingOccurrences(of: "<li[^>]*>", with: "\n• ", options: .regularExpression)
+        result = result.replacingOccurrences(of: "</li>", with: "")
+        result = result.replacingOccurrences(of: "<h[1-6][^>]*>", with: "\n\n", options: .regularExpression)
+        result = result.replacingOccurrences(of: "</h[1-6]>", with: "\n")
+        // Now strip remaining HTML tags
+        result = result.replacingOccurrences(of: "<[^>]+>", with: "", options: .regularExpression)
+        // Decode common entities
+        result = result.replacingOccurrences(of: "&amp;", with: "&")
+        result = result.replacingOccurrences(of: "&lt;", with: "<")
+        result = result.replacingOccurrences(of: "&gt;", with: ">")
+        result = result.replacingOccurrences(of: "&quot;", with: "\"")
+        result = result.replacingOccurrences(of: "&#39;", with: "'")
+        result = result.replacingOccurrences(of: "&nbsp;", with: " ")
+        // Collapse multiple blank lines
+        result = result.replacingOccurrences(of: "\n{3,}", with: "\n\n", options: .regularExpression)
+        return result.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 }
