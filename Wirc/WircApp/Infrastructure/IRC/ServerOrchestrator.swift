@@ -136,17 +136,25 @@ final class ServerOrchestrator: @unchecked Sendable {
 
         // Timeout after 25s
         DispatchQueue.main.asyncAfter(deadline: .now() + 25) { [weak self] in
-            self?.finishServer(configId)
+            guard let self else { return }
+            if self.activeClients.contains(where: { $0.configId == configId }) {
+                self.finishServer(configId)
+            }
         }
     }
 
     private func addChannel(_ gc: GlobalChannel) {
-        // Insert maintaining sort by users desc
-        if let idx = globalChannels.firstIndex(where: { $0.users < gc.users }) {
-            globalChannels.insert(gc, at: idx)
-        } else {
-            globalChannels.append(gc)
+        // Binary-search insertion maintaining sort by users descending
+        var lo = 0, hi = globalChannels.count
+        while lo < hi {
+            let mid = (lo + hi) / 2
+            if globalChannels[mid].users >= gc.users {
+                lo = mid + 1
+            } else {
+                hi = mid
+            }
         }
+        globalChannels.insert(gc, at: lo)
         // Keep max 5000 channels for memory
         if globalChannels.count > 5000 {
             globalChannels = Array(globalChannels.prefix(5000))
@@ -155,6 +163,10 @@ final class ServerOrchestrator: @unchecked Sendable {
     }
 
     private func finishServer(_ configId: UUID) {
+        // Disconnect the client before removing
+        if let entry = activeClients.first(where: { $0.configId == configId }) {
+            entry.client.disconnect()
+        }
         activeClients.removeAll { $0.configId == configId }
         scannedCount += 1
         updateProgress()
