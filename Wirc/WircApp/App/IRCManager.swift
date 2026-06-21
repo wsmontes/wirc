@@ -122,6 +122,9 @@ final class IRCManager {
 
     // MARK: - Connection
     func connect(to configId: UUID) {
+        if let existing = clients[configId] {
+            existing.disconnect()
+        }
         guard let config = servers.first(where: { $0.id == configId }) else { return }
         connectionStates[configId] = .connecting
         let client = IRCClient(config: config)
@@ -144,7 +147,8 @@ final class IRCManager {
     func joinChannel(_ channel: String, serverId: UUID) {
         let ch = channel.hasPrefix("#") ? channel : "#\(channel)"
         clients[serverId]?.join(channel: ch)
-        if !(joinedChannels[serverId]?.contains(ch) ?? false) {
+        let lower = ch.lowercased()
+        if !(joinedChannels[serverId]?.contains(where: { $0.lowercased() == lower }) ?? false) {
             joinedChannels[serverId, default: []].append(ch)
         }
     }
@@ -203,6 +207,7 @@ final class IRCManager {
             scheduleAutoJoin()
         case .disconnected(let reason):
             connectionStates[serverId] = .disconnected
+            isListing[serverId] = false
             // Only clear user lists for the disconnected server, not all servers
             channelUsers = channelUsers.filter { key, _ in
                 !key.hasPrefix("\(config.host)|")
@@ -238,7 +243,8 @@ final class IRCManager {
         case .quit(let nick, _):
             for (key, _) in channelUsers { channelUsers[key]?.removeAll { $0.nick == nick } }
         case .nickChange(let oldNick, let newNick):
-            for (key, _) in channelUsers {
+            let prefix = "\(config.host)|"
+            for (key, _) in channelUsers where key.hasPrefix(prefix) {
                 if let idx = channelUsers[key]?.firstIndex(where: { $0.nick == oldNick }) {
                     channelUsers[key]?[idx] = ChannelUser(nick: newNick, prefix: channelUsers[key]![idx].prefix)
                 }
