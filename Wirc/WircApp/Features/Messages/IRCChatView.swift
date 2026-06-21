@@ -352,6 +352,8 @@ struct IRCChatView: View {
                     .font(.title2)
                     .foregroundStyle(messageText.isEmpty ? DesignSystem.Colors.pencil : DesignSystem.Colors.signal)
             }
+            .accessibilityLabel("Send message")
+            .accessibilityHint("Sends your message to the current channel")
             .disabled(messageText.isEmpty)
         }
         .padding(.horizontal, DesignSystem.Spacing.md)

@@ -213,14 +213,17 @@ struct LibraryRow: View {
 
     var body: some View {
         HStack(spacing: DesignSystem.Spacing.md) {
-            Circle()
-                .fill(sourceColor)
-                .frame(width: 8, height: 8)
+            HStack(spacing: 4) {
+                Circle()
+                    .fill(sourceColor)
+                    .frame(width: 8, height: 8)
+                Text(networkDisplayName)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            .accessibilityElement(children: .combine)
             VStack(alignment: .leading, spacing: 2) {
                 HStack(spacing: DesignSystem.Spacing.xs) {
-                    Text(networkDisplayName)
-                        .font(DesignSystem.Fonts.provenanceLabel)
-                        .foregroundStyle(sourceColor)
                     if let channel = object.data["channel"] {
                         Text(channel)
                             .font(DesignSystem.Fonts.provenanceDetail)

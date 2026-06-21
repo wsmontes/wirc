@@ -52,6 +52,10 @@ struct FeedCard: View {
         .overlay(RoundedRectangle(cornerRadius: DesignSystem.Radius.card).stroke(DesignSystem.Colors.border, lineWidth: 0.5))
         .padding(.horizontal, DesignSystem.Spacing.lg)
         .padding(.vertical, DesignSystem.Spacing.sm)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(networkDisplayName) post: \(post.name ?? (strippedBody.map { String($0.prefix(100)) } ?? "untitled"))")
+        .accessibilityAddTraits(.isButton)
+        .accessibilityHint("Double-tap to open article")
         .onTapGesture {
             if let url = cardURL {
                 UIApplication.shared.open(url)
@@ -117,6 +121,8 @@ struct FeedCard: View {
             .padding(.vertical, DesignSystem.Spacing.sm)
         }
         .buttonStyle(.plain)
+        .frame(minWidth: 44, minHeight: 44)
+        .contentShape(Rectangle())
     }
 
     private var networkDisplayName: String {
