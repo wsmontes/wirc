@@ -90,6 +90,7 @@ final class AppState {
     // MARK: - Mastodon
     var mastodonAccounts: [MastodonServerConfig] = [] { didSet { saveMastodonAccounts() } }
     private var mastodonClients: [UUID: MastodonClient] = [:]
+    private var lastFeedId: String? = nil
 
     // MARK: - Adapters
     private let ircToWOM = IRCToWOMAdapter()
@@ -233,7 +234,7 @@ final class AppState {
         let adapter = MastodonToWOMAdapter(instanceURL: client.config.instanceURL)
         Task { @MainActor in
             do {
-                let timeline = try await client.homeTimeline(limit: 40)
+                let timeline = try await client.homeTimeline(maxId: lastFeedId, limit: 40)
                 for status in timeline {
                     let obj = adapter.convert(status: status)
                     try? await store.save(obj)

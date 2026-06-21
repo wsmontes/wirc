@@ -122,8 +122,8 @@ final class MastodonToWOMAdapter {
             "url": reblog.url ?? ""
         ]
 
-        if let date = reblog.createdAt.flatMap({ parseDate($0) }) {
-            data["originalDate"] = ISO8601DateFormatter().string(from: date)
+        if let date = reblog.createdAt.flatMap({ MastodonToWOMAdapter.parseMastodonDate($0) }) {
+            data["originalDate"] = MastodonToWOMAdapter.isoFormatter.string(from: date)
         }
 
         var attachments: [WOMReference] = []
@@ -138,7 +138,6 @@ final class MastodonToWOMAdapter {
         }
 
         let author = reblog.account
-        let authorAcct = author?.acct ?? "unknown"
 
         let actorRef = WOMReference(
             id: "mastodon://\(instanceURL)/@\(status.account.acct)",
@@ -217,10 +216,29 @@ final class MastodonToWOMAdapter {
             .trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
-    private func parseDate(_ s: String) -> Date? {
-        let fmts = ["yyyy-MM-dd'T'HH:mm:ss.SSSZ", "yyyy-MM-dd'T'HH:mm:ssZ"]
-        let p = DateFormatter(); p.locale = Locale(identifier: "en_US_POSIX")
-        for fmt in fmts { p.dateFormat = fmt; if let d = p.date(from: s) { return d } }
-        return nil
+}
+
+extension MastodonToWOMAdapter {
+    nonisolated(unsafe) static let dateFormatters: [DateFormatter] = {
+        let fmts = [
+            "yyyy-MM-dd'T'HH:mm:ss.SSSZ",
+            "yyyy-MM-dd'T'HH:mm:ss.SSZ",
+            "yyyy-MM-dd'T'HH:mm:ss.SSSSZ",
+        ]
+        return fmts.map { fmt in
+            let f = DateFormatter()
+            f.locale = Locale(identifier: "en_US_POSIX")
+            f.dateFormat = fmt
+            return f
+        }
+    }()
+
+    nonisolated(unsafe) static let isoFormatter = ISO8601DateFormatter()
+
+    static func parseMastodonDate(_ s: String) -> Date? {
+        for fmt in dateFormatters {
+            if let d = fmt.date(from: s) { return d }
+        }
+        return isoFormatter.date(from: s)
     }
 }

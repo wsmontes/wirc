@@ -4,11 +4,8 @@ final class MastodonClient: @unchecked Sendable {
     let config: MastodonServerConfig
 
     private let session: URLSession
-    private let decoder: JSONDecoder = {
-        let d = JSONDecoder()
-        d.keyDecodingStrategy = .convertFromSnakeCase
-        return d
-    }()
+    private var rateLimitRemaining: Int = 300
+    private var rateLimitReset: Date = .distantPast
 
     init(config: MastodonServerConfig) {
         self.config = config
@@ -19,6 +16,26 @@ final class MastodonClient: @unchecked Sendable {
             "Accept": "application/json"
         ]
         self.session = URLSession(configuration: cfg)
+    }
+
+    // MARK: - Rate Limiting
+
+    private func updateRateLimits(from response: HTTPURLResponse) {
+        if let remaining = response.value(forHTTPHeaderField: "X-RateLimit-Remaining") {
+            rateLimitRemaining = Int(remaining) ?? rateLimitRemaining
+        }
+        if let reset = response.value(forHTTPHeaderField: "X-RateLimit-Reset") {
+            if let epoch = Double(reset) {
+                rateLimitReset = Date(timeIntervalSince1970: epoch)
+            }
+        }
+    }
+
+    private func checkRateLimit() async throws {
+        if rateLimitRemaining <= 0 && Date() < rateLimitReset {
+            let wait = rateLimitReset.timeIntervalSinceNow
+            if wait > 0 { try await Task.sleep(for: .seconds(wait)) }
+        }
     }
 
     // MARK: - Timelines
@@ -89,14 +106,21 @@ final class MastodonClient: @unchecked Sendable {
     }
 
     private func get<T: Decodable>(_ url: URL) async throws -> T {
+        try await checkRateLimit()
         let (data, response) = try await session.data(from: url)
-        if let http = response as? HTTPURLResponse, http.statusCode >= 400 {
-            throw MastodonError.http(http.statusCode, String(data: data, encoding: .utf8) ?? "")
+        if let http = response as? HTTPURLResponse {
+            updateRateLimits(from: http)
+            if http.statusCode >= 400 {
+                throw MastodonError.http(http.statusCode, String(data: data, encoding: .utf8) ?? "")
+            }
         }
+        let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
         return try decoder.decode(T.self, from: data)
     }
 
     private func post<T: Decodable>(_ url: URL, params: [String: String]) async throws -> T {
+        try await checkRateLimit()
         var req = URLRequest(url: url)
         req.httpMethod = "POST"
         req.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
@@ -104,9 +128,14 @@ final class MastodonClient: @unchecked Sendable {
         comps.queryItems = params.map { URLQueryItem(name: $0.key, value: $0.value) }
         req.httpBody = comps.query?.data(using: .utf8)
         let (data, response) = try await session.data(for: req)
-        if let http = response as? HTTPURLResponse, http.statusCode >= 400 {
-            throw MastodonError.http(http.statusCode, String(data: data, encoding: .utf8) ?? "")
+        if let http = response as? HTTPURLResponse {
+            updateRateLimits(from: http)
+            if http.statusCode >= 400 {
+                throw MastodonError.http(http.statusCode, String(data: data, encoding: .utf8) ?? "")
+            }
         }
+        let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
         return try decoder.decode(T.self, from: data)
     }
 }

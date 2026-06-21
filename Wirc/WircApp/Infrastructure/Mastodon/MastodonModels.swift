@@ -63,17 +63,7 @@ struct MastodonStatus: Codable, Identifiable {
 
     // Decode dates manually or use a decoder strategy
     var parsedDate: Date? {
-        let fmts = [
-            "yyyy-MM-dd'T'HH:mm:ss.SSSZ",
-            "yyyy-MM-dd'T'HH:mm:ssZ",
-        ]
-        let parser = DateFormatter()
-        parser.locale = Locale(identifier: "en_US_POSIX")
-        for fmt in fmts {
-            parser.dateFormat = fmt
-            if let d = parser.date(from: createdAt) { return d }
-        }
-        return nil
+        MastodonToWOMAdapter.parseMastodonDate(createdAt)
     }
 }
 
