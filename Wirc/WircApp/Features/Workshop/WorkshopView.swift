@@ -3,7 +3,6 @@ import SwiftUI
 struct WorkshopView: View {
     @Environment(AppState.self) private var appState
 
-    @State private var showAddServer = false
     @State private var showAddFeed = false
     @State private var showDebug = false
 
@@ -23,9 +22,6 @@ struct WorkshopView: View {
         .listStyle(.insetGrouped)
         .scrollContentBackground(.hidden)
         .background(DesignSystem.Colors.page)
-        .sheet(isPresented: $showAddServer) {
-            AddServerView { config in appState.irc.servers.append(config) }
-        }
         .sheet(isPresented: $showAddFeed) {
             AddFeedView()
         }
@@ -38,23 +34,6 @@ struct WorkshopView: View {
 
     private var transportsSection: some View {
         Section {
-            // Mastodon
-            NavigationLink {
-                MastodonTransportDetail()
-            } label: {
-                HStack(spacing: DesignSystem.Spacing.md) {
-                    Image(systemName: "m.circle")
-                        .foregroundStyle(DesignSystem.Colors.mastodon)
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Mastodon")
-                            .font(.system(size: 15, weight: .medium))
-                        Text("\(appState.mastodonAccounts.count) account\(appState.mastodonAccounts.count == 1 ? "" : "s")")
-                            .font(DesignSystem.Fonts.caption())
-                            .foregroundStyle(DesignSystem.Colors.pencil)
-                    }
-                }
-            }
-
             // Feeds
             NavigationLink {
                 FeedTransportDetail()
@@ -73,21 +52,12 @@ struct WorkshopView: View {
             }
 
             // Add buttons
-            HStack(spacing: DesignSystem.Spacing.md) {
-                Button { showAddServer = true } label: {
-                    Label("Add Server", systemImage: "plus")
-                        .font(DesignSystem.Fonts.caption())
-                }
-                .buttonStyle(.bordered)
-                .tint(DesignSystem.Colors.irc)
-
-                Button { showAddFeed = true } label: {
-                    Label("Add Feed", systemImage: "plus")
-                        .font(DesignSystem.Fonts.caption())
-                }
-                .buttonStyle(.bordered)
-                .tint(DesignSystem.Colors.rss)
+            Button { showAddFeed = true } label: {
+                Label("Add Feed", systemImage: "plus")
+                    .font(DesignSystem.Fonts.caption())
             }
+            .buttonStyle(.bordered)
+            .tint(DesignSystem.Colors.rss)
         } header: {
             Text("Transports".uppercased())
                 .font(DesignSystem.Fonts.data(11))
@@ -193,51 +163,7 @@ struct WorkshopView: View {
     }
 }
 
-// MARK: - IRC Transport Detail
-
-// MARK: - Mastodon Transport Detail (stub)
-
-struct MastodonTransportDetail: View {
-    @Environment(AppState.self) private var appState
-    @State private var showAddMastodon = false
-
-    var body: some View {
-        List {
-            if appState.mastodonAccounts.isEmpty {
-                ContentUnavailableView("No Mastodon accounts", systemImage: "m.circle")
-            }
-            ForEach(appState.mastodonAccounts) { account in
-                VStack(alignment: .leading, spacing: DesignSystem.Spacing.xs) {
-                    Text(account.name)
-                        .font(.system(size: 15, weight: .medium))
-                    Text(account.instanceURL)
-                        .font(DesignSystem.Fonts.data(11))
-                        .foregroundStyle(DesignSystem.Colors.pencil)
-                }
-            }
-            .onDelete { indexSet in
-                for idx in indexSet {
-                    appState.removeMastodonAccount(id: appState.mastodonAccounts[idx].id)
-                }
-            }
-        }
-        .navigationTitle("Mastodon")
-        .toolbar {
-            ToolbarItem(placement: .navigationBarTrailing) {
-                Button { showAddMastodon = true } label: {
-                    Image(systemName: "plus")
-                }
-            }
-        }
-        .sheet(isPresented: $showAddMastodon) {
-            AddMastodonView { name, url, token in
-                appState.addMastodonAccount(name: name, instanceURL: url, token: token)
-            }
-        }
-    }
-}
-
-// MARK: - Feed Transport Detail (stub)
+// MARK: - Feed Transport Detail
 
 struct FeedTransportDetail: View {
     @Environment(AppState.self) private var appState

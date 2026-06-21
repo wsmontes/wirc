@@ -31,14 +31,14 @@ struct SettingsView: View {
                     ForEach(appState.mastodonAccounts) { acct in
                         HStack {
                             VStack(alignment: .leading) {
-                                Text(acct.name).font(.subheadline)
-                                Text(acct.instanceURL).font(.caption).foregroundStyle(.secondary)
+                                Text(acct.name).font(DesignSystem.Fonts.body())
+                                Text(acct.instanceURL).font(DesignSystem.Fonts.caption()).foregroundStyle(DesignSystem.Colors.pencil)
                             }
                             Spacer()
                             Button {
                                 appState.refreshMastodonFeed(accountId: acct.id)
                             } label: {
-                                Image(systemName: "arrow.clockwise").font(.caption)
+                                Image(systemName: "arrow.clockwise").font(DesignSystem.Fonts.caption())
                             }
                         }
                     }
@@ -56,34 +56,34 @@ struct SettingsView: View {
                 Section("Feeds") {
                     if appState.feed.subscriptionStore.getAll().isEmpty {
                         Text("No feeds subscribed")
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
+                            .font(DesignSystem.Fonts.body())
+                            .foregroundStyle(DesignSystem.Colors.pencil)
                     } else {
                         ForEach(appState.feed.subscriptionStore.getAll()) { sub in
                             HStack {
                                 VStack(alignment: .leading, spacing: 2) {
                                     Text(sub.title)
-                                        .font(.subheadline)
+                                        .font(DesignSystem.Fonts.body())
                                     HStack(spacing: 4) {
                                         Image(systemName: sourceTypeIcon(sub.sourceType))
-                                            .font(.caption2)
+                                            .font(DesignSystem.Fonts.data(11))
                                         Text(sub.sourceType.rawValue.capitalized)
-                                            .font(.caption)
+                                            .font(DesignSystem.Fonts.caption())
                                         if let fetched = sub.lastFetchedAt {
                                             Text("· fetched \(fetched, style: .relative) ago")
-                                                .font(.caption2)
+                                                .font(DesignSystem.Fonts.data(11))
                                         }
                                     }
-                                    .foregroundStyle(.secondary)
+                                    .foregroundStyle(DesignSystem.Colors.pencil)
                                     if !sub.tags.isEmpty {
                                         Text(sub.tags.joined(separator: ", "))
-                                            .font(.caption2)
-                                            .foregroundStyle(.blue)
+                                            .font(DesignSystem.Fonts.data(11))
+                                            .foregroundStyle(DesignSystem.Colors.signal)
                                     }
                                     if sub.errorCount > 0 {
                                         Text("\(sub.errorCount) errors")
-                                            .font(.caption2)
-                                            .foregroundStyle(.red)
+                                            .font(DesignSystem.Fonts.data(11))
+                                            .foregroundStyle(DesignSystem.Colors.signal)
                                     }
                                 }
                                 Spacer()
@@ -91,7 +91,7 @@ struct SettingsView: View {
                                     Task { await appState.refreshAllFeeds() }
                                 } label: {
                                     Image(systemName: "arrow.clockwise")
-                                        .font(.caption)
+                                        .font(DesignSystem.Fonts.caption())
                                 }
                             }
                         }
@@ -120,10 +120,13 @@ struct SettingsView: View {
                         DebugView()
                     } label: {
                         Label("Debug", systemImage: "wrench.and.screwdriver")
-                            .font(.footnote).foregroundStyle(.secondary)
+                            .font(DesignSystem.Fonts.data(11)).foregroundStyle(DesignSystem.Colors.pencil)
                     }
                 }
             }
+            .listStyle(.insetGrouped)
+            .scrollContentBackground(.hidden)
+            .background(DesignSystem.Colors.page)
             .navigationTitle("Settings")
             .sheet(isPresented: $showingAddServer) {
                 AddServerView { config in appState.irc.servers.append(config) }
@@ -199,10 +202,10 @@ struct ServerRow: View {
         HStack {
             VStack(alignment: .leading) {
                 Text(server.name.isEmpty ? server.host : server.name)
-                    .font(.headline)
+                    .font(DesignSystem.Fonts.headline)
                 Text("\(server.host):\(server.port) as \(server.nickname)")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .font(DesignSystem.Fonts.caption())
+                    .foregroundStyle(DesignSystem.Colors.pencil)
             }
 
             Spacer()
@@ -213,7 +216,7 @@ struct ServerRow: View {
 
             Button(action: toggleConnection) {
                 Text(status == .online ? "Disconnect" : "Connect")
-                    .font(.caption)
+                    .font(DesignSystem.Fonts.caption())
             }
             .buttonStyle(.bordered)
         }
@@ -222,9 +225,9 @@ struct ServerRow: View {
 
     private var statusColor: Color {
         switch status {
-        case .disconnected: return .gray
-        case .connecting: return .orange
-        case .online: return .green
+        case .disconnected: return DesignSystem.Colors.pencil
+        case .connecting: return DesignSystem.Colors.signal
+        case .online: return DesignSystem.Colors.github
         }
     }
 

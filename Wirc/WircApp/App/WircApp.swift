@@ -27,6 +27,11 @@ struct WircApp: App {
                     .tabItem {
                         Label("Workshop", systemImage: "hammer")
                     }
+
+                SettingsView()
+                    .tabItem {
+                        Label("Settings", systemImage: "gearshape")
+                    }
             }
             .tint(DesignSystem.Colors.signal)
             .environment(appState)
