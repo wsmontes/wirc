@@ -247,6 +247,19 @@ private final class FeedParserDelegate: NSObject, XMLParserDelegate {
         }
     }
 
+    // MARK: - URL resolution
+
+    /// Resolves a potentially-relative URL against the feed's source URL.
+    /// Absolute URLs (http/https) are returned as-is; relative URLs are resolved
+    /// against the base sourceURL so Atom feeds with relative <link href=""> values
+    /// produce usable absolute URLs.
+    private func resolvedLink(_ href: String?) -> String {
+        guard let href = href else { return "" }
+        if href.hasPrefix("http://") || href.hasPrefix("https://") { return href }
+        guard let base = URL(string: sourceURL) else { return href }
+        return URL(string: href, relativeTo: base)?.absoluteString ?? href
+    }
+
     // MARK: - Commit item
 
     private func commitItem() {
@@ -254,6 +267,10 @@ private final class FeedParserDelegate: NSObject, XMLParserDelegate {
             resetItemState()
             return
         }
+        // Resolve relative URLs before storing
+        currentLink = resolvedLink(currentLink)
+        currentEnclosureURL = resolvedLink(currentEnclosureURL)
+
         // Use explicit link, or fall back to guid/id when no link element exists
         let link = currentLink ?? currentID
         guard let link else {
