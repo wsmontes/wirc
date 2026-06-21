@@ -114,11 +114,11 @@ struct IRCChatView: View {
                             .font(DesignSystem.Fonts.data(10))
                             .foregroundStyle(DesignSystem.Colors.pencil)
                     }
-                    // Debug: events received / PRIVMSG / visible messages / last event type
-                    Text("Σ\(appState.irc.totalEventsReceived) p\(appState.irc.privmsgCount) v\(manager.visibleMessages.count) \(appState.irc.lastEventType)")
+                    #if DEBUG
+                    Text("Σ\(appState.irc.totalEventsReceived) p\(appState.irc.privmsgCount)")
                         .font(.system(size: 8))
                         .foregroundStyle(DesignSystem.Colors.signal)
-                        .lineLimit(1)
+                    #endif
                 }
             }
             .buttonStyle(.plain)

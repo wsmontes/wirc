@@ -10,8 +10,13 @@ final class FeedManager {
     private let adapter = FeedToWOMAdapter()
     private let maxConsecutiveErrors = 5
 
-    var feedLoading = false
     var feedError: String?
+    /// Incremental progress during batch refresh — updated on each batch completion.
+    var refreshProgress: (completed: Int, total: Int) = (0, 0)
+    var isRefreshing = false
+    /// Completion summary that lingers after refresh ends (auto-clears after 4s).
+    var refreshSummary: String?
+    var subscriptionCount: Int { subscriptionStore.getAll().count }
 
     // MARK: - Feed Management
 
@@ -75,17 +80,35 @@ final class FeedManager {
     @discardableResult
     func refreshAllFeedsBatched(womStore: WOMStore, onBatch: (([WOMObject]) async -> Void)? = nil) async -> [WOMObject] {
         let all = subscriptionStore.getAll()
-        let batchSize = 5
+        let batchSize = 15
+        isRefreshing = true
+        refreshSummary = nil
+        refreshProgress = (0, all.count)
+
         var allNew: [WOMObject] = []
+        var completed = 0
         for batch in stride(from: 0, to: all.count, by: batchSize) {
             let end = min(batch + batchSize, all.count)
             var batchItems: [WOMObject] = []
             for i in batch..<end {
                 batchItems.append(contentsOf: await refreshFeed(all[i], womStore: womStore))
+                completed += 1
             }
             allNew.append(contentsOf: batchItems)
+            refreshProgress = (completed, all.count)
             if !batchItems.isEmpty { await onBatch?(batchItems) }
             try? await Task.sleep(for: .milliseconds(100))
+        }
+
+        // Completion summary — lingers for 4s then auto-clears
+        isRefreshing = false
+        refreshProgress = (all.count, all.count)
+        refreshSummary = "✓ \(all.count) sources · \(allNew.count) new posts"
+        Task { @MainActor in
+            try? await Task.sleep(for: .seconds(4))
+            if refreshSummary == "✓ \(all.count) sources · \(allNew.count) new posts" {
+                refreshSummary = nil
+            }
         }
         return allNew
     }
@@ -99,8 +122,6 @@ final class FeedManager {
     /// Refresh one feed. Returns new WOMObjects that were saved.
     func refreshFeed(_ subscription: FeedSubscription, womStore: WOMStore) async -> [WOMObject] {
         if subscription.errorCount >= maxConsecutiveErrors { return [] }
-        feedLoading = true; feedError = nil
-        defer { feedLoading = false }
         do {
             let (data, response) = try await fetcher.fetch(subscription: subscription)
             if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 304 {

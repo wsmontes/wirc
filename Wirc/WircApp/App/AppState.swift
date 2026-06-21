@@ -1,6 +1,7 @@
 import SwiftUI
 import Observation
 import BackgroundTasks
+import os.log
 
 /// Central coordinator. IRC state lives in `irc: IRCManager`, feed state in `feed: FeedManager`.
 /// Keeps WOM store, Mastodon, debug, and cross-cutting adapters.
@@ -23,6 +24,8 @@ final class AppState {
         didSet {
             // Cap in-memory objects to prevent unbounded growth
             if womObjects.count > 2000 {
+                let dropped = womObjects.count - 2000
+                os_log(.debug, "AppState: evicting %d objects from womObjects cap", dropped)
                 womObjects = Array(womObjects.suffix(2000))
             }
             invalidateIndexes()
@@ -208,7 +211,7 @@ final class AppState {
 
     func refreshMastodonFeed(accountId: UUID) {
         guard let client = mastodonClients[accountId] ?? { if let acct = mastodonAccounts.first(where: { $0.id == accountId }) { let c = MastodonClient(config: acct); mastodonClients[accountId] = c; return c }; return nil }() else { return }
-        feed.feedLoading = true; feed.feedError = nil
+        feed.feedError = nil
         let adapter = MastodonToWOMAdapter(instanceURL: client.config.instanceURL)
         Task { @MainActor in
             do {
@@ -218,8 +221,7 @@ final class AppState {
                     try? await store.save(obj)
                     if !womObjects.contains(where: { $0.id == obj.id }) { womObjects.append(obj) }
                 }
-                feed.feedLoading = false
-            } catch { feed.feedError = error.localizedDescription; feed.feedLoading = false }
+            } catch { feed.feedError = error.localizedDescription }
         }
     }
 

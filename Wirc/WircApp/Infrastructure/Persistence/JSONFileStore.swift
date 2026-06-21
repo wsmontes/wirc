@@ -33,7 +33,10 @@ final class JSONFileStore: WOMStore, @unchecked Sendable {
         }
         objectsDir = docs.appendingPathComponent("wirc/objects", isDirectory: true)
         try? FileManager.default.createDirectory(at: objectsDir, withIntermediateDirectories: true)
-        loadIndex()
+        // Load index on background queue — avoids blocking init on 2000 JSON file reads.
+        queue.async { [weak self] in
+            self?.loadIndex()
+        }
     }
 
     // MARK: - WOMStore
@@ -48,6 +51,7 @@ final class JSONFileStore: WOMStore, @unchecked Sendable {
                 do {
                     try self.writeObject(object)
                     self.index[object.id] = object
+                    self.trimIndex()
                     continuation.resume()
                 } catch {
                     continuation.resume(throwing: error)
@@ -80,6 +84,7 @@ final class JSONFileStore: WOMStore, @unchecked Sendable {
                 for obj in objects where writtenIDs.contains(obj.id) {
                     self.index[obj.id] = obj
                 }
+                self.trimIndex()
                 if let error = writeError {
                     os_log(.error, "JSONFileStore.saveMany: partial write failure after %d/%d objects: %{public}@",
                            writtenIDs.count, objects.count, error.localizedDescription)
@@ -146,6 +151,7 @@ final class JSONFileStore: WOMStore, @unchecked Sendable {
                 do {
                     try self.writeObject(object)
                     self.index[object.id] = object
+                    self.trimIndex()
                     continuation.resume(returning: true)
                 } catch {
                     continuation.resume(throwing: error)
@@ -202,5 +208,21 @@ final class JSONFileStore: WOMStore, @unchecked Sendable {
         for obj in allObjects.prefix(maxIndexSize) {
             index[obj.id] = obj
         }
+    }
+
+    /// Enforces the in-memory index cap by evicting the oldest objects
+    /// when the index exceeds maxIndexSize. Called from write success paths.
+    private func trimIndex() {
+        let before = index.count
+        guard before > maxIndexSize else { return }
+        let sorted = index.values.sorted { $0.createdAt > $1.createdAt }
+        index = Dictionary(uniqueKeysWithValues: sorted.prefix(maxIndexSize).map { ($0.id, $0) })
+        let dropped = before - index.count
+        os_log(.debug, "JSONFileStore: trimmed index from %d to %d (dropped %d)", before, index.count, dropped)
+    }
+
+    /// The number of objects currently in the on-disk index (for tests/debug).
+    var diskCount: Int {
+        queue.sync { index.count }
     }
 }

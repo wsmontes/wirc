@@ -31,11 +31,6 @@ final class FeedToWOMAdapter: @unchecked Sendable {
         return savedObjects
     }
 
-    /// Convert a single FeedItem with no dedup check (for direct use).
-    func convertSingle(item: FeedItem, subscription: FeedSubscription) -> WOMObject {
-        convertItem(item, subscription: subscription, index: 0)
-    }
-
     // MARK: - Private
 
     private func convertItem(_ item: FeedItem, subscription: FeedSubscription, index: Int = 0) -> WOMObject {
@@ -166,19 +161,7 @@ final class FeedToWOMAdapter: @unchecked Sendable {
     }
 
     private func defaultGovernance(for sourceType: FeedSourceType) -> WOMGovernance {
-        let sharing: String
-        switch sourceType {
-        case .youtube, .podcast, .github:
-            sharing = WOMSharing.public.rawValue
-        case .rss, .atom:
-            sharing = WOMSharing.public.rawValue
-        }
-        return WOMGovernance(
-            purpose: ["curation"],
-            adsUse: WOMAdsUse.notAllowed.rawValue,
-            agentUse: "allowed",
-            sharing: sharing,
-            retention: "forever"
-        )
+        WOMGovernance(purpose: ["curation"], adsUse: WOMAdsUse.notAllowed.rawValue,
+                      agentUse: "allowed", sharing: WOMSharing.public.rawValue, retention: "forever")
     }
 }
