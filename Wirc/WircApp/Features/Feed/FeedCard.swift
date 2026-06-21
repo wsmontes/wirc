@@ -10,6 +10,14 @@ struct FeedCard: View {
         return URL(string: link)
     }
 
+    // MARK: - Pre-computed values (post is let — compute once)
+    private let strippedBody: String?
+
+    init(post: WOMObject) {
+        self.post = post
+        self.strippedBody = post.content?.text?.stripHTML
+    }
+
     // MARK: - Derived properties
 
     private var network: String { post.data["network"] ?? "" }
@@ -212,8 +220,8 @@ struct FeedCard: View {
                     .foregroundStyle(DesignSystem.Colors.ink)
                     .padding(.horizontal, DesignSystem.Spacing.md)
             }
-            if let text = post.content?.text, !text.isEmpty {
-                Text(text.stripHTML)
+            if let stripped = strippedBody, !stripped.isEmpty {
+                Text(stripped)
                     .font(DesignSystem.Fonts.messageBody)
                     .foregroundStyle(DesignSystem.Colors.ink)
                     .lineLimit(12)
@@ -261,8 +269,8 @@ struct FeedCard: View {
                 .padding(.top, DesignSystem.Spacing.sm)
             }
             // Original content rendered same as mastodon post
-            if let text = post.content?.text, !text.isEmpty {
-                Text(text.stripHTML)
+            if let stripped = strippedBody, !stripped.isEmpty {
+                Text(stripped)
                     .font(DesignSystem.Fonts.messageBody)
                     .foregroundStyle(DesignSystem.Colors.ink)
                     .lineLimit(12)
@@ -289,8 +297,8 @@ struct FeedCard: View {
                     .foregroundStyle(DesignSystem.Colors.pencil)
                     .padding(.horizontal, DesignSystem.Spacing.md)
             }
-            if let text = post.content?.text, !text.isEmpty {
-                Text(text.stripHTML)
+            if let stripped = strippedBody, !stripped.isEmpty {
+                Text(stripped)
                     .font(DesignSystem.Fonts.cardBody)
                     .foregroundStyle(DesignSystem.Colors.ink)
                     .lineLimit(8)
@@ -303,7 +311,7 @@ struct FeedCard: View {
 
     private var youTubeContent: some View {
         HStack(alignment: .top, spacing: DesignSystem.Spacing.md) {
-            if let thumbURL = post.data["enclosureURL"],
+            if let thumbURL = post.data["thumbnailURL"] ?? post.data["enclosureURL"],
                let url = URL(string: thumbURL) {
                 AsyncImage(url: url) { phase in
                     switch phase {
@@ -347,7 +355,7 @@ struct FeedCard: View {
 
     private var podcastContent: some View {
         HStack(alignment: .top, spacing: DesignSystem.Spacing.md) {
-            if let artURL = post.data["enclosureURL"],
+            if let artURL = post.data["thumbnailURL"] ?? post.data["enclosureURL"],
                let url = URL(string: artURL) {
                 AsyncImage(url: url) { phase in
                     switch phase {
@@ -404,8 +412,8 @@ struct FeedCard: View {
             Text(post.data["feedTitle"] ?? "")
                 .font(DesignSystem.Fonts.data(12))
                 .foregroundStyle(DesignSystem.Colors.pencil)
-            if let desc = post.content?.text, !desc.isEmpty {
-                Text(desc.stripHTML.prefix(200) + (desc.stripHTML.count > 200 ? "..." : ""))
+            if let stripped = strippedBody, !stripped.isEmpty {
+                Text(stripped.prefix(200) + (stripped.count > 200 ? "..." : ""))
                     .font(.system(size: 14))
                     .foregroundStyle(DesignSystem.Colors.ink)
                     .lineLimit(5)

@@ -55,6 +55,7 @@ final class FeedToWOMAdapter: @unchecked Sendable {
         if let duration = item.duration { data["duration"] = duration }
         if let encURL = item.enclosureURL { data["enclosureURL"] = encURL }
         if let encType = item.enclosureType { data["enclosureType"] = encType }
+        if let thumb = item.thumbnailURL { data["thumbnailURL"] = thumb }
 
         // Determine content format
         let contentFormat: String = item.description?.contains("<") == true ? "text/html" : "text/plain"
@@ -101,10 +102,13 @@ final class FeedToWOMAdapter: @unchecked Sendable {
             confidence: 1.0
         )
 
+        // Stagger fallback timestamps: 30s per item + per-feed offset so different
+        // feeds interleave naturally instead of clustering at identical timestamps.
+        let feedOffset = abs(subscription.id.hashValue) % 30
         return WOMObject(
             id: objectID,
             type: types,
-            createdAt: item.publishedAt ?? Date(timeIntervalSinceNow: Double(-index * 30)), // stagger by 30s per item to mix chronologically
+            createdAt: item.publishedAt ?? Date(timeIntervalSinceNow: Double(-index * 30 - feedOffset)),
             schema: WOMSchema.post,
             name: item.title,
             attributedTo: attributionRef,

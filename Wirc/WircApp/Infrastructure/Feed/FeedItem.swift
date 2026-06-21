@@ -14,4 +14,5 @@ struct FeedItem: Codable, Equatable {
     let enclosureURL: String?   // media: image, audio, video thumbnail
     let enclosureType: String?  // MIME type
     let duration: String?       // podcast/YouTube duration string
+    let thumbnailURL: String?   // media:thumbnail or itunes:image href
 }

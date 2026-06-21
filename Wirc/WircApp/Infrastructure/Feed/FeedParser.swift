@@ -55,20 +55,20 @@ private final class FeedParserDelegate: NSObject, XMLParserDelegate {
     private var currentEnclosureURL: String?
     private var currentEnclosureType: String?
     private var currentDuration: String?
+    private var currentThumbnailURL: String?
 
     // For RSS link vs Atom link[@rel]
     private var currentLinkRel: String?
 
-    // Date formatters (created lazily to avoid overhead)
-    private let rssDateFormatter: DateFormatter = {
+    // Shared date formatters — created once for all parses (DateFormatter init is expensive)
+    nonisolated(unsafe) private static let rssDateFormatter: DateFormatter = {
         let f = DateFormatter()
         f.locale = Locale(identifier: "en_US_POSIX")
         f.dateFormat = "EEE, dd MMM yyyy HH:mm:ss Z"
         return f
     }()
 
-    // Additional RSS date formats for feeds that deviate from RFC 2822
-    private let rssDateFormatters: [DateFormatter] = {
+    nonisolated(unsafe) private static let rssDateFormatters: [DateFormatter] = {
         let formats = [
             "EEE, dd MMM yyyy HH:mm:ss Z",   // RFC 2822
             "EEE, dd MMM yy HH:mm:ss Z",     // RFC 2822 with 2-digit year
@@ -87,13 +87,13 @@ private final class FeedParserDelegate: NSObject, XMLParserDelegate {
         }
     }()
 
-    private let isoFormatter: ISO8601DateFormatter = {
+    nonisolated(unsafe) private static let isoFormatter: ISO8601DateFormatter = {
         let f = ISO8601DateFormatter()
         f.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
         return f
     }()
 
-    private let isoWithoutFractionalFormatter: ISO8601DateFormatter = {
+    nonisolated(unsafe) private static let isoWithoutFractionalFormatter: ISO8601DateFormatter = {
         let f = ISO8601DateFormatter()
         f.formatOptions = [.withInternetDateTime]
         return f
@@ -119,7 +119,7 @@ private final class FeedParserDelegate: NSObject, XMLParserDelegate {
 
         switch format {
         case .rss:
-            handleRSSStart(elementName, attributes: attributes)
+            handleRSSStart(elementName, attributes: attributes, namespaceURI: namespaceURI)
         case .atom:
             handleAtomStart(elementName, attributes: attributes, namespaceURI: namespaceURI)
         case .unknown:
@@ -149,10 +149,16 @@ private final class FeedParserDelegate: NSObject, XMLParserDelegate {
 
     // MARK: - RSS 2.0
 
-    private func handleRSSStart(_ name: String, attributes: [String: String]) {
+    private func handleRSSStart(_ name: String, attributes: [String: String], namespaceURI: String?) {
         if name == "enclosure" {
             currentEnclosureURL = attributes["url"]
             currentEnclosureType = attributes["type"]
+        }
+        if name == "media:thumbnail" || (name == "thumbnail" && namespaceURI?.contains("media") == true) {
+            currentThumbnailURL = attributes["url"]
+        }
+        if name == "image" && namespaceURI?.contains("itunes") == true {
+            currentThumbnailURL = attributes["href"]
         }
     }
 
@@ -267,7 +273,8 @@ private final class FeedParserDelegate: NSObject, XMLParserDelegate {
             category: currentCategory,
             enclosureURL: currentEnclosureURL,
             enclosureType: currentEnclosureType,
-            duration: currentDuration
+            duration: currentDuration,
+            thumbnailURL: currentThumbnailURL
         )
         items.append(item)
         resetItemState()
@@ -284,24 +291,25 @@ private final class FeedParserDelegate: NSObject, XMLParserDelegate {
         currentEnclosureURL = nil
         currentEnclosureType = nil
         currentDuration = nil
+        currentThumbnailURL = nil
         currentLinkRel = nil
     }
 
     // MARK: - Date parsing
 
     private func parseRSSDate(_ s: String) -> Date? {
-        for fmt in rssDateFormatters {
+        for fmt in Self.rssDateFormatters {
             if let d = fmt.date(from: s) { return d }
         }
         // Try ISO formatters as fallback
-        if let d = isoFormatter.date(from: s) { return d }
-        return isoWithoutFractionalFormatter.date(from: s)
+        if let d = Self.isoFormatter.date(from: s) { return d }
+        return Self.isoWithoutFractionalFormatter.date(from: s)
     }
 
     private func parseISODate(_ s: String) -> Date? {
-        if let d = isoFormatter.date(from: s) { return d }
+        if let d = Self.isoFormatter.date(from: s) { return d }
         // Fallback: try without fractional seconds
-        return isoWithoutFractionalFormatter.date(from: s)
+        return Self.isoWithoutFractionalFormatter.date(from: s)
     }
 }
 
