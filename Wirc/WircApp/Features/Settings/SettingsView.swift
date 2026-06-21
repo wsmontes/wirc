@@ -32,13 +32,13 @@ struct SettingsView: View {
                         HStack {
                             VStack(alignment: .leading) {
                                 Text(acct.name).font(DesignSystem.Fonts.body())
-                                Text(acct.instanceURL).font(DesignSystem.Fonts.caption()).foregroundStyle(DesignSystem.Colors.pencil)
+                                Text(acct.instanceURL).font(DesignSystem.Fonts.caption).foregroundStyle(DesignSystem.Colors.pencil)
                             }
                             Spacer()
                             Button {
                                 appState.refreshMastodonFeed(accountId: acct.id)
                             } label: {
-                                Image(systemName: "arrow.clockwise").font(DesignSystem.Fonts.caption())
+                                Image(systemName: "arrow.clockwise").font(DesignSystem.Fonts.caption)
                             }
                         }
                     }
@@ -68,7 +68,7 @@ struct SettingsView: View {
                                         Image(systemName: sourceTypeIcon(sub.sourceType))
                                             .font(DesignSystem.Fonts.data(11))
                                         Text(sub.sourceType.rawValue.capitalized)
-                                            .font(DesignSystem.Fonts.caption())
+                                            .font(DesignSystem.Fonts.caption)
                                         if let fetched = sub.lastFetchedAt {
                                             Text("· fetched \(fetched, style: .relative) ago")
                                                 .font(DesignSystem.Fonts.data(11))
@@ -91,7 +91,7 @@ struct SettingsView: View {
                                     Task { await appState.refreshAllFeeds() }
                                 } label: {
                                     Image(systemName: "arrow.clockwise")
-                                        .font(DesignSystem.Fonts.caption())
+                                        .font(DesignSystem.Fonts.caption)
                                 }
                             }
                         }
@@ -202,9 +202,9 @@ struct ServerRow: View {
         HStack {
             VStack(alignment: .leading) {
                 Text(server.name.isEmpty ? server.host : server.name)
-                    .font(DesignSystem.Fonts.headline)
+                    .font(DesignSystem.Fonts.headline())
                 Text("\(server.host):\(server.port) as \(server.nickname)")
-                    .font(DesignSystem.Fonts.caption())
+                    .font(DesignSystem.Fonts.caption)
                     .foregroundStyle(DesignSystem.Colors.pencil)
             }
 
@@ -216,7 +216,7 @@ struct ServerRow: View {
 
             Button(action: toggleConnection) {
                 Text(status == .online ? "Disconnect" : "Connect")
-                    .font(DesignSystem.Fonts.caption())
+                    .font(DesignSystem.Fonts.caption)
             }
             .buttonStyle(.bordered)
         }

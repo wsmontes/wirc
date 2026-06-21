@@ -45,7 +45,7 @@ struct WorkshopView: View {
                         Text("Feeds")
                             .font(.system(size: 15, weight: .medium))
                         Text("\(appState.feed.subscriptionStore.getAll().count) subscription\(appState.feed.subscriptionStore.getAll().count == 1 ? "" : "s")")
-                            .font(DesignSystem.Fonts.caption())
+                            .font(DesignSystem.Fonts.caption)
                             .foregroundStyle(DesignSystem.Colors.pencil)
                     }
                 }
@@ -54,7 +54,7 @@ struct WorkshopView: View {
             // Add buttons
             Button { showAddFeed = true } label: {
                 Label("Add Feed", systemImage: "plus")
-                    .font(DesignSystem.Fonts.caption())
+                    .font(DesignSystem.Fonts.caption)
             }
             .buttonStyle(.bordered)
             .tint(DesignSystem.Colors.rss)
@@ -137,7 +137,7 @@ struct WorkshopView: View {
             }
             Button { showDebug = true } label: {
                 Label("Debug", systemImage: "wrench.and.screwdriver")
-                    .font(DesignSystem.Fonts.caption())
+                    .font(DesignSystem.Fonts.caption)
                     .foregroundStyle(DesignSystem.Colors.pencil)
             }
         } header: {

@@ -91,40 +91,48 @@ enum DesignSystem {
     // MARK: - Typography
 
     enum Fonts {
-        /// Display serif for headlines -- New York
+        /// Display serif for headlines -- New York (fixed size, does not scale)
         static func display(_ size: CGFloat, weight: Font.Weight = .semibold) -> Font {
             .system(size: size, weight: weight, design: .serif)
         }
 
-        /// Body sans for messages and descriptions -- SF Pro
+        /// Headline sans -- SF Pro (scales with Dynamic Type)
+        static func headline(_ size: CGFloat = 17) -> Font {
+            .system(size: size, weight: .semibold, design: .default)
+        }
+
+        /// Body sans for messages and descriptions -- SF Pro (scales with Dynamic Type)
         static func body(_ size: CGFloat = 15) -> Font {
             .system(size: size, weight: .regular, design: .default)
         }
 
-        /// Data mono for nicks, channels, timestamps -- SF Mono
-        static func data(_ size: CGFloat = 11, weight: Font.Weight = .regular) -> Font {
-            .system(size: size, weight: weight, design: .monospaced)
+        /// For code/debug text (fixed size acceptable) -- SF Mono
+        static func mono(_ size: CGFloat = 12) -> Font {
+            .system(size: size, weight: .regular, design: .monospaced)
         }
 
-        /// Caption for footer text and chips -- SF Pro Medium
-        static func caption(_ size: CGFloat = 12) -> Font {
-            .system(size: size, weight: .medium, design: .default)
+        /// Data for UI metadata (fixed size acceptable)
+        static func data(_ size: CGFloat = 12, weight: Font.Weight = .regular) -> Font {
+            .system(size: size, weight: weight, design: .default)
         }
 
-        // Pre-built sizes from spec
+        // Pre-built sizes from spec -- text style-relative for Dynamic Type
 
-        static let headline = display(17)
         static let headlineLarge = display(20)
-        static let senderName = data(13, weight: .bold)
-        static let provenanceLabel = data(11, weight: .bold)
-        static let provenanceDetail = data(11)
-        static let timestamp = data(11)
-        static let footer = data(11)
-        static let systemEvent = data(11)
-        static let messageBody = body(15)
-        static let cardBody = body(15)
-        static let chipLabel = caption(12)
-        static let dateHeader = data(12)
+
+        // Text style-relative fonts (scale with Dynamic Type)
+        static let senderName: Font = .system(.subheadline, weight: .bold)
+        static let messageBody: Font = .body
+        static let cardBody: Font = .body
+        static let caption: Font = .caption
+        static let chipLabel: Font = .system(.subheadline, design: .default)
+        static let provenanceLabel: Font = .caption
+        static let provenanceDetail: Font = .caption2
+        static let timestamp: Font = .caption2
+        static let footer: Font = .caption2
+        static let systemEvent: Font = .caption2
+        static let dateHeader: Font = .subheadline
+        static let badge: Font = .caption2
     }
 }
 

@@ -7,6 +7,8 @@ struct LibraryView: View {
     @State private var selectedType: LibraryFilter = .all
     @State private var showInspector = false
     @State private var inspectedObject: WOMObject?
+    @State private var groupedObjects: [(date: Date, objects: [WOMObject])] = []
+    @State private var refreshTask: Task<Void, Never>?
 
     enum LibraryFilter: String, CaseIterable {
         case all = "All"
@@ -15,8 +17,8 @@ struct LibraryView: View {
         case media = "Media"
     }
 
-    /// Date-grouped objects matching current search + filter.
-    private var groupedObjects: [(date: Date, objects: [WOMObject])] {
+    /// Rebuild grouped objects — called on data change, not on every body evaluation.
+    private func refreshLibrary() {
         var objects = appState.womObjects
 
         // Type filter
@@ -51,7 +53,7 @@ struct LibraryView: View {
         let grouped = Dictionary(grouping: objects) { obj -> Date in
             cal.startOfDay(for: obj.createdAt)
         }
-        return grouped
+        groupedObjects = grouped
             .map { (date: $0.key, objects: $0.value.sorted { $0.createdAt > $1.createdAt }) }
             .sorted { $0.date > $1.date }
     }
@@ -107,6 +109,26 @@ struct LibraryView: View {
             }
         }
         .background(DesignSystem.Colors.page)
+        .onAppear { refreshLibrary() }
+        .onChange(of: appState.womObjects.count) { _, _ in
+            // Debounce: coalesce rapid-fire appends into a single refresh
+            refreshTask?.cancel()
+            refreshTask = Task {
+                try? await Task.sleep(for: .milliseconds(120))
+                guard !Task.isCancelled else { return }
+                refreshLibrary()
+            }
+        }
+        .onChange(of: selectedType) { _, _ in refreshLibrary() }
+        .onChange(of: searchText) { _, _ in
+            // Debounce search keystrokes to avoid O(n) filtering on every character
+            refreshTask?.cancel()
+            refreshTask = Task {
+                try? await Task.sleep(for: .milliseconds(200))
+                guard !Task.isCancelled else { return }
+                refreshLibrary()
+            }
+        }
         .sheet(isPresented: $showInspector) {
             if let obj = inspectedObject {
                 ObjectInspectorSheet(object: obj)
@@ -140,11 +162,26 @@ struct LibraryView: View {
 
     // MARK: - Empty State
 
+    @ViewBuilder
     private var emptyState: some View {
-        ContentUnavailableView {
-            Label("Your library is empty", systemImage: "archivebox")
-        } description: {
-            Text("Objects from Stream are automatically saved here.\nOr import a WOM Bundle to get started.")
+        if !searchText.isEmpty {
+            ContentUnavailableView {
+                Label("No results", systemImage: "magnifyingglass")
+            } description: {
+                Text("No objects match \"\(searchText)\"")
+            }
+        } else if selectedType != .all {
+            ContentUnavailableView {
+                Label("No \(selectedType.rawValue.lowercased())", systemImage: "tray")
+            } description: {
+                Text("Your library has no items of this type yet.")
+            }
+        } else {
+            ContentUnavailableView {
+                Label("Your library is empty", systemImage: "archivebox")
+            } description: {
+                Text("Objects from Stream are automatically saved here.\nOr import a WOM Bundle to get started.")
+            }
         }
     }
 
@@ -192,12 +229,12 @@ struct LibraryRow: View {
                 }
                 if let text = object.content?.text {
                     Text(text.stripHTML)
-                        .font(DesignSystem.Fonts.caption())
+                        .font(DesignSystem.Fonts.caption)
                         .foregroundStyle(DesignSystem.Colors.ink)
                         .lineLimit(1)
                 } else if let name = object.name {
                     Text(name)
-                        .font(DesignSystem.Fonts.caption())
+                        .font(DesignSystem.Fonts.caption)
                         .foregroundStyle(DesignSystem.Colors.ink)
                         .lineLimit(1)
                 }

@@ -60,7 +60,7 @@ struct IRCChatView: View {
         if let feedback = commandFeedback {
             VStack {
                 Text(feedback)
-                    .font(DesignSystem.Fonts.caption())
+                    .font(DesignSystem.Fonts.caption)
                     .foregroundStyle(.white)
                     .padding(.horizontal, DesignSystem.Spacing.md)
                     .padding(.vertical, DesignSystem.Spacing.sm)
@@ -221,7 +221,7 @@ struct IRCChatView: View {
                                 Spacer().frame(height: 80)
                                 ProgressView()
                                 Text("Waiting for messages...")
-                                    .font(DesignSystem.Fonts.caption())
+                                    .font(DesignSystem.Fonts.caption)
                                     .foregroundStyle(DesignSystem.Colors.pencil)
                                 Text("Joined \(manager.activeChannel?.name ?? "channels"). Messages appear when someone speaks.")
                                     .font(DesignSystem.Fonts.data(10))
@@ -394,7 +394,7 @@ struct IRCChatView: View {
 
                     Button { /* AddServerView sheet */ } label: {
                         Label("Add Server...", systemImage: "plus")
-                            .font(DesignSystem.Fonts.caption())
+                            .font(DesignSystem.Fonts.caption)
                     }
                 }
 
@@ -409,7 +409,7 @@ struct IRCChatView: View {
                 if !appState.irc.orchestrator.globalChannels.isEmpty {
                     Section("Popular") {
                         if appState.irc.orchestrator.isScanning {
-                            HStack { ProgressView(); Text("Scanning...").font(DesignSystem.Fonts.caption()) }
+                            HStack { ProgressView(); Text("Scanning...").font(DesignSystem.Fonts.caption) }
                         }
                         ForEach(appState.irc.orchestrator.globalChannels.prefix(25)) { ch in
                             Button {
@@ -459,7 +459,7 @@ struct IRCChatView: View {
                 }
                 .buttonStyle(.bordered)
                 .tint(isOnline ? DesignSystem.Colors.signal : DesignSystem.Colors.github)
-                .font(DesignSystem.Fonts.caption())
+                .font(DesignSystem.Fonts.caption)
                 Spacer()
                 Text("\(server.host):\(server.port)")
                     .font(DesignSystem.Fonts.data(10))
@@ -470,7 +470,7 @@ struct IRCChatView: View {
             // Channel list
             if channels.isEmpty {
                 Text("No channels joined")
-                    .font(DesignSystem.Fonts.caption())
+                    .font(DesignSystem.Fonts.caption)
                     .foregroundStyle(DesignSystem.Colors.pencil)
             }
             ForEach(channels) { conv in
@@ -680,7 +680,7 @@ struct QuickJoinField: View {
                 onJoin(ch, sid)
                 channel = ""
             }
-            .font(DesignSystem.Fonts.caption())
+            .font(DesignSystem.Fonts.caption)
             .disabled(channel.isEmpty)
         }
     }

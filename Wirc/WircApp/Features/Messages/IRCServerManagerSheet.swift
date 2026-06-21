@@ -61,7 +61,7 @@ struct IRCServerManagerSheet: View {
                             showJoinSheet = true
                         } label: {
                             Label("Join channel...", systemImage: "plus")
-                                .font(DesignSystem.Fonts.caption())
+                                .font(DesignSystem.Fonts.caption)
                         }
 
                         // Connect/Disconnect + Remove

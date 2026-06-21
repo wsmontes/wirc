@@ -75,7 +75,7 @@ struct IRCMessageDeckView: View {
             if let feedback = commandFeedback {
                 VStack {
                     Text(feedback)
-                        .font(DesignSystem.Fonts.caption())
+                        .font(DesignSystem.Fonts.caption)
                         .foregroundStyle(.white)
                         .padding(.horizontal, DesignSystem.Spacing.md)
                         .padding(.vertical, DesignSystem.Spacing.sm)
@@ -103,7 +103,7 @@ struct IRCMessageDeckView: View {
                                 .fill(statusColor(appState.irc.connectionStates[server.id] ?? .disconnected))
                                 .frame(width: 6, height: 6)
                             Text(server.name.isEmpty ? server.host : server.name)
-                                .font(DesignSystem.Fonts.caption())
+                                .font(DesignSystem.Fonts.caption)
                                 .foregroundStyle(DesignSystem.Colors.ink)
                         }
                         .padding(.horizontal, DesignSystem.Spacing.sm)
@@ -119,7 +119,7 @@ struct IRCMessageDeckView: View {
                         showServerManager = true
                     } label: {
                         Label("Add Server", systemImage: "plus")
-                            .font(DesignSystem.Fonts.caption())
+                            .font(DesignSystem.Fonts.caption)
                     }
                     .buttonStyle(.bordered)
                     .tint(DesignSystem.Colors.signal)
@@ -129,7 +129,7 @@ struct IRCMessageDeckView: View {
                     showServerManager = true
                 } label: {
                     Image(systemName: "gear")
-                        .font(DesignSystem.Fonts.caption())
+                        .font(DesignSystem.Fonts.caption)
                 }
                 .buttonStyle(.plain)
             }
@@ -436,7 +436,7 @@ struct IRCMessageDeckView: View {
                 .font(.system(size: 17, weight: .semibold))
                 .foregroundStyle(DesignSystem.Colors.ink)
             Text("Add a server to start chatting. You can connect to any IRC network — Libera.Chat, OFTC, or your own community server.")
-                .font(DesignSystem.Fonts.caption())
+                .font(DesignSystem.Fonts.caption)
                 .foregroundStyle(DesignSystem.Colors.pencil)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, DesignSystem.Spacing.xl)
@@ -484,7 +484,7 @@ struct IRCMessageDeckView: View {
                         Button(statusLabel(server.id)) {
                             toggleQuickConnection(server.id)
                         }
-                        .font(DesignSystem.Fonts.caption())
+                        .font(DesignSystem.Fonts.caption)
                         .buttonStyle(.bordered)
                         .tint(statusTint(server.id))
                     }
@@ -496,7 +496,7 @@ struct IRCMessageDeckView: View {
                     VStack(alignment: .leading, spacing: DesignSystem.Spacing.xs) {
                         HStack {
                             Text("Popular Channels")
-                                .font(DesignSystem.Fonts.caption())
+                                .font(DesignSystem.Fonts.caption)
                                 .foregroundStyle(DesignSystem.Colors.pencil)
                             Spacer()
                             if appState.irc.orchestrator.isScanning {
@@ -540,7 +540,7 @@ struct IRCMessageDeckView: View {
                         appState.irc.orchestrator.startScan()
                     } label: {
                         Label("Scan for channels", systemImage: "magnifyingglass")
-                            .font(DesignSystem.Fonts.caption())
+                            .font(DesignSystem.Fonts.caption)
                     }
                     .buttonStyle(.bordered)
                 }
@@ -549,7 +549,7 @@ struct IRCMessageDeckView: View {
                     showServerManager = true
                 } label: {
                     Label("Server Manager", systemImage: "gear")
-                        .font(DesignSystem.Fonts.caption())
+                        .font(DesignSystem.Fonts.caption)
                 }
                 .buttonStyle(.bordered)
                 .tint(DesignSystem.Colors.pencil)

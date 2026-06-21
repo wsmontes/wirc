@@ -176,7 +176,7 @@ struct ObjectInspectorSheet: View {
                             Label("Share", systemImage: "square.and.arrow.up")
                         }
                     }
-                    .font(DesignSystem.Fonts.caption())
+                    .font(DesignSystem.Fonts.caption)
                 }
             }
         }

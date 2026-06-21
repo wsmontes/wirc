@@ -6,37 +6,46 @@ struct StreamView: View {
     @Environment(AppState.self) private var appState
 
     @State private var selectedSource: String = "All"
+    @State private var sourceFilters: [String] = ["All"]
+    @State private var timeline: [WOMObject] = []
+    @State private var refreshTask: Task<Void, Never>?
+    @State private var isInitialLoad = true
 
-    /// Dynamic source filters — built from actual data.
-    private var sourceFilters: [String] {
+    /// Recompute filters & timeline once when underlying data changes (not on every body eval).
+    private func refreshTimeline() {
+        let posts = appState.feedObjects
+
+        // Source filters from actual data
         var sources = Set<String>()
-        for obj in appState.womObjects where obj.type.contains("wom:Post") {
+        for obj in posts {
             let network = obj.data["network"] ?? ""
             if !network.isEmpty { sources.insert(network.capitalized) }
         }
-        // Fixed preferred order
         let order = ["Rss", "Mastodon", "Youtube", "Podcast", "Github"]
         var sorted = order.filter { sources.contains($0) }
         for s in sources.sorted() where !order.contains(s) {
             sorted.append(s)
         }
-        return ["All"] + sorted
-    }
+        sourceFilters = ["All"] + sorted
 
-    /// Posts timeline — capped at 200, reverse chronological.
-    private var timeline: [WOMObject] {
-        let posts = appState.womObjects.filter { $0.type.contains("wom:Post") }
-        let filtered: [WOMObject]
+        // Timeline — for "All" mode: round-robin by source so each card is a
+        // different provider. Within each source, newest-first chronology.
         if selectedSource == "All" {
-            filtered = posts
+            timeline = mixedTimeline(posts, cap: 200)
         } else {
-            filtered = posts.filter { ($0.data["network"] ?? "").capitalized == selectedSource }
+            let filtered = posts.filter { ($0.data["network"] ?? "").capitalized == selectedSource }
+            timeline = Array(filtered.prefix(200))
         }
-        return Array(filtered.sorted { $0.createdAt > $1.createdAt }.prefix(200))
     }
 
     var body: some View {
         VStack(spacing: 0) {
+            // Status bar — visible during refresh, after summary, or on error
+            if appState.feed.isRefreshing || appState.feed.refreshSummary != nil || appState.feed.feedError != nil {
+                statusBar
+                    .transition(.move(edge: .top).combined(with: .opacity))
+            }
+
             // Dynamic source filter chips
             if sourceFilters.count > 1 {
                 filterBar
@@ -58,10 +67,96 @@ struct StreamView: View {
             }
         }
         .background(DesignSystem.Colors.page)
+        .onAppear {
+            refreshTimeline()
+            isInitialLoad = false
+        }
+        .onChange(of: appState.womObjects.count) { _, _ in
+            refreshTask?.cancel()
+            refreshTask = Task {
+                try? await Task.sleep(for: .milliseconds(100))
+                guard !Task.isCancelled else { return }
+                refreshTimeline()
+            }
+        }
+        .onChange(of: appState.feed.isRefreshing) { _, refreshing in
+            if !refreshing { isInitialLoad = false }
+        }
+        .onChange(of: selectedSource) { _, _ in refreshTimeline() }
         .refreshable {
             let newObjects = await appState.feed.refreshAllFeedsBatched(womStore: appState.store)
-            appState.womObjects.append(contentsOf: newObjects)
+            await MainActor.run { appState.womObjects.append(contentsOf: newObjects) }
         }
+    }
+
+    // MARK: - Status Bar
+
+    private var statusBar: some View {
+        let p = appState.feed.refreshProgress
+        let fraction = p.total > 0 ? Double(p.completed) / Double(p.total) : 0
+        let isComplete = !appState.feed.isRefreshing && appState.feed.refreshSummary != nil
+        let hasError = appState.feed.feedError != nil
+
+        return VStack(spacing: DesignSystem.Spacing.xs) {
+            // Progress track (hidden for completion or error)
+            if !isComplete && !hasError {
+                GeometryReader { geo in
+                    RoundedRectangle(cornerRadius: 2)
+                        .fill(DesignSystem.Colors.border)
+                        .overlay(alignment: .leading) {
+                            RoundedRectangle(cornerRadius: 2)
+                                .fill(hasError ? Color.red : DesignSystem.Colors.signal)
+                                .frame(width: max(4, geo.size.width * fraction))
+                                .animation(.easeInOut(duration: 0.3), value: fraction)
+                        }
+                }
+                .frame(height: 3)
+                .padding(.horizontal, DesignSystem.Spacing.lg)
+            }
+
+            // Label
+            HStack(spacing: DesignSystem.Spacing.xs) {
+                if hasError {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .font(.system(size: 11))
+                        .foregroundStyle(DesignSystem.Colors.signal)
+                    if let err = appState.feed.feedError {
+                        Text(err)
+                            .font(DesignSystem.Fonts.provenanceDetail)
+                            .lineLimit(2)
+                    }
+                    Spacer()
+                    Button("Dismiss") { appState.feed.feedError = nil }
+                        .font(DesignSystem.Fonts.data(11))
+                        .foregroundStyle(DesignSystem.Colors.signal)
+                } else if isComplete {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.system(size: 11))
+                        .foregroundStyle(DesignSystem.Colors.github)
+                } else {
+                    Image(systemName: "arrow.triangle.2.circlepath")
+                        .font(.system(size: 10))
+                }
+                if isComplete, let summary = appState.feed.refreshSummary {
+                    Text(summary)
+                        .font(DesignSystem.Fonts.provenanceDetail)
+                } else if !hasError {
+                    Text("\(p.completed)/\(p.total) sources")
+                        .font(DesignSystem.Fonts.provenanceDetail)
+                    Spacer()
+                    Text("\(timeline.count) posts")
+                        .font(DesignSystem.Fonts.provenanceDetail)
+                        .foregroundStyle(DesignSystem.Colors.pencil)
+                }
+            }
+            .foregroundStyle(DesignSystem.Colors.pencil)
+            .padding(.horizontal, DesignSystem.Spacing.lg)
+        }
+        .padding(.top, DesignSystem.Spacing.xs)
+        .padding(.bottom, DesignSystem.Spacing.xs)
+        .background(hasError ? DesignSystem.Colors.signal.opacity(0.08) : DesignSystem.Colors.surface.opacity(0.8))
+        .animation(.easeInOut(duration: 0.3), value: isComplete)
+        .animation(.easeInOut(duration: 0.3), value: hasError)
     }
 
     // MARK: - Filter Bar
@@ -90,13 +185,95 @@ struct StreamView: View {
         }
     }
 
+    // MARK: - Interleaving
+
+    /// Pure round-robin by source: one card per provider per round, newest-first
+    /// within each source. After interleaving, applies a diversity pass that
+    /// swaps out consecutive same-type cards when a suitable alternative exists.
+    ///
+    /// Result: RSS → Mastodon → YouTube → Podcast → GitHub → RSS → Mastodon → …
+    /// (never two of the same source in a row while enough variety remains).
+    private func mixedTimeline(_ posts: [WOMObject], cap: Int) -> [WOMObject] {
+        guard !posts.isEmpty else { return [] }
+
+        // 1. Group by source network (posts already sorted by createdAt desc)
+        var buckets: [String: [WOMObject]] = [:]
+        for post in posts {
+            let network = post.data["network"] ?? "other"
+            buckets[network, default: []].append(post)
+        }
+
+        // 2. Source order: text-first, then media, then other → visual diversity
+        let orderedKeys = ["rss", "mastodon", "github", "youtube", "podcast"] +
+            buckets.keys.filter { !["rss", "mastodon", "github", "youtube", "podcast"].contains($0) }
+
+        // 3. Round-robin: one from each source per round
+        var result: [WOMObject] = []
+        var round = 0
+        while result.count < cap {
+            var added = false
+            for key in orderedKeys {
+                guard let bucket = buckets[key], round < bucket.count else { continue }
+                result.append(bucket[round])
+                added = true
+                if result.count >= cap { break }
+            }
+            if !added { break }
+            round += 1
+        }
+
+        // 4. Diversity pass: avoid consecutive same-source cards by looking ahead
+        // and swapping with the next different-source card when possible.
+        var i = 1
+        while i < result.count - 1 {
+            let prevNetwork = result[i - 1].data["network"] ?? ""
+            let curNetwork = result[i].data["network"] ?? ""
+            if prevNetwork == curNetwork {
+                // Find the next card from a different source to swap with
+                if let swapIdx = result[i...].firstIndex(where: { ($0.data["network"] ?? "") != prevNetwork }),
+                   swapIdx != i {
+                    result.swapAt(i, swapIdx)
+                }
+            }
+            i += 1
+        }
+
+        return Array(result.prefix(cap))
+    }
+
     // MARK: - Empty State
 
+    @ViewBuilder
     private var emptyState: some View {
-        ContentUnavailableView(
-            "No posts yet",
-            systemImage: "waveform",
-            description: Text("Add RSS feeds or Mastodon accounts in Workshop to start your stream.")
-        )
+        if appState.feed.isRefreshing || isInitialLoad {
+            VStack(spacing: DesignSystem.Spacing.lg) {
+                Spacer()
+                ProgressView()
+                    .scaleEffect(1.2)
+                VStack(spacing: DesignSystem.Spacing.sm) {
+                    Text("Gathering your stream…")
+                        .font(DesignSystem.Fonts.headline())
+                        .foregroundStyle(DesignSystem.Colors.ink)
+                    Text("Fetching the latest from \(appState.feed.subscriptionCount) sources")
+                        .font(DesignSystem.Fonts.provenanceDetail)
+                        .foregroundStyle(DesignSystem.Colors.pencil)
+                        .multilineTextAlignment(.center)
+                }
+                Spacer()
+            }
+            .frame(maxWidth: .infinity)
+        } else if appState.feed.subscriptionCount == 0 {
+            ContentUnavailableView(
+                "No sources yet",
+                systemImage: "antenna.radiowaves.left.and.right",
+                description: Text("Add RSS feeds or Mastodon accounts in Workshop to start your stream.")
+            )
+        } else {
+            ContentUnavailableView(
+                "No posts yet",
+                systemImage: "waveform",
+                description: Text("Pull to refresh or check back later.")
+            )
+        }
     }
 }

@@ -195,7 +195,7 @@ struct FeedCard: View {
             }
             if let spoiler = post.data["spoiler"], !spoiler.isEmpty {
                 Text(spoiler)
-                    .font(DesignSystem.Fonts.headline)
+                    .font(DesignSystem.Fonts.headline())
                     .foregroundStyle(DesignSystem.Colors.ink)
                     .padding(.horizontal, DesignSystem.Spacing.md)
             }
@@ -264,7 +264,7 @@ struct FeedCard: View {
         VStack(alignment: .leading, spacing: DesignSystem.Spacing.xs) {
             if let name = post.name, !name.isEmpty {
                 Text(name)
-                    .font(DesignSystem.Fonts.headline)
+                    .font(DesignSystem.Fonts.headline())
                     .foregroundStyle(DesignSystem.Colors.ink)
                     .lineLimit(3)
                     .padding(.horizontal, DesignSystem.Spacing.md)
@@ -330,7 +330,7 @@ struct FeedCard: View {
                     .foregroundStyle(DesignSystem.Colors.ink)
                     .lineLimit(3)
                 Text(post.attributedTo?.name ?? "")
-                    .font(DesignSystem.Fonts.caption())
+                    .font(DesignSystem.Fonts.caption)
                     .foregroundStyle(DesignSystem.Colors.pencil)
                 HStack(spacing: DesignSystem.Spacing.sm) {
                     if let dur = post.data["duration"], !dur.isEmpty {
@@ -373,7 +373,7 @@ struct FeedCard: View {
                     .foregroundStyle(DesignSystem.Colors.ink)
                     .lineLimit(2)
                 Text(post.attributedTo?.name ?? post.data["feedTitle"] ?? "")
-                    .font(DesignSystem.Fonts.caption())
+                    .font(DesignSystem.Fonts.caption)
                     .foregroundStyle(DesignSystem.Colors.pencil)
                 HStack(spacing: DesignSystem.Spacing.sm) {
                     if let dur = post.data["duration"], !dur.isEmpty {
