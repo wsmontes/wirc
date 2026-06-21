@@ -7,11 +7,11 @@ struct WorkshopView: View {
     @State private var showAddFeed = false
     @State private var showDebug = false
 
-    // Governance defaults (stored in AppState)
-    @State private var adsUse: String = WOMAdsUse.notAllowed.rawValue
-    @State private var agentUse: String = "allowed"
-    @State private var defaultSharing: String = WOMSharing.friendsOnly.rawValue
-    @State private var retention: String = "forever"
+    // Governance defaults (persisted in AppStorage)
+    @AppStorage("wirc.governance.adsUse") private var adsUse: String = WOMAdsUse.notAllowed.rawValue
+    @AppStorage("wirc.governance.agentUse") private var agentUse: String = "allowed"
+    @AppStorage("wirc.governance.sharing") private var defaultSharing: String = WOMSharing.friendsOnly.rawValue
+    @AppStorage("wirc.governance.retention") private var retention: String = "forever"
 
     var body: some View {
         List {
@@ -99,40 +99,32 @@ struct WorkshopView: View {
 
     private var governanceSection: some View {
         Section {
-            HStack {
-                Text("Ads use")
-                Spacer()
-                Text(adsUse)
-                    .font(DesignSystem.Fonts.data(11))
-                    .foregroundStyle(DesignSystem.Colors.pencil)
+            Picker("Ads use", selection: $adsUse) {
+                Text("Not allowed").tag(WOMAdsUse.notAllowed.rawValue)
+                Text("Allowed").tag(WOMAdsUse.allowed.rawValue)
             }
-            HStack {
-                Text("Agent use")
-                Spacer()
-                Text(agentUse)
-                    .font(DesignSystem.Fonts.data(11))
-                    .foregroundStyle(DesignSystem.Colors.pencil)
+            Picker("Agent use", selection: $agentUse) {
+                Text("Allowed").tag("allowed")
+                Text("Restricted").tag("restricted")
+                Text("Prohibited").tag("prohibited")
             }
-            HStack {
-                Text("Default sharing")
-                Spacer()
-                Text(defaultSharing)
-                    .font(DesignSystem.Fonts.data(11))
-                    .foregroundStyle(DesignSystem.Colors.pencil)
+            Picker("Default sharing", selection: $defaultSharing) {
+                ForEach(WOMSharing.allCases, id: \.rawValue) { level in
+                    Text(level.rawValue.capitalized).tag(level.rawValue)
+                }
             }
-            HStack {
-                Text("Retention")
-                Spacer()
-                Text(retention)
-                    .font(DesignSystem.Fonts.data(11))
-                    .foregroundStyle(DesignSystem.Colors.pencil)
+            Picker("Retention", selection: $retention) {
+                Text("Forever").tag("forever")
+                Text("1 year").tag("1y")
+                Text("90 days").tag("90d")
+                Text("30 days").tag("30d")
             }
         } header: {
             Text("Governance Defaults".uppercased())
                 .font(DesignSystem.Fonts.data(11))
                 .foregroundStyle(DesignSystem.Colors.pencil)
         } footer: {
-            Text("These defaults apply to new objects. Changing them does not retroactively modify existing objects.")
+            Text("Applied to new objects created from this device. Existing objects are not modified.")
                 .font(DesignSystem.Fonts.data(10))
                 .foregroundStyle(DesignSystem.Colors.pencil)
         }

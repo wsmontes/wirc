@@ -66,7 +66,7 @@ enum WOMAdsUse: String, Codable {
 }
 
 /// Sharing constraint per WOM 0.6 §13.
-enum WOMSharing: String, Codable {
+enum WOMSharing: String, Codable, CaseIterable {
     case localOnly = "local_only"
     case directRecipient = "direct_recipient"
     case friendsOnly = "friends_only"
