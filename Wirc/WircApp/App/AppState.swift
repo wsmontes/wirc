@@ -25,7 +25,63 @@ final class AppState {
             if womObjects.count > 2000 {
                 womObjects = Array(womObjects.suffix(2000))
             }
+            invalidateIndexes()
         }
+    }
+
+    // MARK: - Lazy indexes (rebuilt once per womObjects mutation, on-demand)
+    private var _messagesByChannelKey: [String: [WOMObject]] = [:]
+    private var _systemEventsByChannelKey: [String: [WOMObject]] = [:]
+    private var _feedPosts: [WOMObject] = []
+    private var indexesValid = false
+
+    private func invalidateIndexes() { indexesValid = false }
+
+    private func ensureIndexes() {
+        guard !indexesValid else { return }
+        var messages: [String: [WOMObject]] = [:]
+        var systemEvents: [String: [WOMObject]] = [:]
+        var posts: [WOMObject] = []
+
+        for obj in womObjects {
+            if obj.type.contains("wom:Message") {
+                if let server = obj.data["server"], let channel = obj.data["channel"] {
+                    let key = "\(server)|\(channel.lowercased())"
+                    messages[key, default: []].append(obj)
+                }
+            }
+            if obj.type.contains("wom:SystemEvent") {
+                if let server = obj.data["server"] {
+                    let channel = obj.data["channel"] ?? ""
+                    let key = "\(server)|\(channel.lowercased())"
+                    systemEvents[key, default: []].append(obj)
+                }
+            }
+            if obj.type.contains("wom:Post") {
+                posts.append(obj)
+            }
+        }
+
+        // Sort each bucket once
+        for key in messages.keys { messages[key]?.sort { $0.createdAt < $1.createdAt } }
+        for key in systemEvents.keys { systemEvents[key]?.sort { $0.createdAt < $1.createdAt } }
+        posts.sort { $0.createdAt > $1.createdAt }
+
+        _messagesByChannelKey = messages
+        _systemEventsByChannelKey = systemEvents
+        _feedPosts = posts
+        indexesValid = true
+    }
+
+    /// Pre-built messages index — O(1) lookup by channel key.
+    var messagesByChannelKey: [String: [WOMObject]] {
+        ensureIndexes()
+        return _messagesByChannelKey
+    }
+    /// Pre-built system events index — O(1) lookup by channel key.
+    var systemEventsByChannelKey: [String: [WOMObject]] {
+        ensureIndexes()
+        return _systemEventsByChannelKey
     }
 
     // MARK: - Mastodon
@@ -62,11 +118,19 @@ final class AppState {
         }
         loadMastodonAccounts()
         let loaded = DefaultFeedsLoader.loadIfEmpty(into: feed.subscriptionStore)
-        // Always refresh feeds on launch (even if store already had subscriptions)
+        // Load previously saved objects from disk first, then fetch new content.
+        // Without this, every launch starts with an empty timeline and only shows
+        // items published since the last session (favouring frequently-updated feeds).
         Task { [weak self] in
             guard let self else { return }
-            await self.feed.refreshAllFeedsBatched(womStore: self.store) { newObjects in
-                await MainActor.run { self.womObjects.append(contentsOf: newObjects) }
+            // 1. Restore existing items from persistent store
+            if let existing = try? await self.store.all(), !existing.isEmpty {
+                await MainActor.run { self.womObjects = Array(existing.suffix(2000)) }
+            }
+            // 2. Fetch new items and append
+            let allNew = await self.feed.refreshAllFeedsBatched(womStore: self.store)
+            if !allNew.isEmpty {
+                await MainActor.run { self.womObjects.append(contentsOf: allNew) }
             }
         }
     }
@@ -129,9 +193,17 @@ final class AppState {
     // MARK: - Mastodon
     private let mastodonAccountsKey = "wirc.mastodonAccounts"
     private func saveMastodonAccounts() { if let d = try? JSONEncoder().encode(mastodonAccounts) { UserDefaults.standard.set(d, forKey: mastodonAccountsKey) } }
-    private func loadMastodonAccounts() { /* existing logic unchanged */ }
+    private func loadMastodonAccounts() {
+        guard let data = UserDefaults.standard.data(forKey: mastodonAccountsKey) else { return }
+        if let accounts = try? JSONDecoder().decode([MastodonServerConfig].self, from: data) {
+            mastodonAccounts = accounts
+        }
+    }
 
-    func addMastodonAccount(name: String, instanceURL: String, token: String) { /* existing logic unchanged */ }
+    func addMastodonAccount(name: String, instanceURL: String, token: String) {
+        let account = MastodonServerConfig(id: UUID(), name: name, instanceURL: instanceURL, accessToken: token)
+        mastodonAccounts.append(account)
+    }
     func removeMastodonAccount(id: UUID) { mastodonAccounts.removeAll { $0.id == id }; mastodonClients.removeValue(forKey: id) }
 
     func refreshMastodonFeed(accountId: UUID) {
@@ -194,21 +266,23 @@ final class AppState {
     func conversations(forServer server: String) -> [IRCManager.Conversation] { irc.conversations(forServer: server) }
 
     func messagesFor(server: String, channel: String) -> [WOMObject] {
-        womObjects.filter { obj in
-            guard obj.type.contains("wom:Message") else { return false }
-            return obj.data["server"] == server && obj.data["channel"] == channel
-        }.sorted { $0.createdAt < $1.createdAt }
+        let key = "\(server)|\(channel.lowercased())"
+        return messagesByChannelKey[key] ?? []
     }
 
     func systemEventsFor(server: String, channel: String) -> [WOMObject] {
-        womObjects.filter { obj in
-            guard obj.type.contains("wom:SystemEvent") else { return false }
-            guard obj.data["server"] == server else { return false }
+        let msgs = systemEventsByChannelKey.flatMap { key, events in
+            key.hasPrefix("\(server)|") ? events : []
+        }
+        return msgs.filter { obj in
             let c = obj.data["channel"] ?? ""
-            return c == channel || !c.isEmpty
+            return c == channel
         }.sorted { $0.createdAt < $1.createdAt }
     }
 
     // MARK: - Queries
-    var feedObjects: [WOMObject] { womObjects.filter { $0.type.contains("wom:Post") }.sorted { $0.createdAt > $1.createdAt } }
+    var feedObjects: [WOMObject] {
+        ensureIndexes()
+        return _feedPosts
+    }
 }

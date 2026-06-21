@@ -207,6 +207,7 @@ struct WorkshopView: View {
 
 struct MastodonTransportDetail: View {
     @Environment(AppState.self) private var appState
+    @State private var showAddMastodon = false
 
     var body: some View {
         List {
@@ -222,8 +223,25 @@ struct MastodonTransportDetail: View {
                         .foregroundStyle(DesignSystem.Colors.pencil)
                 }
             }
+            .onDelete { indexSet in
+                for idx in indexSet {
+                    appState.removeMastodonAccount(id: appState.mastodonAccounts[idx].id)
+                }
+            }
         }
         .navigationTitle("Mastodon")
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button { showAddMastodon = true } label: {
+                    Image(systemName: "plus")
+                }
+            }
+        }
+        .sheet(isPresented: $showAddMastodon) {
+            AddMastodonView { name, url, token in
+                appState.addMastodonAccount(name: name, instanceURL: url, token: token)
+            }
+        }
     }
 }
 
