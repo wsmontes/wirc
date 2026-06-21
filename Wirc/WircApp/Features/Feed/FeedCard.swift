@@ -283,6 +283,23 @@ struct FeedCard: View {
                     .lineLimit(8)
                     .padding(.horizontal, DesignSystem.Spacing.md)
             }
+            // Show enclosures that are images
+            if let encURL = post.data["enclosureURL"],
+               let encType = post.data["enclosureType"],
+               encType.hasPrefix("image/"),
+               let url = URL(string: encURL) {
+                AsyncImage(url: url) { phase in
+                    switch phase {
+                    case .success(let image):
+                        image.resizable().scaledToFit()
+                            .frame(maxHeight: 160)
+                            .clipShape(RoundedRectangle(cornerRadius: DesignSystem.Radius.thumbnail))
+                    default:
+                        EmptyView()
+                    }
+                }
+                .padding(.horizontal, DesignSystem.Spacing.md)
+            }
         }
     }
 
