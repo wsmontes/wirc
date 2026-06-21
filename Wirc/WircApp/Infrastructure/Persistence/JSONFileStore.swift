@@ -97,15 +97,27 @@ final class JSONFileStore: WOMStore, @unchecked Sendable {
     }
 
     func get(id: String) async throws -> WOMObject? {
-        queue.sync { index[id] }
+        await withCheckedContinuation { continuation in
+            queue.async { [weak self] in
+                continuation.resume(returning: self?.index[id])
+            }
+        }
     }
 
     func list(type: String?) async throws -> [WOMObject] {
-        queue.sync {
-            let all = Array(index.values)
-            guard let type = type else { return all }
-            // Array.contains checks exact element match since $0.type is [String]
-            return all.filter { $0.type.contains(type) }
+        await withCheckedContinuation { continuation in
+            queue.async { [weak self] in
+                guard let self else {
+                    continuation.resume(returning: [])
+                    return
+                }
+                let all = Array(self.index.values)
+                guard let type = type else {
+                    continuation.resume(returning: all)
+                    return
+                }
+                continuation.resume(returning: all.filter { $0.type.contains(type) })
+            }
         }
     }
 
@@ -131,7 +143,15 @@ final class JSONFileStore: WOMStore, @unchecked Sendable {
     }
 
     func all() async throws -> [WOMObject] {
-        queue.sync { Array(index.values) }
+        await withCheckedContinuation { continuation in
+            queue.async { [weak self] in
+                guard let self else {
+                    continuation.resume(returning: [])
+                    return
+                }
+                continuation.resume(returning: Array(self.index.values))
+            }
+        }
     }
 
     /// Atomically checks for an existing object with the same canonical URL
@@ -164,14 +184,22 @@ final class JSONFileStore: WOMStore, @unchecked Sendable {
 
     /// Returns true if an object with the given canonical URL already exists.
     func contains(canonicalURL: String) async -> Bool {
-        queue.sync {
-            index.values.contains { $0.data["canonicalUrl"] == canonicalURL }
+        await withCheckedContinuation { continuation in
+            queue.async { [weak self] in
+                continuation.resume(returning: self?.index.values.contains { $0.data["canonicalUrl"] == canonicalURL } ?? false)
+            }
         }
     }
 
     /// Returns count of stored objects (for tests/debug).
     var count: Int {
-        queue.sync { index.count }
+        get async {
+            await withCheckedContinuation { continuation in
+                queue.async { [weak self] in
+                    continuation.resume(returning: self?.index.count ?? 0)
+                }
+            }
+        }
     }
 
     // MARK: - Private
@@ -223,6 +251,12 @@ final class JSONFileStore: WOMStore, @unchecked Sendable {
 
     /// The number of objects currently in the on-disk index (for tests/debug).
     var diskCount: Int {
-        queue.sync { index.count }
+        get async {
+            await withCheckedContinuation { continuation in
+                queue.async { [weak self] in
+                    continuation.resume(returning: self?.index.count ?? 0)
+                }
+            }
+        }
     }
 }
