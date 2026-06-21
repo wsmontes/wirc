@@ -61,6 +61,7 @@
 		DF00A7A6ADD9370AF764D3D9 /* IRCClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9C0B724FA14588CD378CBD1 /* IRCClient.swift */; };
 		E44885986D6D4884933A8820 /* MastodonToWOMAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B266AC0655998332A501F98 /* MastodonToWOMAdapter.swift */; };
 		E507E3CC098099E1AACAB37A /* AddServerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 354688CFC206205439A3FFFF /* AddServerView.swift */; };
+		539C6C9FEBC248FDF7F16F61 /* KeychainStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBD1E1B7AFDACE9DD2F2F88B /* KeychainStore.swift */; };
 		EB3E4FCDC74623DA8E2D0F0D /* FeedToWOMAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = F48F757875C2347632356611 /* FeedToWOMAdapter.swift */; };
 		EC8AF2CDF21393C5E26B11D3 /* mastodon_config.json in Resources */ = {isa = PBXBuildFile; fileRef = 7FAAB9DB82E9EA69AB9BFAB4 /* mastodon_config.json */; };
 		EFAE2659F2ED47FD1DE8817C /* IRCEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD36B880B97E4EDF5E8A0309 /* IRCEvent.swift */; };
@@ -142,6 +143,7 @@
 		E83E547AD92C7A243ABB80AF /* DesignSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignSystem.swift; sourceTree = "<group>"; };
 		EC2AB09D725C342CEACEAEF1 /* MastodonModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MastodonModels.swift; sourceTree = "<group>"; };
 		F48F757875C2347632356611 /* FeedToWOMAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedToWOMAdapter.swift; sourceTree = "<group>"; };
+		FBD1E1B7AFDACE9DD2F2F88B /* KeychainStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainStore.swift; sourceTree = "<group>"; };
 		FDE1F18BDE942722566DA463 /* DebugView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugView.swift; sourceTree = "<group>"; };
 		B2C3D4E5F60718293A0B1C2D /* StreamView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamView.swift; sourceTree = "<group>"; };
 		A4B5C6D7E8F90019283A4B5D /* LibraryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryView.swift; sourceTree = "<group>"; };
@@ -293,6 +295,7 @@
 			children = (
 				7FAAB9DB82E9EA69AB9BFAB4 /* mastodon_config.json */,
 				CC577F22552016DCF3516362 /* MastodonClient.swift */,
+				FBD1E1B7AFDACE9DD2F2F88B /* KeychainStore.swift */,
 				EC2AB09D725C342CEACEAEF1 /* MastodonModels.swift */,
 				2B266AC0655998332A501F98 /* MastodonToWOMAdapter.swift */,
 			);
@@ -511,6 +514,7 @@
 				D3A953C8893F023EFB20D6CB /* InMemoryWOMStore.swift in Sources */,
 				798F1A5BB0ECD2C6DB4C27EB /* JSONFileStore.swift in Sources */,
 				B36A1CC39ECE5F3BDBBE957B /* MastodonClient.swift in Sources */,
+				539C6C9FEBC248FDF7F16F61 /* KeychainStore.swift in Sources */,
 				6373D6852F0496AFEA75A677 /* MastodonModels.swift in Sources */,
 				D6D4D2F2F8364DD2BFBCC460 /* IRCChatView.swift in Sources */,
 				1D0FF75EE99E46A3B0E77932 /* WOMCrypto.swift in Sources */,

@@ -195,11 +195,29 @@ final class AppState {
 
     // MARK: - Mastodon
     private let mastodonAccountsKey = "wirc.mastodonAccounts"
-    private func saveMastodonAccounts() { if let d = try? JSONEncoder().encode(mastodonAccounts) { UserDefaults.standard.set(d, forKey: mastodonAccountsKey) } }
+    private func saveMastodonAccounts() {
+        // Store token in Keychain, rest in UserDefaults
+        var safeAccounts: [MastodonStoredConfig] = []
+        for account in mastodonAccounts {
+            let key = "wirc.mastodon.token.\(account.id.uuidString)"
+            if let tokenData = account.accessToken.data(using: .utf8) {
+                KeychainStore.save(key: key, data: tokenData)
+            }
+            safeAccounts.append(MastodonStoredConfig(id: account.id, name: account.name, instanceURL: account.instanceURL))
+        }
+        if let d = try? JSONEncoder().encode(safeAccounts) {
+            UserDefaults.standard.set(d, forKey: mastodonAccountsKey)
+        }
+    }
     private func loadMastodonAccounts() {
         guard let data = UserDefaults.standard.data(forKey: mastodonAccountsKey) else { return }
-        if let accounts = try? JSONDecoder().decode([MastodonServerConfig].self, from: data) {
-            mastodonAccounts = accounts
+        if let storedAccounts = try? JSONDecoder().decode([MastodonStoredConfig].self, from: data) {
+            mastodonAccounts = storedAccounts.compactMap { stored in
+                let key = "wirc.mastodon.token.\(stored.id.uuidString)"
+                guard let tokenData = KeychainStore.load(key: key),
+                      let token = String(data: tokenData, encoding: .utf8) else { return nil }
+                return MastodonServerConfig(id: stored.id, name: stored.name, instanceURL: stored.instanceURL, accessToken: token)
+            }
         }
     }
 

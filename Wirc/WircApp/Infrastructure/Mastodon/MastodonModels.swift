@@ -13,6 +13,13 @@ struct MastodonServerConfig: Codable, Identifiable, Equatable {
     }
 }
 
+/// Lightweight persisted config — no accessToken; token goes in Keychain instead.
+struct MastodonStoredConfig: Codable, Identifiable {
+    var id: UUID
+    var name: String
+    var instanceURL: String
+}
+
 // MARK: - Account
 
 struct MastodonAccount: Codable, Identifiable {
