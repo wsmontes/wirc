@@ -26,6 +26,7 @@ final class IRCClient: @unchecked Sendable {
     private var nickRetry = 0
     private var shouldReconnect = false
     private var writeTag = 0
+    weak var automation: IRCAutomation?
 
     enum ClientState { case disconnected, connecting, registering, online }
 
@@ -51,9 +52,10 @@ final class IRCClient: @unchecked Sendable {
     func disconnect() {
         shouldReconnect = false
         write("QUIT :Wirc", tag: 0)
-        connection?.cancel()
-        connection = nil; state = .disconnected
-        emit(.disconnected(reason: nil))
+        // Give the write time to flush, then cancel
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+            self?.connection?.cancel()
+        }
     }
 
     func join(channel: String) {
@@ -101,9 +103,13 @@ final class IRCClient: @unchecked Sendable {
 
     private func scheduleReconnect() {
         guard shouldReconnect else { return }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [weak self] in
-            guard let self, self.shouldReconnect, case .disconnected = self.state else { return }
-            self.connect()
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            let delay = self.automation?.reconnectDelay(for: self.config.id) ?? 3.0
+            DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
+                guard let self, self.shouldReconnect, case .disconnected = self.state else { return }
+                self.connect()
+            }
         }
     }
 
@@ -167,7 +173,21 @@ final class IRCClient: @unchecked Sendable {
                     for ch in config.autoJoinChannels { join(channel: ch) }
                 }
             }
-            if line.contains(" 433 ") { nickRetry += 1; if nickRetry <= 5 { write("NICK \(config.nickname)\(nickRetry)", tag: 0) } }
+            if line.contains(" 433 ") {
+                nickRetry += 1
+                if nickRetry > 5 {
+                    onEvent?(.error("Could not register nickname on \(config.host) after 5 attempts"))
+                    disconnect()
+                    return
+                }
+                write("NICK \(config.nickname)\(nickRetry)", tag: 0)
+            }
+            if line.contains(" 465 ") || line.contains(" 463 ") {
+                shouldReconnect = false
+                onEvent?(.error("Banned from \(config.host)"))
+                connection?.cancel()
+                return
+            }
             var evt = IRCParser.parse(rawLine: line, server: config.host)
             if case .ctcpQuery(let n, let c, let a) = evt { handleCTCP(nick: n, cmd: c, arg: a); evt = .rawLine(line) }
             emit(evt)

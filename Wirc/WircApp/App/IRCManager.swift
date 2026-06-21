@@ -125,6 +125,7 @@ final class IRCManager {
         guard let config = servers.first(where: { $0.id == configId }) else { return }
         connectionStates[configId] = .connecting
         let client = IRCClient(config: config)
+        client.automation = automation
         clients[configId] = client
         client.onEvent = { [weak self] event in
             Task { @MainActor in self?.handleEvent(event, serverId: configId) }
@@ -191,15 +192,9 @@ final class IRCManager {
             if let client = clients[serverId] {
                 automation.autoIdentify(serverHost: config.host, client: client)
             }
+            // Re-join channels from previous session (IRCClient already joins autoJoinChannels)
             if let pending = joinedChannels[serverId] {
                 for ch in pending { clients[serverId]?.join(channel: ch) }
-            }
-            for ch in config.autoJoinChannels {
-                let c = ch.hasPrefix("#") ? ch : "#\(ch)"
-                if !(joinedChannels[serverId]?.contains(c) ?? false) {
-                    joinedChannels[serverId, default: []].append(c)
-                    clients[serverId]?.join(channel: c)
-                }
             }
             // Auto-scan + auto-join on first connect (once per launch)
             if orchestrator.globalChannels.isEmpty && !orchestrator.isScanning {
@@ -208,7 +203,10 @@ final class IRCManager {
             scheduleAutoJoin()
         case .disconnected(let reason):
             connectionStates[serverId] = .disconnected
-            channelUsers.removeAll()
+            // Only clear user lists for the disconnected server, not all servers
+            channelUsers = channelUsers.filter { key, _ in
+                !key.hasPrefix("\(config.host)|")
+            }
             if reason != nil { automation.onDisconnect(serverId: serverId) }
         case .names(let channel, let names):
             let chList = joinedChannels[serverId] ?? []
@@ -284,7 +282,14 @@ final class IRCManager {
         } else {
             // System events are batched to avoid UI overload
             womBatch.append(contentsOf: objects)
-            if womBatchTimer == nil {
+            // Flush immediately if batch grows too large (prevents memory spikes during bursts)
+            if womBatch.count >= 100 {
+                womBatchTimer?.invalidate()
+                womBatchTimer = nil
+                let batch = womBatch
+                womBatch = []
+                onWOMObjects?(batch)
+            } else if womBatchTimer == nil {
                 womBatchTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { [weak self] _ in
                     guard let self else { return }
                     self.womBatchTimer = nil
