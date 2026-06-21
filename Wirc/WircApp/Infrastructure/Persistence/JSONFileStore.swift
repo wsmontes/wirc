@@ -10,8 +10,12 @@ import os.log
 /// are `let` constants set at init and never mutated.
 final class JSONFileStore: WOMStore, @unchecked Sendable {
     private var index: [String: WOMObject] = [:]
+    /// Maps canonicalUrl → objectId for O(1) dedup lookups.
+    private var canonicalIndex: [String: String] = [:]
     private let objectsDir: URL
     private let queue = DispatchQueue(label: "wirc.jsonfilestore", attributes: .concurrent)
+
+    private static let schemaVersion = 1
 
     private enum JSONFileStoreError: LocalizedError {
         case noDocumentDirectory
@@ -29,10 +33,14 @@ final class JSONFileStore: WOMStore, @unchecked Sendable {
 
     init() {
         guard let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
-            fatalError("No document directory available")
+            os_log(.error, "JSONFileStore: no document directory — using in-memory mode")
+            objectsDir = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("wirc-fallback")
+            try? FileManager.default.createDirectory(at: objectsDir, withIntermediateDirectories: true)
+            return
         }
         objectsDir = docs.appendingPathComponent("wirc/objects", isDirectory: true)
         try? FileManager.default.createDirectory(at: objectsDir, withIntermediateDirectories: true)
+        checkSchemaVersion()
         // Load index on background queue — avoids blocking init on 2000 JSON file reads.
         queue.async { [weak self] in
             self?.loadIndex()
@@ -51,6 +59,9 @@ final class JSONFileStore: WOMStore, @unchecked Sendable {
                 do {
                     try self.writeObject(object)
                     self.index[object.id] = object
+                    if let url = object.data["canonicalUrl"] {
+                        self.canonicalIndex[url] = object.id
+                    }
                     self.trimIndex()
                     continuation.resume()
                 } catch {
@@ -83,6 +94,9 @@ final class JSONFileStore: WOMStore, @unchecked Sendable {
                 // Index every object that was successfully written to disk
                 for obj in objects where writtenIDs.contains(obj.id) {
                     self.index[obj.id] = obj
+                    if let url = obj.data["canonicalUrl"] {
+                        self.canonicalIndex[url] = obj.id
+                    }
                 }
                 self.trimIndex()
                 if let error = writeError {
@@ -133,6 +147,9 @@ final class JSONFileStore: WOMStore, @unchecked Sendable {
                     if FileManager.default.fileExists(atPath: url.path) {
                         try FileManager.default.removeItem(at: url)
                     }
+                    if let obj = self.index[id], let url = obj.data["canonicalUrl"] {
+                        self.canonicalIndex.removeValue(forKey: url)
+                    }
                     self.index.removeValue(forKey: id)
                     continuation.resume()
                 } catch {
@@ -164,13 +181,14 @@ final class JSONFileStore: WOMStore, @unchecked Sendable {
                     return
                 }
                 // Atomically check for duplicate inside the barrier
-                if index.values.contains(where: { $0.data["canonicalUrl"] == canonicalURL }) {
+                if self.canonicalIndex[canonicalURL] != nil {
                     continuation.resume(returning: false)
                     return
                 }
                 do {
                     try self.writeObject(object)
                     self.index[object.id] = object
+                    self.canonicalIndex[canonicalURL] = object.id
                     self.trimIndex()
                     continuation.resume(returning: true)
                 } catch {
@@ -186,7 +204,7 @@ final class JSONFileStore: WOMStore, @unchecked Sendable {
     func contains(canonicalURL: String) async -> Bool {
         await withCheckedContinuation { continuation in
             queue.async { [weak self] in
-                continuation.resume(returning: self?.index.values.contains { $0.data["canonicalUrl"] == canonicalURL } ?? false)
+                continuation.resume(returning: self?.canonicalIndex[canonicalURL] != nil)
             }
         }
     }
@@ -227,14 +245,23 @@ final class JSONFileStore: WOMStore, @unchecked Sendable {
         // Load all, then keep only the most recent to cap memory
         var allObjects: [WOMObject] = []
         for url in files where url.pathExtension == "json" {
-            guard let data = try? Data(contentsOf: url),
-                  let obj = try? JSONDecoder().decode(WOMObject.self, from: data) else { continue }
+            guard let data = try? Data(contentsOf: url) else {
+                os_log(.error, "JSONFileStore: could not read file %{public}@", url.lastPathComponent)
+                continue
+            }
+            guard let obj = try? JSONDecoder().decode(WOMObject.self, from: data) else {
+                os_log(.error, "JSONFileStore: corrupted file %{public}@", url.lastPathComponent)
+                continue
+            }
             allObjects.append(obj)
         }
         // Sort by date descending, keep most recent
         allObjects.sort { $0.createdAt > $1.createdAt }
         for obj in allObjects.prefix(maxIndexSize) {
             index[obj.id] = obj
+            if let url = obj.data["canonicalUrl"] {
+                canonicalIndex[url] = obj.id
+            }
         }
     }
 
@@ -245,8 +272,26 @@ final class JSONFileStore: WOMStore, @unchecked Sendable {
         guard before > maxIndexSize else { return }
         let sorted = index.values.sorted { $0.createdAt > $1.createdAt }
         index = Dictionary(uniqueKeysWithValues: sorted.prefix(maxIndexSize).map { ($0.id, $0) })
+        // Rebuild canonicalIndex from remaining entries
+        canonicalIndex = [:]
+        for obj in index.values {
+            if let url = obj.data["canonicalUrl"] {
+                canonicalIndex[url] = obj.id
+            }
+        }
         let dropped = before - index.count
         os_log(.debug, "JSONFileStore: trimmed index from %d to %d (dropped %d)", before, index.count, dropped)
+    }
+
+    /// Checks stored schema version and performs migration if needed.
+    /// Returns true if the store is ready (migration succeeded or version matches).
+    private func checkSchemaVersion() {
+        let key = "wirc.store.schemaVersion"
+        let stored = UserDefaults.standard.integer(forKey: key)
+        if stored < Self.schemaVersion {
+            os_log(.info, "JSONFileStore: migrating schema from v%d to v%d", stored, Self.schemaVersion)
+            UserDefaults.standard.set(Self.schemaVersion, forKey: key)
+        }
     }
 
     /// The number of objects currently in the on-disk index (for tests/debug).
