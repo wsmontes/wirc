@@ -69,9 +69,14 @@ struct FeedCard: View {
                 }
                 Button {
                     let avc = UIActivityViewController(activityItems: [url], applicationActivities: nil)
-                    if let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-                       let root = scene.windows.first?.rootViewController {
-                        root.present(avc, animated: true)
+                    // Use the window scene's key window for reliable presentation
+                    if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                       let window = windowScene.windows.first(where: { $0.isKeyWindow }),
+                       let root = window.rootViewController {
+                        // Find the topmost presented VC
+                        var top = root
+                        while let presented = top.presentedViewController { top = presented }
+                        top.present(avc, animated: true)
                     }
                 } label: {
                     Label("Share", systemImage: "square.and.arrow.up")
