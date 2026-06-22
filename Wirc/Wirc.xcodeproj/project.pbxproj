@@ -13,6 +13,7 @@
 		101E59D30FFAA74118E4E8F7 /* FeedItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 878395F92963933AFF5376AF /* FeedItem.swift */; };
 		1614A2CBB02FDFECE1C3043F /* DebugView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDE1F18BDE942722566DA463 /* DebugView.swift */; };
 		18A08BC4CFC068A4403D2D3A /* WOMObjectInspectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CDD53F05BF753713991139CE /* WOMObjectInspectorView.swift */; };
+		1AD901DCA5C98058428C6947 /* FeedParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F8B99745782483F8175E32D /* FeedParserTests.swift */; };
 		1E42AF5DCC3C22889B1FB5C6 /* WOMBinding.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7301E9B32895F506FF41AB79 /* WOMBinding.swift */; };
 		2065F4616971143C5E5EE6B2 /* ChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D3473D7CE010F204E8D51A3 /* ChatView.swift */; };
 		208A7FE391E119C11444ECB8 /* TrustRelation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C123AABD800E7BE44F5B071D /* TrustRelation.swift */; };
@@ -97,6 +98,16 @@
 		FFE2BBFECF95AADC001E7B84 /* IRCChannelManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3095A1F39684FBBA998F9A9F /* IRCChannelManager.swift */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		8B77B138F5982BDF191F2709 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 29BDCE3CB8F71A773B43C2E5 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A1AB3BDC760E53F45DDF449F;
+			remoteInfo = Wirc;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
 		020931F5C2A78F26DA21B53F /* FeedFetcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedFetcher.swift; sourceTree = "<group>"; };
 		02BFA0A70998650F4CAD3670 /* FeedCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedCard.swift; sourceTree = "<group>"; };
@@ -105,6 +116,7 @@
 		0498ACC5E264A6704F285BBE /* SuggestedChannels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SuggestedChannels.swift; sourceTree = "<group>"; };
 		080F7B7462FB8F4E7F90D92E /* WOMGovernance.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WOMGovernance.swift; sourceTree = "<group>"; };
 		0E9842883A75E2FC1841C43D /* FeedSubscriptionStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedSubscriptionStore.swift; sourceTree = "<group>"; };
+		0F8B99745782483F8175E32D /* FeedParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedParserTests.swift; sourceTree = "<group>"; };
 		110725662E9CAF4F796B6DDC /* RawEventLogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RawEventLogView.swift; sourceTree = "<group>"; };
 		116B884F1396D33A37753847 /* WOMContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WOMContent.swift; sourceTree = "<group>"; };
 		1512EF345EA5BE6212461B8B /* StreamView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamView.swift; sourceTree = "<group>"; };
@@ -116,6 +128,7 @@
 		2686C7E2E61496C6F3A1599F /* WircWidgetBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WircWidgetBundle.swift; sourceTree = "<group>"; };
 		2B02469B01F721B6169799B0 /* SuggestedChannels.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = SuggestedChannels.json; sourceTree = "<group>"; };
 		2B266AC0655998332A501F98 /* MastodonToWOMAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MastodonToWOMAdapter.swift; sourceTree = "<group>"; };
+		2B60813C81C8013AA04E99FE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		2B676B37B716809668A31008 /* SuggestedServers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SuggestedServers.swift; sourceTree = "<group>"; };
 		2BA08C7EEC27E8FED76DCB54 /* SuggestedServers.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = SuggestedServers.json; sourceTree = "<group>"; };
 		2D5B69B87A544419FE5C2911 /* RemoteIdentity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteIdentity.swift; sourceTree = "<group>"; };
@@ -145,6 +158,7 @@
 		878395F92963933AFF5376AF /* FeedItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedItem.swift; sourceTree = "<group>"; };
 		87F94BFC70A2A0434F288001 /* IRCChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IRCChatView.swift; sourceTree = "<group>"; };
 		8A6278833766B2AAC5010770 /* ShareViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareViewController.swift; sourceTree = "<group>"; };
+		902FFA959F2A3F13D525AC59 /* WircTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = WircTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		977059C372AB2F3C65D20D14 /* JSONFileStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSONFileStore.swift; sourceTree = "<group>"; };
 		997D4CFB00768A0732B2714D /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		9D3473D7CE010F204E8D51A3 /* ChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatView.swift; sourceTree = "<group>"; };
@@ -194,6 +208,7 @@
 			children = (
 				49FCCA37D5C72DCC660EA0C9 /* WircApp */,
 				1DCE4ADA96524234AD2589A3 /* WircShareExtension */,
+				AE45A5AEE8CF95F26B828909 /* WircTests */,
 				57B7F45C6F2B27178E019586 /* WircWidget */,
 				FFC8696CE1066C637F57B71F /* Products */,
 			);
@@ -396,6 +411,15 @@
 			path = IRC;
 			sourceTree = "<group>";
 		};
+		AE45A5AEE8CF95F26B828909 /* WircTests */ = {
+			isa = PBXGroup;
+			children = (
+				0F8B99745782483F8175E32D /* FeedParserTests.swift */,
+				2B60813C81C8013AA04E99FE /* Info.plist */,
+			);
+			path = WircTests;
+			sourceTree = "<group>";
+		};
 		BAFF978153FEFBC98288B865 /* Social */ = {
 			isa = PBXGroup;
 			children = (
@@ -454,6 +478,7 @@
 			children = (
 				41C0975A8852038225072B85 /* Wirc.app */,
 				60CF596F4846F3F1298D4B4A /* WircShareExtension.appex */,
+				902FFA959F2A3F13D525AC59 /* WircTests.xctest */,
 				D3B916574F5FE8C8505F9C5E /* WircWidget.appex */,
 			);
 			name = Products;
@@ -462,6 +487,24 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		16FCB2AA430EF5B848B32BB6 /* WircTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1145202B671725D7890D7140 /* Build configuration list for PBXNativeTarget "WircTests" */;
+			buildPhases = (
+				D07B03AE76D6E80609BC9F8F /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				0CC2E635D55DED0FDDD30DAA /* PBXTargetDependency */,
+			);
+			name = WircTests;
+			packageProductDependencies = (
+			);
+			productName = WircTests;
+			productReference = 902FFA959F2A3F13D525AC59 /* WircTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		59DE46390E9DDA56C6F31CA8 /* WircWidget */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = CF9F557167EA7367523A1AF3 /* Build configuration list for PBXNativeTarget "WircWidget" */;
@@ -523,6 +566,10 @@
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1430;
 				TargetAttributes = {
+					16FCB2AA430EF5B848B32BB6 = {
+						DevelopmentTeam = 955573A4YH;
+						ProvisioningStyle = Automatic;
+					};
 					59DE46390E9DDA56C6F31CA8 = {
 						DevelopmentTeam = 955573A4YH;
 						ProvisioningStyle = Automatic;
@@ -553,6 +600,7 @@
 			targets = (
 				A1AB3BDC760E53F45DDF449F /* Wirc */,
 				D3826093F7D1FC58249E9B71 /* WircShareExtension */,
+				16FCB2AA430EF5B848B32BB6 /* WircTests */,
 				59DE46390E9DDA56C6F31CA8 /* WircWidget */,
 			);
 		};
@@ -666,6 +714,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		D07B03AE76D6E80609BC9F8F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1AD901DCA5C98058428C6947 /* FeedParserTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		D3F62BBEA16B11D3425D8DAD /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -680,7 +736,34 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		0CC2E635D55DED0FDDD30DAA /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = A1AB3BDC760E53F45DDF449F /* Wirc */;
+			targetProxy = 8B77B138F5982BDF191F2709 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		13B7DC30FB7547EFADA0B252 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 955573A4YH;
+				INFOPLIST_FILE = WircTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.wirc.wirc.tests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Wirc.app/Wirc";
+			};
+			name = Release;
+		};
 		23A2EAA9CC509F92C07F6236 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -834,6 +917,25 @@
 			};
 			name = Debug;
 		};
+		6B7A34E5DBD57B29D4BC85D0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 955573A4YH;
+				INFOPLIST_FILE = WircTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.wirc.wirc.tests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Wirc.app/Wirc";
+			};
+			name = Debug;
+		};
 		A6B1F0573EE51360B14E6846 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -907,6 +1009,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		1145202B671725D7890D7140 /* Build configuration list for PBXNativeTarget "WircTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6B7A34E5DBD57B29D4BC85D0 /* Debug */,
+				13B7DC30FB7547EFADA0B252 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
 		277FD5F766BB54412DE2760A /* Build configuration list for PBXProject "Wirc" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

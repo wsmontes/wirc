@@ -7,6 +7,7 @@ enum FeedParser {
         let delegate = FeedParserDelegate(sourceURL: sourceURL)
         let parser = XMLParser(data: data)
         parser.delegate = delegate
+        parser.shouldProcessNamespaces = true
         parser.shouldResolveExternalEntities = false
 
         guard parser.parse() else {

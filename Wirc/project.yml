@@ -38,6 +38,20 @@ targets:
         DEVELOPMENT_TEAM: 955573A4YH
         CODE_SIGN_STYLE: Automatic
 
+  WircTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: WircTests
+    dependencies:
+      - target: Wirc
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.wirc.wirc.tests
+        INFOPLIST_FILE: WircTests/Info.plist
+        DEVELOPMENT_TEAM: 955573A4YH
+        CODE_SIGN_STYLE: Automatic
+
   WircWidget:
     type: app-extension
     platform: iOS
