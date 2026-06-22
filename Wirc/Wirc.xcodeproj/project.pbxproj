@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		0B92705E9F8535DEFA71075A /* WOMProvenance.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB33105D31E371B41A8F523F /* WOMProvenance.swift */; };
 		0D4EE10BC4CF5DD6F6D32A93 /* ChannelTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = 205C0F86472A51D8FDDBBF3A /* ChannelTab.swift */; };
+		0FF5A38D57F1B7D075C1DBA7 /* WircWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = D35F8D43CACC09B9E6BDC10B /* WircWidget.swift */; };
 		101E59D30FFAA74118E4E8F7 /* FeedItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 878395F92963933AFF5376AF /* FeedItem.swift */; };
 		1614A2CBB02FDFECE1C3043F /* DebugView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDE1F18BDE942722566DA463 /* DebugView.swift */; };
 		18A08BC4CFC068A4403D2D3A /* WOMObjectInspectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CDD53F05BF753713991139CE /* WOMObjectInspectorView.swift */; };
@@ -20,15 +21,18 @@
 		26B80F99529363367CC97548 /* WOMToIRCAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B62E6C1D03888795A63181F4 /* WOMToIRCAdapter.swift */; };
 		28F555CA915D88B0DB64E00F /* SuggestedServers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B676B37B716809668A31008 /* SuggestedServers.swift */; };
 		3242860B98431E405FDE756C /* StreamView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1512EF345EA5BE6212461B8B /* StreamView.swift */; };
+		39CEF127ABDA50FD57337ED1 /* WOMGovernance.swift in Sources */ = {isa = PBXBuildFile; fileRef = 080F7B7462FB8F4E7F90D92E /* WOMGovernance.swift */; };
 		3BCDAD93119F0B68C399AED9 /* FeedFetcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 020931F5C2A78F26DA21B53F /* FeedFetcher.swift */; };
 		3DC38E9513AAD20E5E04063E /* ConversationListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F1B694593898DDB87326792 /* ConversationListView.swift */; };
 		3E814D0755AD1D8801399E5C /* WOMGovernance.swift in Sources */ = {isa = PBXBuildFile; fileRef = 080F7B7462FB8F4E7F90D92E /* WOMGovernance.swift */; };
 		3F838981C16016FD2DF0443C /* FeedCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02BFA0A70998650F4CAD3670 /* FeedCard.swift */; };
+		482FF42391DCA8EDCC895329 /* WOMProvenance.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB33105D31E371B41A8F523F /* WOMProvenance.swift */; };
 		4DA3E8A6D23BBF6ED1126E17 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAE7D6E8E5F39710B7B47F82 /* SettingsView.swift */; };
 		56B48B28FEBC91BA1D1EDF8F /* FeedItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 878395F92963933AFF5376AF /* FeedItem.swift */; };
 		571A9657E75DCEE173032659 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 997D4CFB00768A0732B2714D /* OnboardingView.swift */; };
 		57935944E52BD16C7D829850 /* SuggestedServers.json in Resources */ = {isa = PBXBuildFile; fileRef = 2BA08C7EEC27E8FED76DCB54 /* SuggestedServers.json */; };
 		57D623F3F96FCC6090F802F2 /* WOMEnums.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45721F0D4168305EC5827852 /* WOMEnums.swift */; };
+		5A19419D2F5D60FBF78634F5 /* WOMEnums.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45721F0D4168305EC5827852 /* WOMEnums.swift */; };
 		5A564F0F105370D5C227631C /* WOMReference.swift in Sources */ = {isa = PBXBuildFile; fileRef = 483BB0DC491D7758B7C2E381 /* WOMReference.swift */; };
 		5ACE5505CCF4639B50B95A91 /* SocialSignal.swift in Sources */ = {isa = PBXBuildFile; fileRef = D96DCC7DC708265CC384DC89 /* SocialSignal.swift */; };
 		5F7A9BB695411458234D8B14 /* WOMObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = C551D1B9BDE12B3F3C761078 /* WOMObject.swift */; };
@@ -38,10 +42,12 @@
 		650ADA11D0E8C152956F478B /* RawEventLogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 110725662E9CAF4F796B6DDC /* RawEventLogView.swift */; };
 		6533D9A172E226BB99DD3C15 /* IRCToWOMAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6A2821582A3BC105EEF454C /* IRCToWOMAdapter.swift */; };
 		661D45AF9B0274CB8CBA0504 /* WorkshopView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EF838065FB3476BD06759AB /* WorkshopView.swift */; };
+		67067C3DCFCAFDCE1B32A700 /* WOMReference.swift in Sources */ = {isa = PBXBuildFile; fileRef = 483BB0DC491D7758B7C2E381 /* WOMReference.swift */; };
 		6794DF1FEFEEF119002734B6 /* FeedSubscriptionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E9842883A75E2FC1841C43D /* FeedSubscriptionStore.swift */; };
 		68F56DB16D64D7DF03FC5C4B /* IRCParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF814FAA578F93CB5FC90BB5 /* IRCParser.swift */; };
 		6E01703388ADF79FF75D4BF5 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEC539290F0DCC4E113874FF /* AppState.swift */; };
 		728523B504672CB8A4ECDE94 /* WOMIDGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02F21BC17F83816701A37D7B /* WOMIDGenerator.swift */; };
+		785D75080F5E906A4F729CFD /* WOMBinding.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7301E9B32895F506FF41AB79 /* WOMBinding.swift */; };
 		798F1A5BB0ECD2C6DB4C27EB /* JSONFileStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 977059C372AB2F3C65D20D14 /* JSONFileStore.swift */; };
 		7B85E860C10694C08CC3BC3D /* WircApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FA00F37E1FF2C32DDF280ED /* WircApp.swift */; };
 		7C4C342761F12EED666F7DA6 /* ObjectInspectorSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82E54BAAED3C1E38E70AAC22 /* ObjectInspectorSheet.swift */; };
@@ -52,6 +58,7 @@
 		93F0B76736890A499C0A9A3F /* AddFeedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 032E2B03065B5DAD4439A579 /* AddFeedView.swift */; };
 		977341D34E28D4155C24A101 /* LibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABD471DAFC07C80E8444F9BF /* LibraryView.swift */; };
 		97C3D31649C0B6A7776D3892 /* FeedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA35FC732F83C26AF70D03B1 /* FeedView.swift */; };
+		9A19808446E845D9CFC8B514 /* WOMClassification.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FCFECC386025CB0EB6A95E1 /* WOMClassification.swift */; };
 		9A32DFFC6C0109974EA32C25 /* FeedSubscription.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1C0054B7701EAA66473F109 /* FeedSubscription.swift */; };
 		A31014B086E449E4EB6AF1E5 /* MessageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36941508DA40D61ED2A49585 /* MessageView.swift */; };
 		A403E8957A992C14D19312EF /* DesignSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = E83E547AD92C7A243ABB80AF /* DesignSystem.swift */; };
@@ -59,6 +66,7 @@
 		B28C05DA310EF2AE7F9492A2 /* SuggestedChannels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0498ACC5E264A6704F285BBE /* SuggestedChannels.swift */; };
 		B36A1CC39ECE5F3BDBBE957B /* MastodonClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC577F22552016DCF3516362 /* MastodonClient.swift */; };
 		B46D3F3D79C7B18743626117 /* IRCAutomation.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBDC50C7FFFAC7CADE43BE2B /* IRCAutomation.swift */; };
+		B7909768908EF0B436E51C02 /* WOMContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 116B884F1396D33A37753847 /* WOMContent.swift */; };
 		B8FA6CA3BEF0D950871DAE84 /* WOMClassification.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FCFECC386025CB0EB6A95E1 /* WOMClassification.swift */; };
 		B9D9F45CF4E0337214450B94 /* SuggestedChannels.json in Resources */ = {isa = PBXBuildFile; fileRef = 2B02469B01F721B6169799B0 /* SuggestedChannels.json */; };
 		BAF1FDE75ACD1D0345ABFEB6 /* IRCManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 634FEF7293B9F11FFDF05727 /* IRCManager.swift */; };
@@ -77,8 +85,12 @@
 		E6E460D2B37A937490CE37B8 /* FeedSubscriptionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E9842883A75E2FC1841C43D /* FeedSubscriptionStore.swift */; };
 		EB3E4FCDC74623DA8E2D0F0D /* FeedToWOMAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = F48F757875C2347632356611 /* FeedToWOMAdapter.swift */; };
 		EC8AF2CDF21393C5E26B11D3 /* mastodon_config.json in Resources */ = {isa = PBXBuildFile; fileRef = 7FAAB9DB82E9EA69AB9BFAB4 /* mastodon_config.json */; };
+		EDEC618C7F82D023FDA8E522 /* WOMObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = C551D1B9BDE12B3F3C761078 /* WOMObject.swift */; };
 		EFAE2659F2ED47FD1DE8817C /* IRCEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD36B880B97E4EDF5E8A0309 /* IRCEvent.swift */; };
+		F0F2A324CFAA80A7AC467BCC /* JSONFileStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 977059C372AB2F3C65D20D14 /* JSONFileStore.swift */; };
 		F9CD1AB651D39C0AB7C888CF /* JoinChannelSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = E40EF8CD99E8AD31FA460F82 /* JoinChannelSheet.swift */; };
+		FB1E47FECE1B420D74EA184F /* WircWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2686C7E2E61496C6F3A1599F /* WircWidgetBundle.swift */; };
+		FC7C9079D20CD75524D01103 /* WOMStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B7847091404A9B9666E9D5F /* WOMStore.swift */; };
 		FCB942B3B38EEE55C87FA1F5 /* BroadcastPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65A2BA21941352A18A47D072 /* BroadcastPicker.swift */; };
 		FF8357CA93F4DA467E59B42A /* FeedSubscription.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1C0054B7701EAA66473F109 /* FeedSubscription.swift */; };
 		FF8F481DE751EB6CDB2469F6 /* MastodonStreamer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43B55A58CBB87C95B7B76217 /* MastodonStreamer.swift */; };
@@ -98,8 +110,10 @@
 		1512EF345EA5BE6212461B8B /* StreamView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamView.swift; sourceTree = "<group>"; };
 		1F1B694593898DDB87326792 /* ConversationListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationListView.swift; sourceTree = "<group>"; };
 		1FCFECC386025CB0EB6A95E1 /* WOMClassification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WOMClassification.swift; sourceTree = "<group>"; };
+		200CC371A9E5453AF90AA6F3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		205C0F86472A51D8FDDBBF3A /* ChannelTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChannelTab.swift; sourceTree = "<group>"; };
 		2153CF2443CFBB781911367C /* IRCCommandParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IRCCommandParser.swift; sourceTree = "<group>"; };
+		2686C7E2E61496C6F3A1599F /* WircWidgetBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WircWidgetBundle.swift; sourceTree = "<group>"; };
 		2B02469B01F721B6169799B0 /* SuggestedChannels.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = SuggestedChannels.json; sourceTree = "<group>"; };
 		2B266AC0655998332A501F98 /* MastodonToWOMAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MastodonToWOMAdapter.swift; sourceTree = "<group>"; };
 		2B676B37B716809668A31008 /* SuggestedServers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SuggestedServers.swift; sourceTree = "<group>"; };
@@ -151,6 +165,8 @@
 		CE794998165C7A6AA30245FF /* ServerOrchestrator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerOrchestrator.swift; sourceTree = "<group>"; };
 		D1C0054B7701EAA66473F109 /* FeedSubscription.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedSubscription.swift; sourceTree = "<group>"; };
 		D26189FDE6636FCBD366020C /* IRCCommandExecutor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IRCCommandExecutor.swift; sourceTree = "<group>"; };
+		D35F8D43CACC09B9E6BDC10B /* WircWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WircWidget.swift; sourceTree = "<group>"; };
+		D3B916574F5FE8C8505F9C5E /* WircWidget.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = WircWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		D6A2821582A3BC105EEF454C /* IRCToWOMAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IRCToWOMAdapter.swift; sourceTree = "<group>"; };
 		D96DCC7DC708265CC384DC89 /* SocialSignal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SocialSignal.swift; sourceTree = "<group>"; };
 		DAE7D6E8E5F39710B7B47F82 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
@@ -178,6 +194,7 @@
 			children = (
 				49FCCA37D5C72DCC660EA0C9 /* WircApp */,
 				1DCE4ADA96524234AD2589A3 /* WircShareExtension */,
+				57B7F45C6F2B27178E019586 /* WircWidget */,
 				FFC8696CE1066C637F57B71F /* Products */,
 			);
 			sourceTree = "<group>";
@@ -294,6 +311,16 @@
 				2B266AC0655998332A501F98 /* MastodonToWOMAdapter.swift */,
 			);
 			path = Mastodon;
+			sourceTree = "<group>";
+		};
+		57B7F45C6F2B27178E019586 /* WircWidget */ = {
+			isa = PBXGroup;
+			children = (
+				200CC371A9E5453AF90AA6F3 /* Info.plist */,
+				D35F8D43CACC09B9E6BDC10B /* WircWidget.swift */,
+				2686C7E2E61496C6F3A1599F /* WircWidgetBundle.swift */,
+			);
+			path = WircWidget;
 			sourceTree = "<group>";
 		};
 		5C9339764535359A67C64440 /* Core */ = {
@@ -427,6 +454,7 @@
 			children = (
 				41C0975A8852038225072B85 /* Wirc.app */,
 				60CF596F4846F3F1298D4B4A /* WircShareExtension.appex */,
+				D3B916574F5FE8C8505F9C5E /* WircWidget.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -434,6 +462,23 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		59DE46390E9DDA56C6F31CA8 /* WircWidget */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CF9F557167EA7367523A1AF3 /* Build configuration list for PBXNativeTarget "WircWidget" */;
+			buildPhases = (
+				2A73A68BDF8CB1CFA8798524 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = WircWidget;
+			packageProductDependencies = (
+			);
+			productName = WircWidget;
+			productReference = D3B916574F5FE8C8505F9C5E /* WircWidget.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		A1AB3BDC760E53F45DDF449F /* Wirc */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 9A2DF018FD118A326CDAA451 /* Build configuration list for PBXNativeTarget "Wirc" */;
@@ -478,6 +523,10 @@
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1430;
 				TargetAttributes = {
+					59DE46390E9DDA56C6F31CA8 = {
+						DevelopmentTeam = 955573A4YH;
+						ProvisioningStyle = Automatic;
+					};
 					A1AB3BDC760E53F45DDF449F = {
 						DevelopmentTeam = 955573A4YH;
 						ProvisioningStyle = Automatic;
@@ -504,6 +553,7 @@
 			targets = (
 				A1AB3BDC760E53F45DDF449F /* Wirc */,
 				D3826093F7D1FC58249E9B71 /* WircShareExtension */,
+				59DE46390E9DDA56C6F31CA8 /* WircWidget */,
 			);
 		};
 /* End PBXProject section */
@@ -523,6 +573,25 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		2A73A68BDF8CB1CFA8798524 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F0F2A324CFAA80A7AC467BCC /* JSONFileStore.swift in Sources */,
+				785D75080F5E906A4F729CFD /* WOMBinding.swift in Sources */,
+				9A19808446E845D9CFC8B514 /* WOMClassification.swift in Sources */,
+				B7909768908EF0B436E51C02 /* WOMContent.swift in Sources */,
+				5A19419D2F5D60FBF78634F5 /* WOMEnums.swift in Sources */,
+				39CEF127ABDA50FD57337ED1 /* WOMGovernance.swift in Sources */,
+				EDEC618C7F82D023FDA8E522 /* WOMObject.swift in Sources */,
+				482FF42391DCA8EDCC895329 /* WOMProvenance.swift in Sources */,
+				67067C3DCFCAFDCE1B32A700 /* WOMReference.swift in Sources */,
+				FC7C9079D20CD75524D01103 /* WOMStore.swift in Sources */,
+				0FF5A38D57F1B7D075C1DBA7 /* WircWidget.swift in Sources */,
+				FB1E47FECE1B420D74EA184F /* WircWidgetBundle.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		94DCB8527FE70EE357B02D57 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -612,6 +681,23 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
+		23A2EAA9CC509F92C07F6236 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 955573A4YH;
+				INFOPLIST_FILE = WircWidget/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.wirc.wirc.Widget;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
 		39F54722FA483BA4227EC5E8 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -784,6 +870,23 @@
 			};
 			name = Debug;
 		};
+		BB536CF052A3855E910C5AB5 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 955573A4YH;
+				INFOPLIST_FILE = WircWidget/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.wirc.wirc.Widget;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 		E762F29C91DA5535387099E9 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -818,6 +921,15 @@
 			buildConfigurations = (
 				A91B75FA535D20A838EEFDFA /* Debug */,
 				A6B1F0573EE51360B14E6846 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		CF9F557167EA7367523A1AF3 /* Build configuration list for PBXNativeTarget "WircWidget" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				23A2EAA9CC509F92C07F6236 /* Debug */,
+				BB536CF052A3855E910C5AB5 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;

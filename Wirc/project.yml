@@ -37,3 +37,25 @@ targets:
         INFOPLIST_FILE: WircShareExtension/Info.plist
         DEVELOPMENT_TEAM: 955573A4YH
         CODE_SIGN_STYLE: Automatic
+
+  WircWidget:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: WircWidget
+      - path: WircApp/Infrastructure/Persistence/JSONFileStore.swift
+      - path: WircApp/Infrastructure/Persistence/WOMStore.swift
+      - path: WircApp/Core/WOM/WOMObject.swift
+      - path: WircApp/Core/WOM/WOMBinding.swift
+      - path: WircApp/Core/WOM/WOMClassification.swift
+      - path: WircApp/Core/WOM/WOMContent.swift
+      - path: WircApp/Core/WOM/WOMEnums.swift
+      - path: WircApp/Core/WOM/WOMGovernance.swift
+      - path: WircApp/Core/WOM/WOMProvenance.swift
+      - path: WircApp/Core/WOM/WOMReference.swift
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.wirc.wirc.Widget
+        INFOPLIST_FILE: WircWidget/Info.plist
+        DEVELOPMENT_TEAM: 955573A4YH
+        CODE_SIGN_STYLE: Automatic
