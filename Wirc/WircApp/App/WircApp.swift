@@ -23,11 +23,6 @@ struct WircApp: App {
                         Label("Library", systemImage: "archivebox")
                     }
 
-                WorkshopView()
-                    .tabItem {
-                        Label("Workshop", systemImage: "hammer")
-                    }
-
                 SettingsView()
                     .tabItem {
                         Label("Settings", systemImage: "gearshape")

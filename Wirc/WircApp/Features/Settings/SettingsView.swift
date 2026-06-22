@@ -5,6 +5,13 @@ struct SettingsView: View {
     @State private var showingAddServer = false
     @State private var showingAddMastodon = false
     @State private var showingAddFeed = false
+    @State private var showingDebug = false
+
+    // Governance defaults (persisted in AppStorage)
+    @AppStorage("wirc.governance.adsUse") private var adsUse: String = WOMAdsUse.notAllowed.rawValue
+    @AppStorage("wirc.governance.agentUse") private var agentUse: String = "allowed"
+    @AppStorage("wirc.governance.sharing") private var defaultSharing: String = WOMSharing.friendsOnly.rawValue
+    @AppStorage("wirc.governance.retention") private var retention: String = "forever"
 
     var body: some View {
         NavigationStack {
@@ -114,14 +121,56 @@ struct SettingsView: View {
                     }
                 }
 
-                // Debug
+                // Governance Defaults
                 Section {
-                    NavigationLink {
-                        DebugView()
-                    } label: {
-                        Label("Debug", systemImage: "wrench.and.screwdriver")
-                            .font(DesignSystem.Fonts.data(11)).foregroundStyle(DesignSystem.Colors.pencil)
+                    Picker("Ads use", selection: $adsUse) {
+                        Text("Not allowed").tag(WOMAdsUse.notAllowed.rawValue)
+                        Text("Allowed").tag(WOMAdsUse.allowed.rawValue)
                     }
+                    Picker("Agent use", selection: $agentUse) {
+                        Text("Allowed").tag("allowed")
+                        Text("Restricted").tag("restricted")
+                        Text("Prohibited").tag("prohibited")
+                    }
+                    Picker("Default sharing", selection: $defaultSharing) {
+                        ForEach(WOMSharing.allCases, id: \.rawValue) { level in
+                            Text(level.rawValue.capitalized).tag(level.rawValue)
+                        }
+                    }
+                    Picker("Retention", selection: $retention) {
+                        Text("Forever").tag("forever")
+                        Text("1 year").tag("1y")
+                        Text("90 days").tag("90d")
+                        Text("30 days").tag("30d")
+                    }
+                } header: {
+                    Text("Governance Defaults")
+                } footer: {
+                    Text("Applied to new objects created from this device. Existing objects are not modified.")
+                        .font(DesignSystem.Fonts.data(10))
+                        .foregroundStyle(DesignSystem.Colors.pencil)
+                }
+
+                // Data
+                Section {
+                    Button { exportLibrary() } label: {
+                        Label("Export Library...", systemImage: "square.and.arrow.up")
+                    }
+                } header: {
+                    Text("Data")
+                }
+
+                // About
+                Section {
+                    HStack {
+                        Text("Version")
+                        Spacer()
+                        Text("0.1 (WOM 0.7)")
+                            .foregroundStyle(DesignSystem.Colors.pencil)
+                    }
+                    .onLongPressGesture { showingDebug = true }
+                } header: {
+                    Text("About")
                 }
             }
             .listStyle(.insetGrouped)
@@ -139,6 +188,29 @@ struct SettingsView: View {
             .sheet(isPresented: $showingAddFeed) {
                 AddFeedView()
             }
+            .sheet(isPresented: $showingDebug) {
+                NavigationStack {
+                    DebugView()
+                        .toolbar {
+                            ToolbarItem(placement: .cancellationAction) {
+                                Button("Close") { showingDebug = false }
+                            }
+                        }
+                }
+            }
+        }
+    }
+
+    private func exportLibrary() {
+        guard let data = try? JSONEncoder().encode(appState.womObjects),
+              let json = String(data: data, encoding: .utf8) else { return }
+        let activityVC = UIActivityViewController(
+            activityItems: [json],
+            applicationActivities: nil
+        )
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+           let root = windowScene.windows.first?.rootViewController {
+            root.present(activityVC, animated: true)
         }
     }
 
