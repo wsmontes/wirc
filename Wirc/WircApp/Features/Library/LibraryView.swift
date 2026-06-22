@@ -310,7 +310,7 @@ struct LibraryRow: View {
                     .frame(width: 8, height: 8)
                 Text(networkDisplayName)
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(DesignSystem.Colors.pencil)
             }
             .accessibilityElement(children: .combine)
             VStack(alignment: .leading, spacing: 2) {

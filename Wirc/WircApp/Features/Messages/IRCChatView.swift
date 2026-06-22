@@ -501,7 +501,7 @@ struct IRCChatView: View {
                     .fill(isOnline ? DesignSystem.Colors.github : .gray)
                     .frame(width: 8, height: 8)
                 Text(server.name.isEmpty ? server.host : server.name)
-                    .font(.system(size: 15, weight: .medium))
+                    .font(DesignSystem.Fonts.headline())
                 Spacer()
                 Text(isOnline ? "online" : "offline")
                     .font(DesignSystem.Fonts.data(10))

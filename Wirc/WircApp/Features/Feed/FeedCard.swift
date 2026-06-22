@@ -203,7 +203,7 @@ struct FeedCard: View {
             if let name = post.attributedTo?.displayName ?? post.attributedTo?.name {
                 HStack(spacing: DesignSystem.Spacing.xs) {
                     Text(name)
-                        .font(.system(size: 15, weight: .semibold))
+                        .font(DesignSystem.Fonts.headline())
                         .foregroundStyle(DesignSystem.Colors.ink)
                     if let handle = post.data["nick"] ?? post.attributedTo?.name {
                         Text("@\(handle)")
@@ -341,7 +341,7 @@ struct FeedCard: View {
             }
             VStack(alignment: .leading, spacing: DesignSystem.Spacing.xs) {
                 Text(post.name ?? post.content?.text ?? "")
-                    .font(.system(size: 15, weight: .semibold))
+                    .font(DesignSystem.Fonts.headline())
                     .foregroundStyle(DesignSystem.Colors.ink)
                     .lineLimit(3)
                 Text(post.attributedTo?.name ?? "")
@@ -383,7 +383,7 @@ struct FeedCard: View {
             }
             VStack(alignment: .leading, spacing: DesignSystem.Spacing.xs) {
                 Text(post.name ?? "")
-                    .font(.system(size: 15, weight: .semibold))
+                    .font(DesignSystem.Fonts.headline())
                     .foregroundStyle(DesignSystem.Colors.ink)
                     .lineLimit(2)
                 Text(post.attributedTo?.name ?? post.data["feedTitle"] ?? "")
@@ -412,7 +412,7 @@ struct FeedCard: View {
                     .font(.caption)
                     .foregroundStyle(DesignSystem.Colors.github)
                 Text(post.name ?? "")
-                    .font(.system(size: 15, weight: .semibold))
+                    .font(DesignSystem.Fonts.headline())
                     .foregroundStyle(DesignSystem.Colors.ink)
                 Spacer()
                 Text(post.createdAt, style: .relative)
@@ -423,7 +423,7 @@ struct FeedCard: View {
                 .foregroundStyle(DesignSystem.Colors.pencil)
             if let stripped = strippedBody, !stripped.isEmpty {
                 Text(stripped.prefix(200) + (stripped.count > 200 ? "..." : ""))
-                    .font(.system(size: 14))
+                    .font(DesignSystem.Fonts.body())
                     .foregroundStyle(DesignSystem.Colors.ink)
                     .lineLimit(5)
             }

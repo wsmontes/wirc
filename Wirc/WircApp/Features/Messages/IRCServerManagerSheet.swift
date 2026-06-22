@@ -22,7 +22,7 @@ struct IRCServerManagerSheet: View {
                                 .frame(width: 8, height: 8)
                             VStack(alignment: .leading, spacing: 2) {
                                 Text(server.name.isEmpty ? server.host : server.name)
-                                    .font(.system(size: 15, weight: .medium))
+                                    .font(DesignSystem.Fonts.headline())
                                 Text("\(server.host):\(server.port) · \(server.nickname)")
                                     .font(DesignSystem.Fonts.data(10))
                                     .foregroundStyle(DesignSystem.Colors.pencil)

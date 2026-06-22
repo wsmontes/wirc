@@ -26,14 +26,14 @@ struct ObjectInspectorSheet: View {
                     }
                     if let text = object.content?.text {
                         VStack(alignment: .leading, spacing: 8) {
-                            Text("Body").font(.caption).foregroundStyle(.secondary)
+                            Text("Body").font(.caption).foregroundStyle(DesignSystem.Colors.pencil)
                             Text(text).font(.body)
                         }
                     }
                     if !object.attachments.isEmpty {
                         LabeledContent("Attachments", value: "\(object.attachments.count) items")
                         ForEach(object.attachments) { att in
-                            Text(att.id).font(.caption).foregroundStyle(.secondary)
+                            Text(att.id).font(.caption).foregroundStyle(DesignSystem.Colors.pencil)
                         }
                     }
                 }

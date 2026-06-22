@@ -45,13 +45,13 @@ struct ConversationListView: View {
                             ProgressView().scaleEffect(1.5)
                             Text(appState.irc.orchestrator.scanProgress).font(.headline).multilineTextAlignment(.center)
                         } else if !appState.irc.orchestrator.globalChannels.isEmpty {
-                            Image(systemName: "globe.americas.fill").font(.largeTitle).foregroundStyle(.blue)
+                            Image(systemName: "globe.americas.fill").font(.largeTitle).foregroundStyle(DesignSystem.Colors.signal)
                             Text("\(appState.irc.orchestrator.globalChannels.count) channels").font(.headline)
-                            Text("Tap to re-scan all \(SuggestedServersLoader.servers.count) servers").font(.caption).foregroundStyle(.secondary)
+                            Text("Tap to re-scan all \(SuggestedServersLoader.servers.count) servers").font(.caption).foregroundStyle(DesignSystem.Colors.pencil)
                         } else {
-                            Image(systemName: "antenna.radiowaves.left.and.right").font(.largeTitle).foregroundStyle(.blue)
+                            Image(systemName: "antenna.radiowaves.left.and.right").font(.largeTitle).foregroundStyle(DesignSystem.Colors.signal)
                             Text("Connect All Networks").font(.headline)
-                            Text("Scans \(SuggestedServersLoader.servers.count) IRC servers for channels").font(.caption).foregroundStyle(.secondary)
+                            Text("Scans \(SuggestedServersLoader.servers.count) IRC servers for channels").font(.caption).foregroundStyle(DesignSystem.Colors.pencil)
                         }
                     }
                     Spacer()
@@ -77,11 +77,11 @@ struct ConversationListView: View {
                     HStack {
                         VStack(alignment: .leading, spacing: 2) {
                             Text(gc.name).font(.body).lineLimit(1)
-                            Text(gc.topic).font(.caption).foregroundStyle(.secondary).lineLimit(1)
-                            Text(gc.serverName).font(.caption2).foregroundStyle(.blue)
+                            Text(gc.topic).font(.caption).foregroundStyle(DesignSystem.Colors.pencil).lineLimit(1)
+                            Text(gc.serverName).font(.caption2).foregroundStyle(DesignSystem.Colors.signal)
                         }
                         Spacer()
-                        Text("\(gc.users)").font(.caption).foregroundStyle(.blue)
+                        Text("\(gc.users)").font(.caption).foregroundStyle(DesignSystem.Colors.signal)
                             .padding(.horizontal, 6).padding(.vertical, 2)
                             .background(Color(.systemGray6)).clipShape(Capsule())
                     }
@@ -97,7 +97,7 @@ struct ConversationListView: View {
             Section {
                 HStack {
                     Circle().fill(dot(appState.irc.connectionStates[server.id] ?? .disconnected)).frame(width: 8, height: 8)
-                    Text(server.host).font(.caption).foregroundStyle(.secondary)
+                    Text(server.host).font(.caption).foregroundStyle(DesignSystem.Colors.pencil)
                     Spacer()
                     if case .online = appState.irc.connectionStates[server.id] ?? .disconnected {
                         Button {
@@ -114,7 +114,7 @@ struct ConversationListView: View {
                             serverId: server.id, serverHost: server.host, channel: conv.name
                         )) {
                             HStack {
-                                Image(systemName: "number").foregroundStyle(.secondary)
+                                Image(systemName: "number").foregroundStyle(DesignSystem.Colors.pencil)
                                 Text(conv.name)
                                 Spacer()
                                 if case .channel(let ch) = conv {
@@ -165,7 +165,7 @@ struct GlobalJoinView: View {
                 VStack(spacing: 16) {
                     ProgressView()
                     Text("Connecting to \(host)...").font(.headline)
-                    Text(channel).font(.caption).foregroundStyle(.secondary)
+                    Text(channel).font(.caption).foregroundStyle(DesignSystem.Colors.pencil)
                 }
                 .onAppear { connect() }
             }

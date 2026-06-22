@@ -70,7 +70,7 @@ struct MessageView: View {
                     HStack(alignment: .top, spacing: 4) {
                         Text("Topic:")
                             .font(.caption2)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(DesignSystem.Colors.pencil)
                         Text(topic.text)
                             .font(.caption)
                             .lineLimit(3)

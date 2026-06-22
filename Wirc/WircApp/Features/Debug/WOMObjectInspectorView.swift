@@ -9,11 +9,11 @@ struct WOMObjectInspectorView: View {
                 HStack {
                     Text(object.type.joined(separator: ", "))
                         .font(DesignSystem.Fonts.caption)
-                        .foregroundStyle(.blue)
+                        .foregroundStyle(DesignSystem.Colors.signal)
                     Spacer()
                     Text(object.createdAt, style: .time)
                         .font(DesignSystem.Fonts.provenanceDetail)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(DesignSystem.Colors.pencil)
                 }
                 Text(object.content?.text ?? "(no text)")
                     .font(DesignSystem.Fonts.body())
@@ -22,7 +22,7 @@ struct WOMObjectInspectorView: View {
                 if let json = prettyJSON(object) {
                     Text(json)
                         .font(DesignSystem.Fonts.mono(11))
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(DesignSystem.Colors.pencil)
                         .lineLimit(10)
                         .textSelection(.enabled)
                 }

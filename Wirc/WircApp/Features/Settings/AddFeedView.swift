@@ -39,7 +39,7 @@ struct AddFeedView: View {
                     if let error = errorMessage {
                         Text(error)
                             .font(.caption)
-                            .foregroundStyle(.red)
+                            .foregroundStyle(DesignSystem.Colors.signal)
                     }
                 }
 
@@ -54,7 +54,7 @@ struct AddFeedView: View {
                                 Spacer()
                                 if selectedDiscoveredURL == url {
                                     Image(systemName: "checkmark")
-                                        .foregroundStyle(.blue)
+                                        .foregroundStyle(DesignSystem.Colors.signal)
                                 }
                             }
                             .contentShape(Rectangle())

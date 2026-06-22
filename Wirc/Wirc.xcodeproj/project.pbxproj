@@ -55,6 +55,7 @@
 		7EC94869472B0565F65A371D /* RemoteIdentity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D5B69B87A544419FE5C2911 /* RemoteIdentity.swift */; };
 		80B15D3CC47D7A8C729D0AD8 /* IRCChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87F94BFC70A2A0434F288001 /* IRCChatView.swift */; };
 		83D3F1EA012B94B9F965D8C1 /* WOMContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 116B884F1396D33A37753847 /* WOMContent.swift */; };
+		85DC63F3F4C71F7478785E13 /* JSONFileStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FDFB27251D13368A0B2F48F /* JSONFileStoreTests.swift */; };
 		89545409416029AA5D6EF14F /* ServerOrchestrator.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE794998165C7A6AA30245FF /* ServerOrchestrator.swift */; };
 		93F0B76736890A499C0A9A3F /* AddFeedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 032E2B03065B5DAD4439A579 /* AddFeedView.swift */; };
 		977341D34E28D4155C24A101 /* LibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABD471DAFC07C80E8444F9BF /* LibraryView.swift */; };
@@ -163,6 +164,7 @@
 		997D4CFB00768A0732B2714D /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		9D3473D7CE010F204E8D51A3 /* ChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatView.swift; sourceTree = "<group>"; };
 		9FA00F37E1FF2C32DDF280ED /* WircApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WircApp.swift; sourceTree = "<group>"; };
+		9FDFB27251D13368A0B2F48F /* JSONFileStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSONFileStoreTests.swift; sourceTree = "<group>"; };
 		AA35FC732F83C26AF70D03B1 /* FeedView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedView.swift; sourceTree = "<group>"; };
 		ABD471DAFC07C80E8444F9BF /* LibraryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryView.swift; sourceTree = "<group>"; };
 		AEC539290F0DCC4E113874FF /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
@@ -416,6 +418,7 @@
 			children = (
 				0F8B99745782483F8175E32D /* FeedParserTests.swift */,
 				2B60813C81C8013AA04E99FE /* Info.plist */,
+				9FDFB27251D13368A0B2F48F /* JSONFileStoreTests.swift */,
 			);
 			path = WircTests;
 			sourceTree = "<group>";
@@ -719,6 +722,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				1AD901DCA5C98058428C6947 /* FeedParserTests.swift in Sources */,
+				85DC63F3F4C71F7478785E13 /* JSONFileStoreTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
