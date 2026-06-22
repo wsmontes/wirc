@@ -93,35 +93,52 @@ final class IRCChannelManager {
         isLoadingOlder = true
         defer { isLoadingOlder = false }
 
-        do {
-            let all = allObjects
-            let filtered: [WOMObject]
+        // 1. Try in-memory first
+        let all = allObjects
+        let filtered: [WOMObject]
+        if let ch = activeChannel {
+            filtered = all.filter { obj in
+                (obj.type.contains("wom:Message") || obj.type.contains("wom:SystemEvent")) &&
+                obj.data["server"] == ch.serverHost &&
+                obj.data["channel"] == ch.name &&
+                obj.createdAt < oldest
+            }
+        } else {
+            let channelKeys = Set(channels.map { "\($0.serverHost)|\($0.name)" })
+            filtered = all.filter { obj in
+                guard (obj.type.contains("wom:Message") || obj.type.contains("wom:SystemEvent")),
+                      obj.createdAt < oldest else { return false }
+                guard let server = obj.data["server"], let channel = obj.data["channel"] else { return false }
+                return channelKeys.contains("\(server)|\(channel)")
+            }
+        }
 
-            if let ch = activeChannel {
-                filtered = all.filter { obj in
+        var older = Array(filtered.sorted { $0.createdAt > $1.createdAt }.prefix(50))
+
+        // 2. If in-memory is insufficient, query persistent store
+        if older.count < 50, let ch = activeChannel {
+            do {
+                let allStored = try await store.all()
+                let storedFiltered = allStored.filter { obj in
                     (obj.type.contains("wom:Message") || obj.type.contains("wom:SystemEvent")) &&
                     obj.data["server"] == ch.serverHost &&
                     obj.data["channel"] == ch.name &&
                     obj.createdAt < oldest
+                }.sorted { $0.createdAt > $1.createdAt }
+                // Merge, dedup by id, take 50
+                var seen = Set(older.map(\.id))
+                for obj in storedFiltered where !seen.contains(obj.id) {
+                    seen.insert(obj.id)
+                    older.append(obj)
+                    if older.count >= 50 { break }
                 }
-            } else {
-                let channelKeys = Set(channels.map { "\($0.serverHost)|\($0.name)" })
-                filtered = all.filter { obj in
-                    guard (obj.type.contains("wom:Message") || obj.type.contains("wom:SystemEvent")),
-                          (obj.type.contains("wom:Message") || isDisplayableEvent(obj)),
-                          obj.createdAt < oldest else { return false }
-                    guard let server = obj.data["server"],
-                          let channel = obj.data["channel"] else { return false }
-                    return channelKeys.contains("\(server)|\(channel)")
-                }
+            } catch {
+                os_log(.error, "loadOlderMessages store query failed: %{public}@", error.localizedDescription)
             }
-
-            let older = filtered.sorted { $0.createdAt > $1.createdAt }.prefix(50)
-            visibleMessages.append(contentsOf: older)
-            oldestVisibleTimestamp = visibleMessages.last?.createdAt
-        } catch {
-            os_log(.error, "IRCChannelManager.loadOlderMessages failed: %{public}@", error.localizedDescription)
         }
+
+        visibleMessages.append(contentsOf: older)
+        oldestVisibleTimestamp = visibleMessages.last?.createdAt
     }
 
     func updatePreview(for channelId: String, text: String) {
