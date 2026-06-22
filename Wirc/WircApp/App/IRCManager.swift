@@ -35,9 +35,7 @@ final class IRCManager {
     var totalEventsReceived: Int = 0
     var privmsgCount: Int = 0
 
-    /// Batched WOM objects — flushed periodically to avoid UI overload.
-    private var womBatch: [WOMObject] = []
-    private var womBatchTimer: Timer?
+    // WOM objects are delivered immediately — the view debounce handles throttling.
 
     // MARK: - Types
     enum ConnectionStatus: Hashable { case disconnected, connecting, online }
@@ -277,36 +275,12 @@ final class IRCManager {
         default: lastEventType = "?"
         }
 
-        // Convert IRC event to WOM objects (messages immediately, system events batched)
+        // Convert IRC event to WOM objects
         let objects = ircToWOM.convert(event, config: config)
         guard !objects.isEmpty else { return }
 
-        // Messages (PRIVMSG, NOTICE) and own actions go immediately
-        let isMessage = objects.contains(where: { $0.type.contains("wom:Message") })
-        if isMessage {
-            onWOMObjects?(objects)
-        } else {
-            // System events are batched to avoid UI overload
-            womBatch.append(contentsOf: objects)
-            // Flush immediately if batch grows too large (prevents memory spikes during bursts)
-            if womBatch.count >= 100 {
-                womBatchTimer?.invalidate()
-                womBatchTimer = nil
-                let batch = womBatch
-                womBatch = []
-                onWOMObjects?(batch)
-            } else if womBatchTimer == nil {
-                womBatchTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { [weak self] _ in
-                    guard let self else { return }
-                    self.womBatchTimer = nil
-                    if !self.womBatch.isEmpty {
-                        let batch = self.womBatch
-                        self.womBatch = []
-                        self.onWOMObjects?(batch)
-                    }
-                }
-            }
-        }
+        // Deliver all WOM objects immediately — the view debounce handles throttling
+        onWOMObjects?(objects)
     }
 
     // MARK: - Auto-join
