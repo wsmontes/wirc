@@ -47,6 +47,7 @@ struct FeedCard: View {
             contentArea
             if hasFooter { footerArea }
         }
+        .frame(minHeight: 80)
         .background(DesignSystem.Colors.surface)
         .clipShape(RoundedRectangle(cornerRadius: DesignSystem.Radius.card))
         .overlay(RoundedRectangle(cornerRadius: DesignSystem.Radius.card).stroke(DesignSystem.Colors.border, lineWidth: 0.5))
@@ -276,12 +277,6 @@ struct FeedCard: View {
                     .padding(.horizontal, DesignSystem.Spacing.md)
                     .padding(.top, DesignSystem.Spacing.md)
             }
-            if let author = post.attributedTo?.name {
-                Text(author)
-                    .font(DesignSystem.Fonts.provenanceDetail)
-                    .foregroundStyle(DesignSystem.Colors.pencil)
-                    .padding(.horizontal, DesignSystem.Spacing.md)
-            }
             if let stripped = strippedBody, !stripped.isEmpty {
                 Text(stripped)
                     .font(DesignSystem.Fonts.cardBody)
@@ -343,7 +338,6 @@ struct FeedCard: View {
                         Label(dur, systemImage: "clock")
                             .font(.caption2).foregroundStyle(DesignSystem.Colors.pencil)
                     }
-                    pill("YouTube", color: DesignSystem.Colors.youtube)
                     Text(post.createdAt, style: .relative)
                         .font(.caption2).foregroundStyle(DesignSystem.Colors.pencil)
                 }
@@ -386,7 +380,6 @@ struct FeedCard: View {
                         Label(dur, systemImage: "clock")
                             .font(.caption2).foregroundStyle(DesignSystem.Colors.pencil)
                     }
-                    pill("Podcast", color: DesignSystem.Colors.podcast)
                     Text(post.createdAt, style: .relative)
                         .font(.caption2).foregroundStyle(DesignSystem.Colors.pencil)
                 }
