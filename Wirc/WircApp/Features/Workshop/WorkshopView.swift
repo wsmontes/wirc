@@ -5,6 +5,7 @@ struct WorkshopView: View {
 
     @State private var showAddFeed = false
     @State private var showDebug = false
+    @State private var showImporter = false
 
     // Governance defaults (persisted in AppStorage)
     @AppStorage("wirc.governance.adsUse") private var adsUse: String = WOMAdsUse.notAllowed.rawValue
@@ -107,8 +108,20 @@ struct WorkshopView: View {
             Button { exportLibrary() } label: {
                 Label("Export Library...", systemImage: "square.and.arrow.up")
             }
-            Button { /* file picker stub */ } label: {
+            Button {
+                showImporter = true
+            } label: {
                 Label("Import WOM Bundle...", systemImage: "square.and.arrow.down")
+            }
+            .fileImporter(isPresented: $showImporter, allowedContentTypes: [.json]) { result in
+                if case .success(let url) = result {
+                    Task {
+                        guard let data = try? Data(contentsOf: url),
+                              let objects = try? JSONDecoder().decode([WOMObject].self, from: data) else { return }
+                        try? await appState.store.saveMany(objects)
+                        await MainActor.run { appState.womObjects.append(contentsOf: objects) }
+                    }
+                }
             }
         } header: {
             Text("Data".uppercased())

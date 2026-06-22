@@ -394,7 +394,10 @@ struct IRCChatView: View {
                         serverSection(server)
                     }
 
-                    Button { /* AddServerView sheet */ } label: {
+                    Button {
+                        showSheet = true
+                        sheetHeight = .large
+                    } label: {
                         Label("Add Server...", systemImage: "plus")
                             .font(DesignSystem.Fonts.caption)
                     }
