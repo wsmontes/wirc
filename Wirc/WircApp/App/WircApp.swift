@@ -30,6 +30,9 @@ struct WircApp: App {
             }
             .tint(DesignSystem.Colors.signal)
             .environment(appState)
+            .onOpenURL { url in
+                appState.handleOAuthCallback(url: url)
+            }
             .fullScreenCover(isPresented: Binding(
                 get: { !appState.onboardingCompleted },
                 set: { appState.onboardingCompleted = !$0 }

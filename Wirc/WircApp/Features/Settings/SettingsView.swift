@@ -187,9 +187,12 @@ struct SettingsView: View {
                 AddServerView { config in appState.irc.servers.append(config) }
             }
             .sheet(isPresented: $showingAddMastodon) {
-                AddMastodonView { name, url, token in
-                    appState.addMastodonAccount(name: name, instanceURL: url, token: token)
-                }
+                AddMastodonView(onConnect: { instance, name in
+                    showingAddMastodon = false
+                    Task {
+                        try? await appState.startMastodonOAuth(instance: instance, accountName: name)
+                    }
+                })
             }
             .sheet(isPresented: $showingAddFeed) {
                 AddFeedView()
@@ -232,36 +235,39 @@ struct SettingsView: View {
 
 struct AddMastodonView: View {
     @Environment(\.dismiss) private var dismiss
-    let onSave: (String, String, String) -> Void
+    let onConnect: (String, String) -> Void
 
     @State private var name = ""
-    @State private var instanceURL = "https://"
-    @State private var token = ""
+    @State private var instance = "mastodon.social"
+    @State private var isConnecting = false
 
     var body: some View {
         NavigationStack {
             Form {
                 Section {
                     TextField("Name (e.g. My Mastodon)", text: $name)
-                    TextField("Instance URL (e.g. https://mastodon.social)", text: $instanceURL)
-                        .autocapitalization(.none).autocorrectionDisabled()
-                        .keyboardType(.URL)
                 }
                 Section {
-                    TextField("Access Token", text: $token)
+                    TextField("Instance (e.g. mastodon.social)", text: $instance)
                         .autocapitalization(.none).autocorrectionDisabled()
+                        .keyboardType(.URL)
                 } footer: {
-                    Text("Get your access token from Preferences → Development → New Application on your Mastodon instance.")
+                    Text("Enter the hostname of your Mastodon instance (without https://).")
                 }
             }
-            .navigationTitle("Add Mastodon").navigationBarTitleDisplayMode(.inline)
+            .navigationTitle("Connect Mastodon").navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Save") {
-                        onSave(name, instanceURL, token)
+                    Button("Connect") {
+                        let cleanInstance = instance
+                            .trimmingCharacters(in: .whitespaces)
+                            .replacingOccurrences(of: "https://", with: "")
+                            .replacingOccurrences(of: "/", with: "")
+                        onConnect(cleanInstance, name)
                         dismiss()
-                    }.disabled(name.isEmpty || instanceURL.isEmpty || token.isEmpty)
+                    }
+                    .disabled(name.isEmpty || instance.trimmingCharacters(in: .whitespaces).isEmpty || isConnecting)
                 }
             }
         }

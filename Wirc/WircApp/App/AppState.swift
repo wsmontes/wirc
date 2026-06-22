@@ -280,6 +280,67 @@ final class AppState {
         }
     }
 
+    // MARK: - OAuth
+
+    /// Pending OAuth state — set before opening the browser, read on callback.
+    private struct PendingOAuth: Sendable {
+        let accountName: String
+        let instance: String
+        let clientId: String
+        let clientSecret: String
+    }
+    private var pendingOAuth: PendingOAuth?
+
+    /// Start the OAuth flow: register app on instance, then open browser for authorization.
+    func startMastodonOAuth(instance: String, accountName: String) async throws {
+        let registration = try await MastodonClient.registerApp(instance: instance)
+        pendingOAuth = PendingOAuth(
+            accountName: accountName,
+            instance: instance,
+            clientId: registration.clientId,
+            clientSecret: registration.clientSecret
+        )
+        let url = try MastodonClient.oauthURL(instance: instance, clientId: registration.clientId)
+        await MainActor.run {
+            UIApplication.shared.open(url)
+        }
+    }
+
+    /// Handle OAuth callback URL — exchange code for token and save account.
+    func handleOAuthCallback(url: URL) {
+        guard url.scheme == "wirc",
+              url.host == "oauth",
+              url.path == "/callback" || url.path == "callback",
+              let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
+              let code = components.queryItems?.first(where: { $0.name == "code" })?.value,
+              let pending = pendingOAuth else { return }
+
+        Task {
+            defer { Task { @MainActor in self.pendingOAuth = nil } }
+            do {
+                let token = try await MastodonClient.exchangeCode(
+                    code: code,
+                    instance: pending.instance,
+                    clientId: pending.clientId,
+                    clientSecret: pending.clientSecret
+                )
+                let instanceURL = "https://\(pending.instance)"
+                await MainActor.run {
+                    addMastodonAccount(name: pending.accountName, instanceURL: instanceURL, token: token)
+                }
+            } catch {
+                await MainActor.run {
+                    rawEvents.append(DebugRawEvent(
+                        timestamp: Date(),
+                        server: pending.instance,
+                        raw: "OAuth token exchange failed: \(error.localizedDescription)",
+                        parsedAs: "mastodon_oauth_error"
+                    ))
+                }
+            }
+        }
+    }
+
     // MARK: - Feed delegations
     func addFeed(url: String, sourceType: FeedSourceType? = nil) async throws {
         let newObjects = try await feed.addFeed(url: url, sourceType: sourceType, womStore: store)
