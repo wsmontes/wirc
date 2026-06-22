@@ -10,12 +10,28 @@ struct LibraryView: View {
     @State private var groupedObjects: [(date: Date, objects: [WOMObject])] = []
     @State private var refreshTask: Task<Void, Never>?
 
+    @State private var dateRange: DateRange = .all
+    @State private var sortOrder: SortOrder = .newest
+
     enum LibraryFilter: String, CaseIterable {
         case all = "All"
         case saved = "Saved"
         case messages = "Messages"
         case posts = "Posts"
         case media = "Media"
+    }
+
+    enum DateRange: String, CaseIterable {
+        case day = "24h"
+        case week = "7d"
+        case month = "30d"
+        case all = "All"
+    }
+
+    enum SortOrder: String, CaseIterable {
+        case newest = "Newest"
+        case oldest = "Oldest"
+        case bySource = "By Source"
     }
 
     /// Rebuild grouped objects — called on data change, not on every body evaluation.
@@ -50,18 +66,38 @@ struct LibraryView: View {
                 (obj.data["server"]?.lowercased().contains(query) ?? false) ||
                 (obj.data["feedTitle"]?.lowercased().contains(query) ?? false) ||
                 (obj.data["instance"]?.lowercased().contains(query) ?? false) ||
+                (obj.data["author"]?.lowercased().contains(query) ?? false) ||
                 obj.id.lowercased().contains(query)
             }
         }
 
-        // Group by calendar day
+        // Date range filter
+        switch dateRange {
+        case .day: objects = objects.filter { $0.createdAt > Date().addingTimeInterval(-86400) }
+        case .week: objects = objects.filter { $0.createdAt > Date().addingTimeInterval(-604800) }
+        case .month: objects = objects.filter { $0.createdAt > Date().addingTimeInterval(-2592000) }
+        case .all: break
+        }
+
+        // Group and sort
         let cal = Calendar.current
         let grouped = Dictionary(grouping: objects) { obj -> Date in
             cal.startOfDay(for: obj.createdAt)
         }
-        groupedObjects = grouped
-            .map { (date: $0.key, objects: $0.value.sorted { $0.createdAt > $1.createdAt }) }
-            .sorted { $0.date > $1.date }
+        switch sortOrder {
+        case .newest:
+            groupedObjects = grouped
+                .map { (date: $0.key, objects: $0.value.sorted { $0.createdAt > $1.createdAt }) }
+                .sorted { $0.date > $1.date }
+        case .oldest:
+            groupedObjects = grouped
+                .map { (date: $0.key, objects: $0.value.sorted { $0.createdAt < $1.createdAt }) }
+                .sorted { $0.date < $1.date }
+        case .bySource:
+            groupedObjects = grouped
+                .map { (date: $0.key, objects: $0.value.sorted { ($0.data["network"] ?? "") < ($1.data["network"] ?? "") }) }
+                .sorted { $0.date > $1.date }
+        }
     }
 
     var body: some View {
@@ -88,6 +124,10 @@ struct LibraryView: View {
 
             // Filter chips
             filterBar
+                .padding(.horizontal, DesignSystem.Spacing.lg)
+
+            // Date range & sort controls
+            filterControls
                 .padding(.horizontal, DesignSystem.Spacing.lg)
 
             if groupedObjects.isEmpty {
@@ -126,6 +166,8 @@ struct LibraryView: View {
             }
         }
         .onChange(of: selectedType) { _, _ in refreshLibrary() }
+        .onChange(of: dateRange) { _, _ in refreshLibrary() }
+        .onChange(of: sortOrder) { _, _ in refreshLibrary() }
         .onChange(of: searchText) { _, _ in
             // Debounce search keystrokes to avoid O(n) filtering on every character
             refreshTask?.cancel()
@@ -159,6 +201,49 @@ struct LibraryView: View {
                             .padding(.horizontal, DesignSystem.Spacing.md)
                             .padding(.vertical, DesignSystem.Spacing.sm)
                             .background(selectedType == filter ? DesignSystem.Colors.signal : DesignSystem.Colors.border)
+                            .clipShape(RoundedRectangle(cornerRadius: DesignSystem.Radius.chip))
+                    }
+                }
+            }
+        }
+    }
+
+    // MARK: - Date Range & Sort Controls
+
+    private var filterControls: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: DesignSystem.Spacing.sm) {
+                ForEach(DateRange.allCases, id: \.self) { range in
+                    Button {
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            dateRange = range
+                        }
+                    } label: {
+                        Text(range.rawValue)
+                            .font(DesignSystem.Fonts.chipLabel)
+                            .foregroundStyle(dateRange == range ? .white : DesignSystem.Colors.ink)
+                            .padding(.horizontal, DesignSystem.Spacing.md)
+                            .padding(.vertical, DesignSystem.Spacing.sm)
+                            .background(dateRange == range ? DesignSystem.Colors.signal : DesignSystem.Colors.border)
+                            .clipShape(RoundedRectangle(cornerRadius: DesignSystem.Radius.chip))
+                    }
+                }
+
+                Divider()
+                    .frame(height: 20)
+
+                ForEach(SortOrder.allCases, id: \.self) { order in
+                    Button {
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            sortOrder = order
+                        }
+                    } label: {
+                        Text(order.rawValue)
+                            .font(DesignSystem.Fonts.chipLabel)
+                            .foregroundStyle(sortOrder == order ? .white : DesignSystem.Colors.ink)
+                            .padding(.horizontal, DesignSystem.Spacing.md)
+                            .padding(.vertical, DesignSystem.Spacing.sm)
+                            .background(sortOrder == order ? DesignSystem.Colors.signal : DesignSystem.Colors.border)
                             .clipShape(RoundedRectangle(cornerRadius: DesignSystem.Radius.chip))
                     }
                 }
