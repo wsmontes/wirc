@@ -1,0 +1,1 @@
+Wirc does not collect, store, or transmit any personal information. All content is stored locally on your device. The app connects to third-party servers (RSS feeds, IRC servers, Mastodon instances) that you configure. Wirc has no analytics, no tracking, and no advertising. Your data belongs to you.
