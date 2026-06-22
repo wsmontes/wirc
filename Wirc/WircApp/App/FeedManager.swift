@@ -94,7 +94,7 @@ final class FeedManager {
     }
 
     @discardableResult
-    func refreshAllFeedsBatched(womStore: WOMStore, onBatch: (([WOMObject]) async -> Void)? = nil) async -> [WOMObject] {
+    func refreshAllFeedsBatched(womStore: WOMStore) async -> [WOMObject] {
         guard isOnline else {
             feedError = "No internet connection"
             return []
@@ -125,7 +125,6 @@ final class FeedManager {
             allNew.append(contentsOf: batchItems)
             completed += batchSubs.count
             refreshProgress = (completed, all.count)
-            if !batchItems.isEmpty { await onBatch?(batchItems) }
             try? await Task.sleep(for: .milliseconds(100))
         }
 
