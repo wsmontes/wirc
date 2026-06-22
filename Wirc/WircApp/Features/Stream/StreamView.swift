@@ -40,8 +40,8 @@ struct StreamView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // Status bar — visible during refresh, after summary, or on error
-            if appState.feed.isRefreshing || appState.feed.refreshSummary != nil || appState.feed.feedError != nil {
+            // Status bar — visible during refresh, after summary, on error, or when offline
+            if appState.feed.isRefreshing || appState.feed.refreshSummary != nil || appState.feed.feedError != nil || !appState.feed.isOnline {
                 statusBar
                     .transition(.move(edge: .top).combined(with: .opacity))
             }
@@ -96,10 +96,11 @@ struct StreamView: View {
         let fraction = p.total > 0 ? Double(p.completed) / Double(p.total) : 0
         let isComplete = !appState.feed.isRefreshing && appState.feed.refreshSummary != nil
         let hasError = appState.feed.feedError != nil
+        let isOffline = !appState.feed.isOnline
 
         return VStack(spacing: DesignSystem.Spacing.xs) {
-            // Progress track (hidden for completion or error)
-            if !isComplete && !hasError {
+            // Progress track (hidden for completion, error, or offline)
+            if !isComplete && !hasError && !isOffline {
                 GeometryReader { geo in
                     RoundedRectangle(cornerRadius: 2)
                         .fill(DesignSystem.Colors.border)
@@ -116,7 +117,7 @@ struct StreamView: View {
 
             // Label
             HStack(spacing: DesignSystem.Spacing.xs) {
-                if hasError {
+                if hasError || isOffline {
                     Image(systemName: "exclamationmark.triangle.fill")
                         .font(.system(size: 11))
                         .foregroundStyle(DesignSystem.Colors.signal)
@@ -124,11 +125,16 @@ struct StreamView: View {
                         Text(err)
                             .font(DesignSystem.Fonts.provenanceDetail)
                             .lineLimit(2)
+                    } else if isOffline {
+                        Text("No internet connection")
+                            .font(DesignSystem.Fonts.provenanceDetail)
                     }
                     Spacer()
-                    Button("Dismiss") { appState.feed.feedError = nil }
-                        .font(DesignSystem.Fonts.data(11))
-                        .foregroundStyle(DesignSystem.Colors.signal)
+                    if !isOffline {
+                        Button("Dismiss") { appState.feed.feedError = nil }
+                            .font(DesignSystem.Fonts.data(11))
+                            .foregroundStyle(DesignSystem.Colors.signal)
+                    }
                 } else if isComplete {
                     Image(systemName: "checkmark.circle.fill")
                         .font(.system(size: 11))
@@ -154,9 +160,10 @@ struct StreamView: View {
         }
         .padding(.top, DesignSystem.Spacing.xs)
         .padding(.bottom, DesignSystem.Spacing.xs)
-        .background(hasError ? DesignSystem.Colors.signal.opacity(0.08) : DesignSystem.Colors.surface.opacity(0.8))
+        .background(hasError || isOffline ? DesignSystem.Colors.signal.opacity(0.08) : DesignSystem.Colors.surface.opacity(0.8))
         .animation(.easeInOut(duration: 0.3), value: isComplete)
         .animation(.easeInOut(duration: 0.3), value: hasError)
+        .animation(.easeInOut(duration: 0.3), value: isOffline)
     }
 
     // MARK: - Filter Bar

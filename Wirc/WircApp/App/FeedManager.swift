@@ -1,5 +1,6 @@
 import SwiftUI
 import BackgroundTasks
+import Network
 
 /// All feed-related state and logic, extracted from AppState.
 @Observable
@@ -10,6 +11,10 @@ final class FeedManager {
     private let adapter = FeedToWOMAdapter()
     private let maxConsecutiveErrors = 5
 
+    private let monitor = NWPathMonitor()
+    private let monitorQueue = DispatchQueue(label: "wirc.reachability")
+    var isOnline = true
+
     var feedError: String?
     /// Incremental progress during batch refresh — updated on each batch completion.
     var refreshProgress: (completed: Int, total: Int) = (0, 0)
@@ -17,6 +22,17 @@ final class FeedManager {
     /// Completion summary that lingers after refresh ends (auto-clears after 4s).
     var refreshSummary: String?
     var subscriptionCount: Int { subscriptionStore.getAll().count }
+
+    // MARK: - Init
+
+    init() {
+        monitor.pathUpdateHandler = { [weak self] path in
+            Task { @MainActor in
+                self?.isOnline = (path.status == .satisfied)
+            }
+        }
+        monitor.start(queue: monitorQueue)
+    }
 
     // MARK: - Feed Management
 
@@ -79,6 +95,10 @@ final class FeedManager {
 
     @discardableResult
     func refreshAllFeedsBatched(womStore: WOMStore) async -> [WOMObject] {
+        guard isOnline else {
+            feedError = "No internet connection"
+            return []
+        }
         let all = subscriptionStore.getAll()
         let batchSize = 15
         isRefreshing = true
