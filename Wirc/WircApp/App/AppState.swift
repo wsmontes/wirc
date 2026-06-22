@@ -22,11 +22,19 @@ final class AppState {
     }
     var womObjects: [WOMObject] = [] {
         didSet {
-            // Cap in-memory objects to prevent unbounded growth
             if womObjects.count > 2000 {
-                let dropped = womObjects.count - 2000
-                os_log(.debug, "AppState: evicting %d objects from womObjects cap", dropped)
-                womObjects = Array(womObjects.suffix(2000))
+                let feedPosts = womObjects.filter { $0.type.contains("wom:Post") }
+                let ircMessages = womObjects.filter { !$0.type.contains("wom:Post") }
+                // Keep all feed posts + most recent IRC messages up to 2000 total
+                let feedCap = min(feedPosts.count, 400)
+                let keptFeed = Array(feedPosts.prefix(feedCap))
+                let ircCap = 2000 - keptFeed.count
+                let keptIRC = Array(ircMessages.suffix(ircCap))
+                womObjects = keptFeed + keptIRC
+                let totalDropped = oldValue.count - womObjects.count
+                if totalDropped > 0 {
+                    os_log(.debug, "AppState: evicted %d objects (kept %d feed, %d IRC)", totalDropped, keptFeed.count, keptIRC.count)
+                }
             }
             invalidateIndexes()
         }
