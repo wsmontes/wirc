@@ -7,24 +7,26 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		912D61FCF8454117AF9B8C4F /* BroadcastPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E93703AC0E44685825F141A /* BroadcastPicker.swift */; };
-		9AFCC8312FA54EC9AA947EA8 /* ChannelTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = 652F478DD92E4E2E92A4FC85 /* ChannelTab.swift */; };
-		19A684A44F714E0D842F268E /* JoinChannelSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82D3B22B3817428A9C9AE90F /* JoinChannelSheet.swift */; };
 		0B92705E9F8535DEFA71075A /* WOMProvenance.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB33105D31E371B41A8F523F /* WOMProvenance.swift */; };
+		0D4EE10BC4CF5DD6F6D32A93 /* ChannelTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = 205C0F86472A51D8FDDBBF3A /* ChannelTab.swift */; };
 		101E59D30FFAA74118E4E8F7 /* FeedItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 878395F92963933AFF5376AF /* FeedItem.swift */; };
 		1614A2CBB02FDFECE1C3043F /* DebugView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDE1F18BDE942722566DA463 /* DebugView.swift */; };
 		18A08BC4CFC068A4403D2D3A /* WOMObjectInspectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CDD53F05BF753713991139CE /* WOMObjectInspectorView.swift */; };
 		1E42AF5DCC3C22889B1FB5C6 /* WOMBinding.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7301E9B32895F506FF41AB79 /* WOMBinding.swift */; };
 		2065F4616971143C5E5EE6B2 /* ChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D3473D7CE010F204E8D51A3 /* ChatView.swift */; };
 		208A7FE391E119C11444ECB8 /* TrustRelation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C123AABD800E7BE44F5B071D /* TrustRelation.swift */; };
+		22D0DBCDCD21DD53A0881160 /* DefaultFeedsLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FC6873ED73F3DB6E392C71A /* DefaultFeedsLoader.swift */; };
+		23AC33D60FE652ED6685E67A /* FeedManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E24246B1B47DC903758611E6 /* FeedManager.swift */; };
 		26B80F99529363367CC97548 /* WOMToIRCAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B62E6C1D03888795A63181F4 /* WOMToIRCAdapter.swift */; };
 		28F555CA915D88B0DB64E00F /* SuggestedServers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B676B37B716809668A31008 /* SuggestedServers.swift */; };
+		3242860B98431E405FDE756C /* StreamView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1512EF345EA5BE6212461B8B /* StreamView.swift */; };
+		3BCDAD93119F0B68C399AED9 /* FeedFetcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 020931F5C2A78F26DA21B53F /* FeedFetcher.swift */; };
 		3DC38E9513AAD20E5E04063E /* ConversationListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F1B694593898DDB87326792 /* ConversationListView.swift */; };
 		3E814D0755AD1D8801399E5C /* WOMGovernance.swift in Sources */ = {isa = PBXBuildFile; fileRef = 080F7B7462FB8F4E7F90D92E /* WOMGovernance.swift */; };
 		3F838981C16016FD2DF0443C /* FeedCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02BFA0A70998650F4CAD3670 /* FeedCard.swift */; };
 		4DA3E8A6D23BBF6ED1126E17 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAE7D6E8E5F39710B7B47F82 /* SettingsView.swift */; };
-				C3D4E5F60718293A0B1C2D3E /* StreamView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2C3D4E5F60718293A0B1C2D /* StreamView.swift */; };
-		A4B5C6D7E8F90019283A4B5E /* LibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4B5C6D7E8F90019283A4B5D /* LibraryView.swift */; };
+		56B48B28FEBC91BA1D1EDF8F /* FeedItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 878395F92963933AFF5376AF /* FeedItem.swift */; };
+		571A9657E75DCEE173032659 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 997D4CFB00768A0732B2714D /* OnboardingView.swift */; };
 		57935944E52BD16C7D829850 /* SuggestedServers.json in Resources */ = {isa = PBXBuildFile; fileRef = 2BA08C7EEC27E8FED76DCB54 /* SuggestedServers.json */; };
 		57D623F3F96FCC6090F802F2 /* WOMEnums.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45721F0D4168305EC5827852 /* WOMEnums.swift */; };
 		5A564F0F105370D5C227631C /* WOMReference.swift in Sources */ = {isa = PBXBuildFile; fileRef = 483BB0DC491D7758B7C2E381 /* WOMReference.swift */; };
@@ -35,55 +37,55 @@
 		648CA65F111308F728806EA5 /* FeedParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E66A769A142818053ED76F7 /* FeedParser.swift */; };
 		650ADA11D0E8C152956F478B /* RawEventLogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 110725662E9CAF4F796B6DDC /* RawEventLogView.swift */; };
 		6533D9A172E226BB99DD3C15 /* IRCToWOMAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6A2821582A3BC105EEF454C /* IRCToWOMAdapter.swift */; };
+		661D45AF9B0274CB8CBA0504 /* WorkshopView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EF838065FB3476BD06759AB /* WorkshopView.swift */; };
 		6794DF1FEFEEF119002734B6 /* FeedSubscriptionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E9842883A75E2FC1841C43D /* FeedSubscriptionStore.swift */; };
 		68F56DB16D64D7DF03FC5C4B /* IRCParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF814FAA578F93CB5FC90BB5 /* IRCParser.swift */; };
 		6E01703388ADF79FF75D4BF5 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEC539290F0DCC4E113874FF /* AppState.swift */; };
-		D3C4B5A6E7F801293A0B1C2 /* WorkshopView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5F4A3B2C1D60718293A0B1E /* WorkshopView.swift */; };
 		728523B504672CB8A4ECDE94 /* WOMIDGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02F21BC17F83816701A37D7B /* WOMIDGenerator.swift */; };
 		798F1A5BB0ECD2C6DB4C27EB /* JSONFileStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 977059C372AB2F3C65D20D14 /* JSONFileStore.swift */; };
 		7B85E860C10694C08CC3BC3D /* WircApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FA00F37E1FF2C32DDF280ED /* WircApp.swift */; };
 		7C4C342761F12EED666F7DA6 /* ObjectInspectorSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82E54BAAED3C1E38E70AAC22 /* ObjectInspectorSheet.swift */; };
 		7EC94869472B0565F65A371D /* RemoteIdentity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D5B69B87A544419FE5C2911 /* RemoteIdentity.swift */; };
+		80B15D3CC47D7A8C729D0AD8 /* IRCChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87F94BFC70A2A0434F288001 /* IRCChatView.swift */; };
 		83D3F1EA012B94B9F965D8C1 /* WOMContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 116B884F1396D33A37753847 /* WOMContent.swift */; };
 		89545409416029AA5D6EF14F /* ServerOrchestrator.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE794998165C7A6AA30245FF /* ServerOrchestrator.swift */; };
 		93F0B76736890A499C0A9A3F /* AddFeedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 032E2B03065B5DAD4439A579 /* AddFeedView.swift */; };
+		977341D34E28D4155C24A101 /* LibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABD471DAFC07C80E8444F9BF /* LibraryView.swift */; };
 		97C3D31649C0B6A7776D3892 /* FeedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA35FC732F83C26AF70D03B1 /* FeedView.swift */; };
 		9A32DFFC6C0109974EA32C25 /* FeedSubscription.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1C0054B7701EAA66473F109 /* FeedSubscription.swift */; };
 		A31014B086E449E4EB6AF1E5 /* MessageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36941508DA40D61ED2A49585 /* MessageView.swift */; };
 		A403E8957A992C14D19312EF /* DesignSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = E83E547AD92C7A243ABB80AF /* DesignSystem.swift */; };
+		A6A6AA02CCC1C3EC63E3E3EF /* IRCCommandParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2153CF2443CFBB781911367C /* IRCCommandParser.swift */; };
 		B28C05DA310EF2AE7F9492A2 /* SuggestedChannels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0498ACC5E264A6704F285BBE /* SuggestedChannels.swift */; };
 		B36A1CC39ECE5F3BDBBE957B /* MastodonClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC577F22552016DCF3516362 /* MastodonClient.swift */; };
+		B46D3F3D79C7B18743626117 /* IRCAutomation.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBDC50C7FFFAC7CADE43BE2B /* IRCAutomation.swift */; };
 		B8FA6CA3BEF0D950871DAE84 /* WOMClassification.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FCFECC386025CB0EB6A95E1 /* WOMClassification.swift */; };
 		B9D9F45CF4E0337214450B94 /* SuggestedChannels.json in Resources */ = {isa = PBXBuildFile; fileRef = 2B02469B01F721B6169799B0 /* SuggestedChannels.json */; };
+		BAF1FDE75ACD1D0345ABFEB6 /* IRCManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 634FEF7293B9F11FFDF05727 /* IRCManager.swift */; };
+		BFF889896BCD1E83FB50974C /* IRCCommandExecutor.swift in Sources */ = {isa = PBXBuildFile; fileRef = D26189FDE6636FCBD366020C /* IRCCommandExecutor.swift */; };
+		C00BDA18AEA42FBE756F0C1C /* IRCServerManagerSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FD71A62971FCAC7D6CE5AF1 /* IRCServerManagerSheet.swift */; };
+		C72ACA83860950DE1B36C730 /* ShareViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A6278833766B2AAC5010770 /* ShareViewController.swift */; };
+		CEA4029066FE26C9FC4B6A6A /* DefaultFeeds.json in Resources */ = {isa = PBXBuildFile; fileRef = CAF9F7C7688711D4C9C33E4E /* DefaultFeeds.json */; };
 		D3A953C8893F023EFB20D6CB /* InMemoryWOMStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A9D83E615CA39680B6D1405 /* InMemoryWOMStore.swift */; };
 		D6CCE39854349C77813524F6 /* FeedFetcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 020931F5C2A78F26DA21B53F /* FeedFetcher.swift */; };
 		D88E678DCB7158297CD4F64B /* IRCMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DD2E68D088CDE5CE20AE674 /* IRCMessage.swift */; };
 		DC9D1DFA06EEFA62B253FD57 /* IRCConnectionConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6326E3AE770420F6AF2E043E /* IRCConnectionConfig.swift */; };
 		DF00A7A6ADD9370AF764D3D9 /* IRCClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9C0B724FA14588CD378CBD1 /* IRCClient.swift */; };
+		E0140A54DE0FE96F534B6508 /* KeychainStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B9062EF925BF18DC9D8D340 /* KeychainStore.swift */; };
 		E44885986D6D4884933A8820 /* MastodonToWOMAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B266AC0655998332A501F98 /* MastodonToWOMAdapter.swift */; };
 		E507E3CC098099E1AACAB37A /* AddServerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 354688CFC206205439A3FFFF /* AddServerView.swift */; };
-		1688B28606E748F2958545A4DADFB2F0 /* MastodonStreamer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AE37823E9D04DB99F0D4A5AECEBE6E3C /* MastodonStreamer.swift */; };
-		539C6C9FEBC248FDF7F16F61 /* KeychainStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBD1E1B7AFDACE9DD2F2F88B /* KeychainStore.swift */; };
+		E6E460D2B37A937490CE37B8 /* FeedSubscriptionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E9842883A75E2FC1841C43D /* FeedSubscriptionStore.swift */; };
 		EB3E4FCDC74623DA8E2D0F0D /* FeedToWOMAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = F48F757875C2347632356611 /* FeedToWOMAdapter.swift */; };
 		EC8AF2CDF21393C5E26B11D3 /* mastodon_config.json in Resources */ = {isa = PBXBuildFile; fileRef = 7FAAB9DB82E9EA69AB9BFAB4 /* mastodon_config.json */; };
 		EFAE2659F2ED47FD1DE8817C /* IRCEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD36B880B97E4EDF5E8A0309 /* IRCEvent.swift */; };
-		67207DDCC898482FBF633D96 /* DefaultFeeds.json in Resources */ = {isa = PBXBuildFile; fileRef = A71564092EE74C10B88563DC /* DefaultFeeds.json */; };
-		F9EFA01B3C3E4B74AF13043E /* DefaultFeedsLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A25279B4ED747D19F5B7540 /* DefaultFeedsLoader.swift */; };
-		908719EFEBB845E18C6F2735 /* IRCChannelManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAD6B46A60924B6996B52D18 /* IRCChannelManager.swift */; };
-		49564F780D13465BA3A7D819 /* IRCServerManagerSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 493BFE617DC14CC09BA5E57B /* IRCServerManagerSheet.swift */; };
-		F8BC07DB36074DAEB2B3476D /* IRCCommandParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49C7586EAB014C1C95E1D168 /* IRCCommandParser.swift */; };
-		2A8449521C34403EA7FFE62F /* IRCCommandExecutor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7350D5AC7904A30B36086CF /* IRCCommandExecutor.swift */; };
-		33B1FDEE49A64552BF250756 /* IRCAutomation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 420B4F345DB84D65AAF16EFB /* IRCAutomation.swift */; };
-		7726A1A5D37A495D834F3925 /* IRCManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 600D88F1A2974B558DCE36E4 /* IRCManager.swift */; };
-		80B7B7475A35415CA8E8666D /* FeedManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 480FC6D050F34DC49D1FB6CF /* FeedManager.swift */; };
-		D6D4D2F2F8364DD2BFBCC460 /* IRCChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A7C88E8A20D471BB406539B /* IRCChatView.swift */; };
-			47349691299C4391A4896641 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C0E1C56D40B4545820D16A4 /* OnboardingView.swift */; };
+		F9CD1AB651D39C0AB7C888CF /* JoinChannelSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = E40EF8CD99E8AD31FA460F82 /* JoinChannelSheet.swift */; };
+		FCB942B3B38EEE55C87FA1F5 /* BroadcastPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65A2BA21941352A18A47D072 /* BroadcastPicker.swift */; };
+		FF8357CA93F4DA467E59B42A /* FeedSubscription.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1C0054B7701EAA66473F109 /* FeedSubscription.swift */; };
+		FF8F481DE751EB6CDB2469F6 /* MastodonStreamer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43B55A58CBB87C95B7B76217 /* MastodonStreamer.swift */; };
+		FFE2BBFECF95AADC001E7B84 /* IRCChannelManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3095A1F39684FBBA998F9A9F /* IRCChannelManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		5E93703AC0E44685825F141A /* BroadcastPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WircApp/Features/Messages/BroadcastPicker.swift; sourceTree = SOURCE_ROOT; };
-		652F478DD92E4E2E92A4FC85 /* ChannelTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WircApp/Features/Messages/ChannelTab.swift; sourceTree = SOURCE_ROOT; };
-		82D3B22B3817428A9C9AE90F /* JoinChannelSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WircApp/Features/Messages/JoinChannelSheet.swift; sourceTree = SOURCE_ROOT; };
 		020931F5C2A78F26DA21B53F /* FeedFetcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedFetcher.swift; sourceTree = "<group>"; };
 		02BFA0A70998650F4CAD3670 /* FeedCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedCard.swift; sourceTree = "<group>"; };
 		02F21BC17F83816701A37D7B /* WOMIDGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WOMIDGenerator.swift; sourceTree = "<group>"; };
@@ -93,31 +95,48 @@
 		0E9842883A75E2FC1841C43D /* FeedSubscriptionStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedSubscriptionStore.swift; sourceTree = "<group>"; };
 		110725662E9CAF4F796B6DDC /* RawEventLogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RawEventLogView.swift; sourceTree = "<group>"; };
 		116B884F1396D33A37753847 /* WOMContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WOMContent.swift; sourceTree = "<group>"; };
+		1512EF345EA5BE6212461B8B /* StreamView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamView.swift; sourceTree = "<group>"; };
 		1F1B694593898DDB87326792 /* ConversationListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationListView.swift; sourceTree = "<group>"; };
 		1FCFECC386025CB0EB6A95E1 /* WOMClassification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WOMClassification.swift; sourceTree = "<group>"; };
+		205C0F86472A51D8FDDBBF3A /* ChannelTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChannelTab.swift; sourceTree = "<group>"; };
+		2153CF2443CFBB781911367C /* IRCCommandParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IRCCommandParser.swift; sourceTree = "<group>"; };
 		2B02469B01F721B6169799B0 /* SuggestedChannels.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = SuggestedChannels.json; sourceTree = "<group>"; };
 		2B266AC0655998332A501F98 /* MastodonToWOMAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MastodonToWOMAdapter.swift; sourceTree = "<group>"; };
 		2B676B37B716809668A31008 /* SuggestedServers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SuggestedServers.swift; sourceTree = "<group>"; };
 		2BA08C7EEC27E8FED76DCB54 /* SuggestedServers.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = SuggestedServers.json; sourceTree = "<group>"; };
 		2D5B69B87A544419FE5C2911 /* RemoteIdentity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteIdentity.swift; sourceTree = "<group>"; };
+		2FC6873ED73F3DB6E392C71A /* DefaultFeedsLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultFeedsLoader.swift; sourceTree = "<group>"; };
+		3095A1F39684FBBA998F9A9F /* IRCChannelManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IRCChannelManager.swift; sourceTree = "<group>"; };
 		354688CFC206205439A3FFFF /* AddServerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddServerView.swift; sourceTree = "<group>"; };
 		36941508DA40D61ED2A49585 /* MessageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageView.swift; sourceTree = "<group>"; };
+		3C0B152F36A787C578E261C6 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		3DD2E68D088CDE5CE20AE674 /* IRCMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IRCMessage.swift; sourceTree = "<group>"; };
 		41C0975A8852038225072B85 /* Wirc.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Wirc.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		43B55A58CBB87C95B7B76217 /* MastodonStreamer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MastodonStreamer.swift; sourceTree = "<group>"; };
 		45721F0D4168305EC5827852 /* WOMEnums.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WOMEnums.swift; sourceTree = "<group>"; };
 		483BB0DC491D7758B7C2E381 /* WOMReference.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WOMReference.swift; sourceTree = "<group>"; };
 		4A9D83E615CA39680B6D1405 /* InMemoryWOMStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InMemoryWOMStore.swift; sourceTree = "<group>"; };
+		4B9062EF925BF18DC9D8D340 /* KeychainStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainStore.swift; sourceTree = "<group>"; };
 		5B7847091404A9B9666E9D5F /* WOMStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WOMStore.swift; sourceTree = "<group>"; };
 		5E66A769A142818053ED76F7 /* FeedParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedParser.swift; sourceTree = "<group>"; };
+		5FD71A62971FCAC7D6CE5AF1 /* IRCServerManagerSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IRCServerManagerSheet.swift; sourceTree = "<group>"; };
+		60CF596F4846F3F1298D4B4A /* WircShareExtension.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = WircShareExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		6326E3AE770420F6AF2E043E /* IRCConnectionConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IRCConnectionConfig.swift; sourceTree = "<group>"; };
+		634FEF7293B9F11FFDF05727 /* IRCManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IRCManager.swift; sourceTree = "<group>"; };
+		65A2BA21941352A18A47D072 /* BroadcastPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BroadcastPicker.swift; sourceTree = "<group>"; };
+		6EF838065FB3476BD06759AB /* WorkshopView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkshopView.swift; sourceTree = "<group>"; };
 		7301E9B32895F506FF41AB79 /* WOMBinding.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WOMBinding.swift; sourceTree = "<group>"; };
 		7FAAB9DB82E9EA69AB9BFAB4 /* mastodon_config.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = mastodon_config.json; sourceTree = "<group>"; };
 		82E54BAAED3C1E38E70AAC22 /* ObjectInspectorSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObjectInspectorSheet.swift; sourceTree = "<group>"; };
 		878395F92963933AFF5376AF /* FeedItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedItem.swift; sourceTree = "<group>"; };
+		87F94BFC70A2A0434F288001 /* IRCChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IRCChatView.swift; sourceTree = "<group>"; };
+		8A6278833766B2AAC5010770 /* ShareViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareViewController.swift; sourceTree = "<group>"; };
 		977059C372AB2F3C65D20D14 /* JSONFileStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSONFileStore.swift; sourceTree = "<group>"; };
+		997D4CFB00768A0732B2714D /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		9D3473D7CE010F204E8D51A3 /* ChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatView.swift; sourceTree = "<group>"; };
 		9FA00F37E1FF2C32DDF280ED /* WircApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WircApp.swift; sourceTree = "<group>"; };
 		AA35FC732F83C26AF70D03B1 /* FeedView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedView.swift; sourceTree = "<group>"; };
+		ABD471DAFC07C80E8444F9BF /* LibraryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryView.swift; sourceTree = "<group>"; };
 		AEC539290F0DCC4E113874FF /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
 		B62E6C1D03888795A63181F4 /* WOMToIRCAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WOMToIRCAdapter.swift; sourceTree = "<group>"; };
 		BB33105D31E371B41A8F523F /* WOMProvenance.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WOMProvenance.swift; sourceTree = "<group>"; };
@@ -126,41 +145,39 @@
 		C551D1B9BDE12B3F3C761078 /* WOMObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WOMObject.swift; sourceTree = "<group>"; };
 		C6C049CD72667A707D2C2029 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		C9C0B724FA14588CD378CBD1 /* IRCClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IRCClient.swift; sourceTree = "<group>"; };
+		CAF9F7C7688711D4C9C33E4E /* DefaultFeeds.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = DefaultFeeds.json; sourceTree = "<group>"; };
 		CC577F22552016DCF3516362 /* MastodonClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MastodonClient.swift; sourceTree = "<group>"; };
 		CDD53F05BF753713991139CE /* WOMObjectInspectorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WOMObjectInspectorView.swift; sourceTree = "<group>"; };
 		CE794998165C7A6AA30245FF /* ServerOrchestrator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerOrchestrator.swift; sourceTree = "<group>"; };
 		D1C0054B7701EAA66473F109 /* FeedSubscription.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedSubscription.swift; sourceTree = "<group>"; };
+		D26189FDE6636FCBD366020C /* IRCCommandExecutor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IRCCommandExecutor.swift; sourceTree = "<group>"; };
 		D6A2821582A3BC105EEF454C /* IRCToWOMAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IRCToWOMAdapter.swift; sourceTree = "<group>"; };
 		D96DCC7DC708265CC384DC89 /* SocialSignal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SocialSignal.swift; sourceTree = "<group>"; };
 		DAE7D6E8E5F39710B7B47F82 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		DD36B880B97E4EDF5E8A0309 /* IRCEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IRCEvent.swift; sourceTree = "<group>"; };
+		E24246B1B47DC903758611E6 /* FeedManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedManager.swift; sourceTree = "<group>"; };
+		E40EF8CD99E8AD31FA460F82 /* JoinChannelSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JoinChannelSheet.swift; sourceTree = "<group>"; };
 		E83E547AD92C7A243ABB80AF /* DesignSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignSystem.swift; sourceTree = "<group>"; };
 		EC2AB09D725C342CEACEAEF1 /* MastodonModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MastodonModels.swift; sourceTree = "<group>"; };
 		F48F757875C2347632356611 /* FeedToWOMAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedToWOMAdapter.swift; sourceTree = "<group>"; };
-		FBD1E1B7AFDACE9DD2F2F88B /* KeychainStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainStore.swift; sourceTree = "<group>"; };
-			6AE37823E9D04DB99F0D4A5AECEBE6E3C /* MastodonStreamer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MastodonStreamer.swift; sourceTree = "<group>"; };
+		FBDC50C7FFFAC7CADE43BE2B /* IRCAutomation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IRCAutomation.swift; sourceTree = "<group>"; };
 		FDE1F18BDE942722566DA463 /* DebugView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugView.swift; sourceTree = "<group>"; };
-		B2C3D4E5F60718293A0B1C2D /* StreamView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamView.swift; sourceTree = "<group>"; };
-		A4B5C6D7E8F90019283A4B5D /* LibraryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryView.swift; sourceTree = "<group>"; };
-		E5F4A3B2C1D60718293A0B1E /* WorkshopView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkshopView.swift; sourceTree = "<group>"; };
-		A71564092EE74C10B88563DC /* DefaultFeeds.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = WircApp/Infrastructure/Feed/DefaultFeeds.json; sourceTree = SOURCE_ROOT; };
-		6A25279B4ED747D19F5B7540 /* DefaultFeedsLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WircApp/Infrastructure/Feed/DefaultFeedsLoader.swift; sourceTree = SOURCE_ROOT; };
-		AAD6B46A60924B6996B52D18 /* IRCChannelManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WircApp/Infrastructure/IRC/IRCChannelManager.swift; sourceTree = SOURCE_ROOT; };
-		493BFE617DC14CC09BA5E57B /* IRCServerManagerSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WircApp/Features/Messages/IRCServerManagerSheet.swift; sourceTree = SOURCE_ROOT; };
-		49C7586EAB014C1C95E1D168 /* IRCCommandParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WircApp/Infrastructure/IRC/IRCCommandParser.swift; sourceTree = SOURCE_ROOT; };
-		B7350D5AC7904A30B36086CF /* IRCCommandExecutor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WircApp/Infrastructure/IRC/IRCCommandExecutor.swift; sourceTree = SOURCE_ROOT; };
-		420B4F345DB84D65AAF16EFB /* IRCAutomation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WircApp/Infrastructure/IRC/IRCAutomation.swift; sourceTree = SOURCE_ROOT; };
-		600D88F1A2974B558DCE36E4 /* IRCManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WircApp/App/IRCManager.swift; sourceTree = SOURCE_ROOT; };
-		480FC6D050F34DC49D1FB6CF /* FeedManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WircApp/App/FeedManager.swift; sourceTree = SOURCE_ROOT; };
-		5A7C88E8A20D471BB406539B /* IRCChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WircApp/Features/Messages/IRCChatView.swift; sourceTree = SOURCE_ROOT; };
-		1C0E1C56D40B4545820D16A4 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WircApp/Features/Onboarding/OnboardingView.swift; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
+		032BB77F241DA8AC6426E9D7 /* Workshop */ = {
+			isa = PBXGroup;
+			children = (
+				6EF838065FB3476BD06759AB /* WorkshopView.swift */,
+			);
+			path = Workshop;
+			sourceTree = "<group>";
+		};
 		05AF971AE3FAA71E8822420B = {
 			isa = PBXGroup;
 			children = (
 				49FCCA37D5C72DCC660EA0C9 /* WircApp */,
+				1DCE4ADA96524234AD2589A3 /* WircShareExtension */,
 				FFC8696CE1066C637F57B71F /* Products */,
 			);
 			sourceTree = "<group>";
@@ -173,6 +190,15 @@
 				5B7847091404A9B9666E9D5F /* WOMStore.swift */,
 			);
 			path = Persistence;
+			sourceTree = "<group>";
+		};
+		1DCE4ADA96524234AD2589A3 /* WircShareExtension */ = {
+			isa = PBXGroup;
+			children = (
+				3C0B152F36A787C578E261C6 /* Info.plist */,
+				8A6278833766B2AAC5010770 /* ShareViewController.swift */,
+			);
+			path = WircShareExtension;
 			sourceTree = "<group>";
 		};
 		237682781EF8DA6DC129DCA0 /* WOM */ = {
@@ -191,6 +217,14 @@
 			path = WOM;
 			sourceTree = "<group>";
 		};
+		3887C0A844D8EB4E2CB956C8 /* Onboarding */ = {
+			isa = PBXGroup;
+			children = (
+				997D4CFB00768A0732B2714D /* OnboardingView.swift */,
+			);
+			path = Onboarding;
+			sourceTree = "<group>";
+		};
 		3F3BAAE714EFDB70F4D078D0 /* Shared */ = {
 			isa = PBXGroup;
 			children = (
@@ -203,9 +237,9 @@
 			isa = PBXGroup;
 			children = (
 				AEC539290F0DCC4E113874FF /* AppState.swift */,
-				480FC6D050F34DC49D1FB6CF /* FeedManager.swift */,
-				600D88F1A2974B558DCE36E4 /* IRCManager.swift */,
+				E24246B1B47DC903758611E6 /* FeedManager.swift */,
 				C6C049CD72667A707D2C2029 /* Info.plist */,
+				634FEF7293B9F11FFDF05727 /* IRCManager.swift */,
 				9FA00F37E1FF2C32DDF280ED /* WircApp.swift */,
 			);
 			path = App;
@@ -228,37 +262,15 @@
 				4E0777227E87289411EBA1CB /* Chat */,
 				C9E9DB7C2281B09165AD78FD /* Debug */,
 				88F4DD70905DEE09FC3CBF1B /* Feed */,
-				B418644AD4F24461B3A9FA14 /* Messages */,CC45187C8720D690484C4929 /* Settings */,
-				A1B2C3D4E5F60718293A0B1C /* Stream */,
-				A4B5C6D7E8F90019283A4B5C /* Library */,
-				C2D3E4F5A6B718293A0B1C3 /* Workshop */,
+				EA9A1602165C6AE3672721C2 /* Library */,
+				7E57D0488E8E9BD5E5BFFDF7 /* Messages */,
+				3887C0A844D8EB4E2CB956C8 /* Onboarding */,
+				CC45187C8720D690484C4929 /* Settings */,
 				3F3BAAE714EFDB70F4D078D0 /* Shared */,
+				87E6B5F602C8F2B1D20C00FA /* Stream */,
+				032BB77F241DA8AC6426E9D7 /* Workshop */,
 			);
 			path = Features;
-			sourceTree = "<group>";
-		};
-		A1B2C3D4E5F60718293A0B1C /* Stream */ = {
-			isa = PBXGroup;
-			children = (
-				B2C3D4E5F60718293A0B1C2D /* StreamView.swift */,
-			);
-			path = Stream;
-			sourceTree = "<group>";
-		};
-		A4B5C6D7E8F90019283A4B5C /* Library */ = {
-			isa = PBXGroup;
-			children = (
-				A4B5C6D7E8F90019283A4B5D /* LibraryView.swift */,
-			);
-			path = Library;
-			sourceTree = "<group>";
-		};
-		C2D3E4F5A6B718293A0B1C3 /* Workshop */ = {
-			isa = PBXGroup;
-			children = (
-				E5F4A3B2C1D60718293A0B1E /* WorkshopView.swift */,
-			);
-			path = Workshop;
 			sourceTree = "<group>";
 		};
 		4E0777227E87289411EBA1CB /* Chat */ = {
@@ -274,12 +286,12 @@
 		50B0F8AE07F0D83C7830E073 /* Mastodon */ = {
 			isa = PBXGroup;
 			children = (
+				4B9062EF925BF18DC9D8D340 /* KeychainStore.swift */,
 				7FAAB9DB82E9EA69AB9BFAB4 /* mastodon_config.json */,
 				CC577F22552016DCF3516362 /* MastodonClient.swift */,
-				FBD1E1B7AFDACE9DD2F2F88B /* KeychainStore.swift */,
 				EC2AB09D725C342CEACEAEF1 /* MastodonModels.swift */,
+				43B55A58CBB87C95B7B76217 /* MastodonStreamer.swift */,
 				2B266AC0655998332A501F98 /* MastodonToWOMAdapter.swift */,
-				6AE37823E9D04DB99F0D4A5AECEBE6E3C /* MastodonStreamer.swift */,
 			);
 			path = Mastodon;
 			sourceTree = "<group>";
@@ -292,6 +304,26 @@
 				237682781EF8DA6DC129DCA0 /* WOM */,
 			);
 			path = Core;
+			sourceTree = "<group>";
+		};
+		7E57D0488E8E9BD5E5BFFDF7 /* Messages */ = {
+			isa = PBXGroup;
+			children = (
+				65A2BA21941352A18A47D072 /* BroadcastPicker.swift */,
+				205C0F86472A51D8FDDBBF3A /* ChannelTab.swift */,
+				87F94BFC70A2A0434F288001 /* IRCChatView.swift */,
+				5FD71A62971FCAC7D6CE5AF1 /* IRCServerManagerSheet.swift */,
+				E40EF8CD99E8AD31FA460F82 /* JoinChannelSheet.swift */,
+			);
+			path = Messages;
+			sourceTree = "<group>";
+		};
+		87E6B5F602C8F2B1D20C00FA /* Stream */ = {
+			isa = PBXGroup;
+			children = (
+				1512EF345EA5BE6212461B8B /* StreamView.swift */,
+			);
+			path = Stream;
 			sourceTree = "<group>";
 		};
 		88F4DD70905DEE09FC3CBF1B /* Feed */ = {
@@ -317,7 +349,11 @@
 		9D6E03E92B2659AB6B6A9176 /* IRC */ = {
 			isa = PBXGroup;
 			children = (
+				FBDC50C7FFFAC7CADE43BE2B /* IRCAutomation.swift */,
+				3095A1F39684FBBA998F9A9F /* IRCChannelManager.swift */,
 				C9C0B724FA14588CD378CBD1 /* IRCClient.swift */,
+				D26189FDE6636FCBD366020C /* IRCCommandExecutor.swift */,
+				2153CF2443CFBB781911367C /* IRCCommandParser.swift */,
 				6326E3AE770420F6AF2E043E /* IRCConnectionConfig.swift */,
 				DD36B880B97E4EDF5E8A0309 /* IRCEvent.swift */,
 				3DD2E68D088CDE5CE20AE674 /* IRCMessage.swift */,
@@ -329,9 +365,6 @@
 				2BA08C7EEC27E8FED76DCB54 /* SuggestedServers.json */,
 				2B676B37B716809668A31008 /* SuggestedServers.swift */,
 				B62E6C1D03888795A63181F4 /* WOMToIRCAdapter.swift */,
-							AAD6B46A60924B6996B52D18 /* IRCChannelManager.swift */,
-				420B4F345DB84D65AAF16EFB /* IRCAutomation.swift */,
-				49C7586EAB014C1C95E1D168 /* IRCCommandParser.swift */,
 			);
 			path = IRC;
 			sourceTree = "<group>";
@@ -369,6 +402,8 @@
 		E6680ADA8D25684C7089E484 /* Feed */ = {
 			isa = PBXGroup;
 			children = (
+				CAF9F7C7688711D4C9C33E4E /* DefaultFeeds.json */,
+				2FC6873ED73F3DB6E392C71A /* DefaultFeedsLoader.swift */,
 				020931F5C2A78F26DA21B53F /* FeedFetcher.swift */,
 				878395F92963933AFF5376AF /* FeedItem.swift */,
 				5E66A769A142818053ED76F7 /* FeedParser.swift */,
@@ -379,32 +414,21 @@
 			path = Feed;
 			sourceTree = "<group>";
 		};
+		EA9A1602165C6AE3672721C2 /* Library */ = {
+			isa = PBXGroup;
+			children = (
+				ABD471DAFC07C80E8444F9BF /* LibraryView.swift */,
+			);
+			path = Library;
+			sourceTree = "<group>";
+		};
 		FFC8696CE1066C637F57B71F /* Products */ = {
 			isa = PBXGroup;
 			children = (
 				41C0975A8852038225072B85 /* Wirc.app */,
+				60CF596F4846F3F1298D4B4A /* WircShareExtension.appex */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		B418644AD4F24461B3A9FA14 /* Messages */ = {
-			isa = PBXGroup;
-			children = (
-				5A7C88E8A20D471BB406539B /* IRCChatView.swift */,
-				5E93703AC0E44685825F141A /* BroadcastPicker.swift */,
-				652F478DD92E4E2E92A4FC85 /* ChannelTab.swift */,
-				82D3B22B3817428A9C9AE90F /* JoinChannelSheet.swift */,
-				493BFE617DC14CC09BA5E57B /* IRCServerManagerSheet.swift */,
-			);
-			path = Messages;
-			sourceTree = "<group>";
-		};
-		D8097EBB2FF4484C9701588F /* Onboarding */ = {
-			isa = PBXGroup;
-			children = (
-				1C0E1C56D40B4545820D16A4 /* OnboardingView.swift */,
-			);
-			path = Onboarding;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -428,6 +452,23 @@
 			productReference = 41C0975A8852038225072B85 /* Wirc.app */;
 			productType = "com.apple.product-type.application";
 		};
+		D3826093F7D1FC58249E9B71 /* WircShareExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E994BDC3EAE9E58A7686883A /* Build configuration list for PBXNativeTarget "WircShareExtension" */;
+			buildPhases = (
+				D3F62BBEA16B11D3425D8DAD /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = WircShareExtension;
+			packageProductDependencies = (
+			);
+			productName = WircShareExtension;
+			productReference = 60CF596F4846F3F1298D4B4A /* WircShareExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -438,6 +479,10 @@
 				LastUpgradeCheck = 1430;
 				TargetAttributes = {
 					A1AB3BDC760E53F45DDF449F = {
+						DevelopmentTeam = 955573A4YH;
+						ProvisioningStyle = Automatic;
+					};
+					D3826093F7D1FC58249E9B71 = {
 						DevelopmentTeam = 955573A4YH;
 						ProvisioningStyle = Automatic;
 					};
@@ -458,6 +503,7 @@
 			projectRoot = "";
 			targets = (
 				A1AB3BDC760E53F45DDF449F /* Wirc */,
+				D3826093F7D1FC58249E9B71 /* WircShareExtension */,
 			);
 		};
 /* End PBXProject section */
@@ -467,9 +513,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CEA4029066FE26C9FC4B6A6A /* DefaultFeeds.json in Resources */,
 				B9D9F45CF4E0337214450B94 /* SuggestedChannels.json in Resources */,
 				57935944E52BD16C7D829850 /* SuggestedServers.json in Resources */,
-				67207DDCC898482FBF633D96 /* DefaultFeeds.json in Resources */,
 				EC8AF2CDF21393C5E26B11D3 /* mastodon_config.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -484,53 +530,53 @@
 				93F0B76736890A499C0A9A3F /* AddFeedView.swift in Sources */,
 				E507E3CC098099E1AACAB37A /* AddServerView.swift in Sources */,
 				6E01703388ADF79FF75D4BF5 /* AppState.swift in Sources */,
+				FCB942B3B38EEE55C87FA1F5 /* BroadcastPicker.swift in Sources */,
+				0D4EE10BC4CF5DD6F6D32A93 /* ChannelTab.swift in Sources */,
 				2065F4616971143C5E5EE6B2 /* ChatView.swift in Sources */,
 				3DC38E9513AAD20E5E04063E /* ConversationListView.swift in Sources */,
 				1614A2CBB02FDFECE1C3043F /* DebugView.swift in Sources */,
+				22D0DBCDCD21DD53A0881160 /* DefaultFeedsLoader.swift in Sources */,
 				A403E8957A992C14D19312EF /* DesignSystem.swift in Sources */,
 				3F838981C16016FD2DF0443C /* FeedCard.swift in Sources */,
 				D6CCE39854349C77813524F6 /* FeedFetcher.swift in Sources */,
 				101E59D30FFAA74118E4E8F7 /* FeedItem.swift in Sources */,
+				23AC33D60FE652ED6685E67A /* FeedManager.swift in Sources */,
 				648CA65F111308F728806EA5 /* FeedParser.swift in Sources */,
 				9A32DFFC6C0109974EA32C25 /* FeedSubscription.swift in Sources */,
 				6794DF1FEFEEF119002734B6 /* FeedSubscriptionStore.swift in Sources */,
 				EB3E4FCDC74623DA8E2D0F0D /* FeedToWOMAdapter.swift in Sources */,
-				F9EFA01B3C3E4B74AF13043E /* DefaultFeedsLoader.swift in Sources */,
 				97C3D31649C0B6A7776D3892 /* FeedView.swift in Sources */,
+				B46D3F3D79C7B18743626117 /* IRCAutomation.swift in Sources */,
+				FFE2BBFECF95AADC001E7B84 /* IRCChannelManager.swift in Sources */,
+				80B15D3CC47D7A8C729D0AD8 /* IRCChatView.swift in Sources */,
 				DF00A7A6ADD9370AF764D3D9 /* IRCClient.swift in Sources */,
+				BFF889896BCD1E83FB50974C /* IRCCommandExecutor.swift in Sources */,
+				A6A6AA02CCC1C3EC63E3E3EF /* IRCCommandParser.swift in Sources */,
 				DC9D1DFA06EEFA62B253FD57 /* IRCConnectionConfig.swift in Sources */,
 				EFAE2659F2ED47FD1DE8817C /* IRCEvent.swift in Sources */,
+				BAF1FDE75ACD1D0345ABFEB6 /* IRCManager.swift in Sources */,
 				D88E678DCB7158297CD4F64B /* IRCMessage.swift in Sources */,
 				68F56DB16D64D7DF03FC5C4B /* IRCParser.swift in Sources */,
+				C00BDA18AEA42FBE756F0C1C /* IRCServerManagerSheet.swift in Sources */,
 				6533D9A172E226BB99DD3C15 /* IRCToWOMAdapter.swift in Sources */,
 				D3A953C8893F023EFB20D6CB /* InMemoryWOMStore.swift in Sources */,
 				798F1A5BB0ECD2C6DB4C27EB /* JSONFileStore.swift in Sources */,
+				F9CD1AB651D39C0AB7C888CF /* JoinChannelSheet.swift in Sources */,
+				E0140A54DE0FE96F534B6508 /* KeychainStore.swift in Sources */,
+				977341D34E28D4155C24A101 /* LibraryView.swift in Sources */,
 				B36A1CC39ECE5F3BDBBE957B /* MastodonClient.swift in Sources */,
-				539C6C9FEBC248FDF7F16F61 /* KeychainStore.swift in Sources */,
 				6373D6852F0496AFEA75A677 /* MastodonModels.swift in Sources */,
-				D6D4D2F2F8364DD2BFBCC460 /* IRCChatView.swift in Sources */,
-				912D61FCF8454117AF9B8C4F /* BroadcastPicker.swift in Sources */,
-				9AFCC8312FA54EC9AA947EA8 /* ChannelTab.swift in Sources */,
-				19A684A44F714E0D842F268E /* JoinChannelSheet.swift in Sources */,
-				80B7B7475A35415CA8E8666D /* FeedManager.swift in Sources */,
-				7726A1A5D37A495D834F3925 /* IRCManager.swift in Sources */,
-				33B1FDEE49A64552BF250756 /* IRCAutomation.swift in Sources */,
-				2A8449521C34403EA7FFE62F /* IRCCommandExecutor.swift in Sources */,
-				F8BC07DB36074DAEB2B3476D /* IRCCommandParser.swift in Sources */,
-				908719EFEBB845E18C6F2735 /* IRCChannelManager.swift in Sources */,
-				49564F780D13465BA3A7D819 /* IRCServerManagerSheet.swift in Sources */,
+				FF8F481DE751EB6CDB2469F6 /* MastodonStreamer.swift in Sources */,
 				E44885986D6D4884933A8820 /* MastodonToWOMAdapter.swift in Sources */,
-				1688B28606E748F2958545A4DADFB2F0 /* MastodonStreamer.swift in Sources */,
 				A31014B086E449E4EB6AF1E5 /* MessageView.swift in Sources */,
 				7C4C342761F12EED666F7DA6 /* ObjectInspectorSheet.swift in Sources */,
+				571A9657E75DCEE173032659 /* OnboardingView.swift in Sources */,
 				650ADA11D0E8C152956F478B /* RawEventLogView.swift in Sources */,
 				7EC94869472B0565F65A371D /* RemoteIdentity.swift in Sources */,
 				89545409416029AA5D6EF14F /* ServerOrchestrator.swift in Sources */,
 				4DA3E8A6D23BBF6ED1126E17 /* SettingsView.swift in Sources */,
-					C3D4E5F60718293A0B1C2D3E /* StreamView.swift in Sources */,
-					A4B5C6D7E8F90019283A4B5E /* LibraryView.swift in Sources */,
-					D3C4B5A6E7F801293A0B1C2 /* WorkshopView.swift in Sources */,
 				5ACE5505CCF4639B50B95A91 /* SocialSignal.swift in Sources */,
+				3242860B98431E405FDE756C /* StreamView.swift in Sources */,
 				B28C05DA310EF2AE7F9492A2 /* SuggestedChannels.swift in Sources */,
 				28F555CA915D88B0DB64E00F /* SuggestedServers.swift in Sources */,
 				208A7FE391E119C11444ECB8 /* TrustRelation.swift in Sources */,
@@ -546,8 +592,20 @@
 				5A564F0F105370D5C227631C /* WOMReference.swift in Sources */,
 				6410C014AFB74C80C7CC91BA /* WOMStore.swift in Sources */,
 				26B80F99529363367CC97548 /* WOMToIRCAdapter.swift in Sources */,
-				47349691299C4391A4896641 /* OnboardingView.swift in Sources */,
 				7B85E860C10694C08CC3BC3D /* WircApp.swift in Sources */,
+				661D45AF9B0274CB8CBA0504 /* WorkshopView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D3F62BBEA16B11D3425D8DAD /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3BCDAD93119F0B68C399AED9 /* FeedFetcher.swift in Sources */,
+				56B48B28FEBC91BA1D1EDF8F /* FeedItem.swift in Sources */,
+				FF8357CA93F4DA467E59B42A /* FeedSubscription.swift in Sources */,
+				E6E460D2B37A937490CE37B8 /* FeedSubscriptionStore.swift in Sources */,
+				C72ACA83860950DE1B36C730 /* ShareViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -607,6 +665,23 @@
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+		59572F9FE664B19AA5756DBC /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 955573A4YH;
+				INFOPLIST_FILE = WircShareExtension/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.wirc.wirc.ShareExtension;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
 		};
@@ -709,6 +784,23 @@
 			};
 			name = Debug;
 		};
+		E762F29C91DA5535387099E9 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 955573A4YH;
+				INFOPLIST_FILE = WircShareExtension/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.wirc.wirc.ShareExtension;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -726,6 +818,15 @@
 			buildConfigurations = (
 				A91B75FA535D20A838EEFDFA /* Debug */,
 				A6B1F0573EE51360B14E6846 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		E994BDC3EAE9E58A7686883A /* Build configuration list for PBXNativeTarget "WircShareExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E762F29C91DA5535387099E9 /* Debug */,
+				59572F9FE664B19AA5756DBC /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;

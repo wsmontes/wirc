@@ -21,3 +21,19 @@ targets:
         INFOPLIST_FILE: WircApp/App/Info.plist
         DEVELOPMENT_TEAM: 955573A4YH
         CODE_SIGN_STYLE: Automatic
+
+  WircShareExtension:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: WircShareExtension
+      - path: WircApp/Infrastructure/Feed/FeedFetcher.swift
+      - path: WircApp/Infrastructure/Feed/FeedSubscriptionStore.swift
+      - path: WircApp/Infrastructure/Feed/FeedSubscription.swift
+      - path: WircApp/Infrastructure/Feed/FeedItem.swift
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.wirc.wirc.ShareExtension
+        INFOPLIST_FILE: WircShareExtension/Info.plist
+        DEVELOPMENT_TEAM: 955573A4YH
+        CODE_SIGN_STYLE: Automatic
