@@ -60,7 +60,7 @@ struct SettingsView: View {
                 }
 
                 // RSS/Atom Feeds
-                Section("Feeds") {
+                Section("Feed Subscriptions (\(appState.feed.subscriptionCount))") {
                     if appState.feed.subscriptionStore.getAll().isEmpty {
                         Text("No feeds subscribed")
                             .font(DesignSystem.Fonts.body())
@@ -110,6 +110,12 @@ struct SettingsView: View {
                             }
                         }
                     }
+
+                    Button("Reset to Defaults") {
+                        DefaultFeedsLoader.loadIfEmpty(into: appState.feed.subscriptionStore)
+                    }
+                    .font(DesignSystem.Fonts.caption)
+
                     Button { showingAddFeed = true } label: {
                         Label("Add Feed", systemImage: "plus")
                     }

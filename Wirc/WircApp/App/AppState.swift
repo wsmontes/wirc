@@ -133,7 +133,11 @@ final class AppState {
             }
         }
         loadMastodonAccounts()
-        let loaded = DefaultFeedsLoader.loadIfEmpty(into: feed.subscriptionStore)
+        let defaultsLoaded = UserDefaults.standard.bool(forKey: "wirc.feeds.defaultsLoaded")
+        if !defaultsLoaded {
+            DefaultFeedsLoader.loadIfEmpty(into: feed.subscriptionStore)
+            UserDefaults.standard.set(true, forKey: "wirc.feeds.defaultsLoaded")
+        }
         // Load previously saved objects from disk first, then fetch new content.
         // Without this, every launch starts with an empty timeline and only shows
         // items published since the last session (favouring frequently-updated feeds).
