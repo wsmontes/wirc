@@ -8,20 +8,20 @@ struct WOMObjectInspectorView: View {
             VStack(alignment: .leading, spacing: 4) {
                 HStack {
                     Text(object.type.joined(separator: ", "))
-                        .font(.caption)
+                        .font(DesignSystem.Fonts.caption)
                         .foregroundStyle(.blue)
                     Spacer()
                     Text(object.createdAt, style: .time)
-                        .font(.caption2)
+                        .font(DesignSystem.Fonts.provenanceDetail)
                         .foregroundStyle(.secondary)
                 }
                 Text(object.content?.text ?? "(no text)")
-                    .font(.body)
+                    .font(DesignSystem.Fonts.body())
                     .lineLimit(3)
 
                 if let json = prettyJSON(object) {
                     Text(json)
-                        .font(.system(.caption2, design: .monospaced))
+                        .font(DesignSystem.Fonts.mono(11))
                         .foregroundStyle(.secondary)
                         .lineLimit(10)
                         .textSelection(.enabled)

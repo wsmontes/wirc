@@ -10,17 +10,17 @@ struct RawEventLogView: View {
                     VStack(alignment: .leading, spacing: 2) {
                         HStack {
                             Text(event.timestamp, style: .time)
-                                .font(.caption2)
-                                .foregroundStyle(.secondary)
+                                .font(DesignSystem.Fonts.provenanceDetail)
+                                .foregroundStyle(DesignSystem.Colors.pencil)
                             Text(event.server)
-                                .font(.caption2)
-                                .foregroundStyle(.blue)
+                                .font(DesignSystem.Fonts.provenanceDetail)
+                                .foregroundStyle(DesignSystem.Colors.signal)
                             Text(event.parsedAs)
-                                .font(.caption2)
-                                .foregroundStyle(.orange)
+                                .font(DesignSystem.Fonts.provenanceDetail)
+                                .foregroundStyle(DesignSystem.Colors.signal)
                         }
                         Text(event.raw)
-                            .font(.system(.caption, design: .monospaced))
+                            .font(DesignSystem.Fonts.mono(12))
                             .textSelection(.enabled)
                     }
                     .padding(.vertical, 2)

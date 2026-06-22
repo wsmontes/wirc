@@ -19,9 +19,9 @@ struct StreamView: View {
         var sources = Set<String>()
         for obj in posts {
             let network = obj.data["network"] ?? ""
-            if !network.isEmpty { sources.insert(network.capitalized) }
+            if !network.isEmpty { sources.insert(networkDisplayName(network)) }
         }
-        let order = ["Rss", "Mastodon", "Youtube", "Podcast", "Github"]
+        let order = ["RSS", "Mastodon", "YouTube", "Podcast", "GitHub"]
         var sorted = order.filter { sources.contains($0) }
         for s in sources.sorted() where !order.contains(s) {
             sorted.append(s)
@@ -274,6 +274,20 @@ struct StreamView: View {
                 systemImage: "waveform",
                 description: Text("Pull to refresh or check back later.")
             )
+        }
+    }
+
+    // MARK: - Helpers
+
+    private func networkDisplayName(_ network: String) -> String {
+        switch network.lowercased() {
+        case "irc": return "IRC"
+        case "mastodon": return "Mastodon"
+        case "rss": return "RSS"
+        case "github": return "GitHub"
+        case "youtube": return "YouTube"
+        case "podcast": return "Podcast"
+        default: return network.capitalized
         }
     }
 }

@@ -87,10 +87,10 @@ struct AddServerView: View {
             Section {
                 HStack {
                     Image(systemName: "info.circle")
-                        .foregroundStyle(.blue)
+                        .foregroundStyle(DesignSystem.Colors.signal)
                     Text("Tap a server to pre-fill the form, then set your nickname and Save.")
                         .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(DesignSystem.Colors.pencil)
                 }
             }
 
@@ -107,16 +107,16 @@ struct AddServerView: View {
                             VStack(alignment: .leading, spacing: 2) {
                                 Text(server.name)
                                     .font(.body)
-                                    .foregroundStyle(.primary)
+                                    .foregroundStyle(DesignSystem.Colors.ink)
                                 Text("\(server.host):\(server.port) \(server.useTLS ? "🔒" : "") · \(server.description)")
                                     .font(.caption)
-                                    .foregroundStyle(.secondary)
+                                    .foregroundStyle(DesignSystem.Colors.pencil)
                                     .lineLimit(1)
                             }
                             Spacer()
                             Image(systemName: "arrow.right.circle")
                                 .font(.caption)
-                                .foregroundStyle(.blue)
+                                .foregroundStyle(DesignSystem.Colors.signal)
                         }
                     }
                 }

@@ -43,7 +43,7 @@ struct WorkshopView: View {
                         .foregroundStyle(DesignSystem.Colors.rss)
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Feeds")
-                            .font(.system(size: 15, weight: .medium))
+                            .font(DesignSystem.Fonts.headline(15))
                         Text("\(appState.feed.subscriptionStore.getAll().count) subscription\(appState.feed.subscriptionStore.getAll().count == 1 ? "" : "s")")
                             .font(DesignSystem.Fonts.caption)
                             .foregroundStyle(DesignSystem.Colors.pencil)
@@ -178,7 +178,7 @@ struct FeedTransportDetail: View {
             ForEach(feeds) { sub in
                 VStack(alignment: .leading, spacing: DesignSystem.Spacing.xs) {
                     Text(sub.title.isEmpty ? sub.feedURL : sub.title)
-                        .font(.system(size: 15, weight: .medium))
+                        .font(DesignSystem.Fonts.headline(15))
                     Text(sub.feedURL)
                         .font(DesignSystem.Fonts.data(10))
                         .foregroundStyle(DesignSystem.Colors.pencil)
@@ -188,12 +188,12 @@ struct FeedTransportDetail: View {
                              color: DesignSystem.Colors.forSource(sub.sourceType.rawValue))
                         if let last = sub.lastFetchedAt {
                             Text("Updated \(last, style: .relative)")
-                                .font(.caption2)
+                                .font(DesignSystem.Fonts.timestamp)
                                 .foregroundStyle(DesignSystem.Colors.pencil)
                         }
                         if sub.errorCount > 0 {
                             Text("\(sub.errorCount) errors")
-                                .font(.caption2)
+                                .font(DesignSystem.Fonts.provenanceDetail)
                                 .foregroundStyle(DesignSystem.Colors.signal)
                         }
                     }
@@ -218,7 +218,7 @@ struct FeedTransportDetail: View {
 
     private func pill(_ text: String, color: Color) -> some View {
         Text(text)
-            .font(.caption2)
+            .font(DesignSystem.Fonts.caption)
             .foregroundStyle(color)
             .padding(.horizontal, DesignSystem.Spacing.sm)
             .padding(.vertical, 2)
