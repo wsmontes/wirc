@@ -8,4 +8,5 @@ struct IRCMessage: Codable, Equatable {
     var text: String
     var receivedAt: Date
     var raw: String?
+    var tags: [String: String] = [:]
 }

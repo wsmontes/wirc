@@ -2,6 +2,14 @@ import Foundation
 
 final class IRCToWOMAdapter {
 
+    /// Shared formatter — DateFormatter init is expensive, avoid creating per event.
+    private static let topicDateFormatter: DateFormatter = {
+        let df = DateFormatter()
+        df.dateStyle = .medium
+        df.timeStyle = .short
+        return df
+    }()
+
     func convert(_ event: IRCEvent, config: IRCConnectionConfig) -> [WOMObject] {
         switch event {
         case .message(let ircMsg):
@@ -65,6 +73,8 @@ final class IRCToWOMAdapter {
         if let channel = ircMsg.channel { data["channel"] = channel }
         data["visibility"] = isChannel ? "channel" : "direct"
         if let raw = ircMsg.raw { data["raw"] = raw }
+        if let msgid = ircMsg.tags["msgid"] { data["ircMsgId"] = msgid }
+        if let serverTime = ircMsg.tags["time"] { data["ircServerTime"] = serverTime }
 
         let sourceRef = WOMReference(
             id: isChannel ? "irc://\(config.host)/\(ircMsg.channel ?? "")" : "irc://\(config.host)",
@@ -147,11 +157,8 @@ final class IRCToWOMAdapter {
     }
 
     private func convertTopicWho(channel: String, setBy: String, setAt: Date, config: IRCConnectionConfig) -> WOMObject {
-        let df = DateFormatter()
-        df.dateStyle = .medium
-        df.timeStyle = .short
         return systemEvent(type: "topicWho", config: config, extra: [
-            "channel": channel, "setBy": setBy, "setAt": df.string(from: setAt), "event": "topicWho"
+            "channel": channel, "setBy": setBy, "setAt": Self.topicDateFormatter.string(from: setAt), "event": "topicWho"
         ])
     }
 

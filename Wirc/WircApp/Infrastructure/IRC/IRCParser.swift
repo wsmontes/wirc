@@ -13,8 +13,16 @@ enum IRCParser {
         }
 
         // IRCv3 tags (@key=value;...)
+        var tags: [String: String] = [:]
         if line.hasPrefix("@") {
             if let spaceIdx = line.firstIndex(of: " ") {
+                let tagString = String(line[line.index(after: line.startIndex)..<spaceIdx])
+                for tag in tagString.split(separator: ";") {
+                    let parts = tag.split(separator: "=", maxSplits: 1)
+                    let key = String(parts[0])
+                    let value = parts.count > 1 ? String(parts[1]) : ""
+                    tags[key] = value
+                }
                 line = String(line[line.index(after: spaceIdx)...])
             }
         }
@@ -80,7 +88,8 @@ enum IRCParser {
                 senderHostmask: senderHostmask,
                 text: trailing ?? "",
                 receivedAt: Date(),
-                raw: rawLine
+                raw: rawLine,
+                tags: tags
             )
             return .message(msg)
 
@@ -92,7 +101,8 @@ enum IRCParser {
                 senderHostmask: senderHostmask,
                 text: trailing ?? "",
                 receivedAt: Date(),
-                raw: rawLine
+                raw: rawLine,
+                tags: tags
             )
             return .notice(msg)
 
