@@ -30,6 +30,13 @@ struct WircApp: App {
             }
             .tint(DesignSystem.Colors.signal)
             .environment(appState)
+            .fullScreenCover(isPresented: Binding(
+                get: { !appState.onboardingCompleted },
+                set: { appState.onboardingCompleted = !$0 }
+            )) {
+                OnboardingView()
+                    .environment(appState)
+            }
         }
     }
 }

@@ -16,6 +16,12 @@ final class AppState {
     // MARK: - WOM Store
     let store: WOMStore = JSONFileStore()
 
+    // MARK: - Onboarding
+    var onboardingCompleted: Bool {
+        get { UserDefaults.standard.bool(forKey: "wirc.onboarding.completed") }
+        set { UserDefaults.standard.set(newValue, forKey: "wirc.onboarding.completed") }
+    }
+
     // MARK: - Debug logs
     var rawEvents: [DebugRawEvent] = [] {
         didSet { if rawEvents.count > 500 { rawEvents = Array(rawEvents.suffix(500)) } }
