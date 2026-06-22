@@ -94,7 +94,7 @@ final class FeedManager {
     }
 
     @discardableResult
-    func refreshAllFeedsBatched(womStore: WOMStore) async -> [WOMObject] {
+    func refreshAllFeedsBatched(womStore: WOMStore, onBatch: (([WOMObject]) async -> Void)? = nil) async -> [WOMObject] {
         guard isOnline else {
             feedError = "No internet connection"
             return []
@@ -109,13 +109,23 @@ final class FeedManager {
         var completed = 0
         for batch in stride(from: 0, to: all.count, by: batchSize) {
             let end = min(batch + batchSize, all.count)
-            var batchItems: [WOMObject] = []
-            for i in batch..<end {
-                batchItems.append(contentsOf: await refreshFeed(all[i], womStore: womStore))
-                completed += 1
+            let batchSubs = Array(all[batch..<end])
+
+            // Fetch batch concurrently
+            let batchResults: [[WOMObject]] = await withTaskGroup(of: [WOMObject].self) { group in
+                for sub in batchSubs {
+                    group.addTask { await self.refreshFeed(sub, womStore: womStore) }
+                }
+                var results: [[WOMObject]] = []
+                for await items in group { results.append(items) }
+                return results
             }
+
+            let batchItems = batchResults.flatMap { $0 }
             allNew.append(contentsOf: batchItems)
+            completed += batchSubs.count
             refreshProgress = (completed, all.count)
+            if !batchItems.isEmpty { await onBatch?(batchItems) }
             try? await Task.sleep(for: .milliseconds(100))
         }
 
