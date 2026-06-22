@@ -9,6 +9,7 @@ final class ServerOrchestrator: @unchecked Sendable {
     private(set) var scanProgress: String = ""
     private var scannedCount = 0
     private var totalServers = 0
+    private var scanStartTime: Date = .distantPast
 
     struct GlobalChannel: Identifiable, Hashable {
         var id: String { "\(serverHost)|\(name)" }
@@ -40,6 +41,7 @@ final class ServerOrchestrator: @unchecked Sendable {
         scannedCount = 0
         totalServers = servers.count
         globalChannels = []
+        scanStartTime = Date()
         pendingServers = Array(servers.shuffled()) // randomize to spread load
         activeClients = []
 
@@ -179,10 +181,20 @@ final class ServerOrchestrator: @unchecked Sendable {
 
     private func updateProgress() {
         let active = activeClients.count
+        let elapsed = Date().timeIntervalSince(scanStartTime)
         if isScanning {
-            scanProgress = "\(scannedCount)/\(totalServers) servers · \(active) active · \(globalChannels.count) channels"
+            let fraction = totalServers > 0 ? Double(scannedCount) / Double(totalServers) : 0
+            let eta: String
+            if scannedCount > 0 && fraction > 0 {
+                let total = elapsed / fraction
+                let remaining = total - elapsed
+                eta = remaining < 60 ? "~\(Int(remaining))s left" : "~\(Int(remaining / 60))m left"
+            } else {
+                eta = "estimating..."
+            }
+            scanProgress = "\(scannedCount)/\(totalServers) servers · \(active) active · \(globalChannels.count) channels · \(eta)"
         } else {
-            scanProgress = "\(globalChannels.count) channels from \(scannedCount)/\(totalServers) servers"
+            scanProgress = "\(globalChannels.count) channels from \(scannedCount)/\(totalServers) servers in \(Int(elapsed))s"
         }
     }
 }
