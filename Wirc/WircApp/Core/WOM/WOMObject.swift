@@ -314,3 +314,163 @@ struct WOMSourceProtection: Codable, Equatable {
     var quoteStatus: String?        // raw, verified, approved_for_publication, paraphrase_only, etc.
     var legalReviewStatus: String?  // not_required, required, pending, approved, approved_with_changes, blocked
 }
+
+// MARK: - Identity layer (§8) — consolidated from WOMIdentity.swift
+
+/// Identity model per WOM 0.6 §8: separates entity, name, external identifier,
+/// variant, version, and representation.
+struct WOMIdentity: Codable, Equatable {
+    var canonicalId: String?
+    var variantOf: String?
+    var versionOf: String?
+    var representationOf: String?
+    var workId: String?
+    var instanceId: String?
+    var itemId: String?
+    var canonicalStatus: String?  // "canonical", "variant", "representation", "instance", "item"
+}
+
+/// A label or name for an entity, per WOM 0.6 §8.
+struct WOMLabel: Codable, Equatable {
+    var value: String
+    var language: String?
+    var role: String?  // "preferred", "alias", "display", "sort", "index"
+}
+
+// MARK: - Relations & annotations — consolidated from WOMRelation.swift
+
+struct WOMRelation: Codable, Identifiable, Equatable {
+    var id: String?
+    var type: String            // "wom:references", "wom:trusts"
+    var subject: String?
+    var object: String
+    var createdAt: Date?
+    var confidence: Double?
+    var provenance: WOMProvenance?
+}
+
+// MARK: - Annotations (§7) — consolidated from WOMAnnotation.swift
+
+/// Annotation per W3C Web Annotation / WOM 0.6.
+struct WOMAnnotation: Codable, Equatable {
+    var id: String?
+    var type: String?               // "Annotation", "Highlight", "Comment"
+    var motivation: String?         // "commenting", "tagging", "identifying", "classifying"
+    var target: WOMTarget?
+    var body: WOMAnnotationBody?
+    var creator: WOMReference?
+    var createdAt: Date?
+}
+
+struct WOMTarget: Codable, Equatable {
+    var id: String                  // target object ID
+    var selector: WOMSelector?      // fragment selector
+}
+
+struct WOMSelector: Codable, Equatable {
+    var type: String?               // "TextQuoteSelector", "FragmentSelector", "XPathSelector"
+    var exact: String?              // the quoted text
+    var prefix: String?
+    var suffix: String?
+    var start: Int?
+    var end: Int?
+}
+
+struct WOMAnnotationBody: Codable, Equatable {
+    var format: String?             // "text/plain", "text/html"
+    var text: String?
+    var reference: WOMReference?    // reference to another object
+}
+
+// MARK: - Knowledge layer (§10) — consolidated from WOMKnowledge.swift
+
+/// A claim — assertion pending verification, inferred, or contested.
+struct WOMClaim: Codable, Equatable {
+    var subject: String?            // entity the claim is about
+    var property: String?           // predicate / property
+    var value: String?              // asserted value
+    var qualifiers: [WOMQualifier]?
+    var references: [WOMReference]?
+    var rank: String?               // preferred, normal, deprecated, contested
+    var verificationStatus: String? // verified, unverified, disputed, pending
+    var confidence: Double?
+}
+
+/// A statement — verified, structured assertion with references and rank.
+struct WOMStatement: Codable, Equatable {
+    var id: String?
+    var type: [String]?             // ["wom:Statement"]
+    var subject: String
+    var property: String
+    var value: String
+    var qualifiers: [WOMQualifier]?
+    var references: [WOMReference]?
+    var rank: String?               // preferred, normal, deprecated, contested
+    var verificationStatus: String? // verified, unverified, disputed, pending
+}
+
+struct WOMQualifier: Codable, Equatable {
+    var property: String            // e.g., "wom:datePrecision"
+    var value: String               // e.g., "year"
+}
+
+/// A source — citable or consultable origin of information.
+struct WOMSource: Codable, Equatable {
+    var id: String?
+    var type: [String]?             // ["wom:Source"]
+    var name: String?
+    var description: String?
+    var url: String?
+    var reliability: String?        // verified, trusted, unknown, disputed, unreliable
+    var sourceKind: String?         // human_source, official_document, public_record, etc.
+    var attributionStatus: String?  // on_the_record, anonymous, on_background, etc.
+    var protectionLevel: String?    // none, low, medium, high
+}
+
+/// Evidence — specific material: excerpt, message, document, audio, event.
+struct WOMEvidence: Codable, Equatable {
+    var id: String?
+    var type: [String]?             // ["wom:Evidence"]
+    var source: WOMReference?       // points to source
+    var selector: WOMSelector?      // fragment within source
+    var artifact: WOMReference?     // points to artifact (image, audio, document)
+    var capturedAt: Date?
+    var format: String?             // MIME type of evidence
+}
+
+/// Citation per WOM 0.6 §10.
+struct WOMCitation: Codable, Equatable {
+    var id: String?
+    var reference: WOMReference     // the source/evidence being cited
+    var context: String?            // why this citation is relevant
+    var position: String?           // "body", "footnote", "endnote", "inline"
+}
+
+// MARK: - WOM 0.7 payloads — consolidated from WOMEncrypted.swift, WOMLite.swift, WOMProof.swift
+
+/// Encrypted content payload per WOM 0.7.
+struct WOMEncryptedPayload: Codable, Equatable {
+    var algorithm: String         // "XChaCha20-Poly1305"
+    var keyAgreement: String      // "X25519"
+    var recipients: [String]      // ["did:key:...", ...] — who can decrypt
+    var nonce: String             // base64-encoded nonce
+    var ciphertext: String        // base64-encoded encrypted data
+}
+
+/// Compact transmission metadata per WOM 0.7 §9.
+struct WOMLite: Codable, Equatable {
+    var fullHash: String          // "sha256:..." — hash of the complete WOM
+    var fullSize: Int             // bytes of the complete WOM JSON
+    var version: Int              // revision version
+    var previousHash: String?     // previous version hash (chain)
+    var previousSignature: String? // previous version signature (chain)
+    var fields: [String]?         // top-level field names omitted from Lite
+}
+
+/// Ed25519 signature proof per WOM 0.7.
+struct WOMProof: Codable, Equatable {
+    var type: String              // "Ed25519"
+    var target: String            // "sha256:..." — the hash being signed
+    var signature: String         // base64-encoded Ed25519 signature
+    var verificationMethod: String // "did:key:..." or pubkey reference
+}

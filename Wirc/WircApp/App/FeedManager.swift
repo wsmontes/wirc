@@ -78,7 +78,7 @@ final class FeedManager {
     }
 
     @discardableResult
-    func refreshAllFeedsBatched(womStore: WOMStore, onBatch: (([WOMObject]) async -> Void)? = nil) async -> [WOMObject] {
+    func refreshAllFeedsBatched(womStore: WOMStore) async -> [WOMObject] {
         let all = subscriptionStore.getAll()
         let batchSize = 15
         isRefreshing = true
@@ -96,7 +96,6 @@ final class FeedManager {
             }
             allNew.append(contentsOf: batchItems)
             refreshProgress = (completed, all.count)
-            if !batchItems.isEmpty { await onBatch?(batchItems) }
             try? await Task.sleep(for: .milliseconds(100))
         }
 
