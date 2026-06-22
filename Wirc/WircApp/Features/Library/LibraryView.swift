@@ -12,6 +12,7 @@ struct LibraryView: View {
 
     enum LibraryFilter: String, CaseIterable {
         case all = "All"
+        case saved = "Saved"
         case messages = "Messages"
         case posts = "Posts"
         case media = "Media"
@@ -24,6 +25,11 @@ struct LibraryView: View {
         // Type filter
         switch selectedType {
         case .all: break
+        case .saved:
+            let savedIds = Set(appState.womObjects
+                .filter { $0.type.contains("wom:Signal") && $0.data["signalType"] == "bookmarked" }
+                .compactMap { $0.data["targetId"] })
+            objects = objects.filter { savedIds.contains($0.id) }
         case .messages: objects = objects.filter { $0.type.contains("wom:Message") }
         case .posts: objects = objects.filter { $0.type.contains("wom:Post") }
         case .media: objects = objects.filter {

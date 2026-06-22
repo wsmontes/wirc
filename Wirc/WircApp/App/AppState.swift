@@ -325,4 +325,33 @@ final class AppState {
         ensureIndexes()
         return _feedPosts
     }
+
+    // MARK: - Bookmarks
+
+    func toggleBookmark(_ object: WOMObject) {
+        let existingId = womObjects.first(where: {
+            $0.type.contains("wom:Signal") && $0.data["signalType"] == "bookmarked" && $0.data["targetId"] == object.id
+        })?.id
+        if let eid = existingId {
+            // Remove bookmark
+            womObjects.removeAll { $0.id == eid }
+            Task { try? await store.delete(id: eid) }
+        } else {
+            // Add bookmark
+            let signal = WOMObject(
+                id: WOMIDGenerator.generate(type: "signal"),
+                type: ["wom:Signal"],
+                createdAt: Date(),
+                data: ["signalType": "bookmarked", "targetId": object.id, "targetTitle": object.name ?? object.content.flatMap { String($0.text?.prefix(100) ?? "") } ?? ""],
+                provenance: .localUser()
+            )
+            Task { try? await store.save(signal); await MainActor.run { womObjects.append(signal) } }
+        }
+    }
+
+    func isBookmarked(_ object: WOMObject) -> Bool {
+        womObjects.contains(where: {
+            $0.type.contains("wom:Signal") && $0.data["signalType"] == "bookmarked" && $0.data["targetId"] == object.id
+        })
+    }
 }

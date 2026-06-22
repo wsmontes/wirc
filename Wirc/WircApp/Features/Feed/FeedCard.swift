@@ -2,6 +2,7 @@ import SwiftUI
 
 struct FeedCard: View {
     let post: WOMObject
+    @Environment(AppState.self) private var appState
     @State private var showInspector = false
 
     private var cardURL: URL? {
@@ -84,6 +85,14 @@ struct FeedCard: View {
                 Button { UIPasteboard.general.string = url.absoluteString } label: {
                     Label("Copy Link", systemImage: "doc.on.doc")
                 }
+            }
+            Divider()
+            Button {
+                appState.toggleBookmark(post)
+            } label: {
+                let saved = appState.isBookmarked(post)
+                Label(saved ? "Remove from Saved" : "Save for Later",
+                      systemImage: saved ? "bookmark.fill" : "bookmark")
             }
             Button { showInspector = true } label: {
                 Label("Inspect", systemImage: "info.circle")
