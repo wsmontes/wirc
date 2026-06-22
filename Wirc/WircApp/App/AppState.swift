@@ -98,8 +98,6 @@ final class AppState {
     // MARK: - Mastodon
     var mastodonAccounts: [MastodonServerConfig] = [] { didSet { saveMastodonAccounts() } }
     private var mastodonClients: [UUID: MastodonClient] = [:]
-    private var lastFeedId: String? = nil
-
     // MARK: - Adapters
     private let ircToWOM = IRCToWOMAdapter()
 
@@ -242,11 +240,18 @@ final class AppState {
         let adapter = MastodonToWOMAdapter(instanceURL: client.config.instanceURL)
         Task { @MainActor in
             do {
-                let timeline = try await client.homeTimeline(maxId: lastFeedId, limit: 40)
+                let lastId = mastodonAccounts.first(where: { $0.id == accountId })?.lastFetchedId
+                let timeline = try await client.homeTimeline(maxId: lastId, limit: 40)
                 for status in timeline {
                     let obj = adapter.convert(status: status)
                     try? await store.save(obj)
                     if !womObjects.contains(where: { $0.id == obj.id }) { womObjects.append(obj) }
+                }
+                // Store last ID for next refresh
+                if let latestStatus = timeline.first,
+                   let idx = mastodonAccounts.firstIndex(where: { $0.id == accountId }) {
+                    mastodonAccounts[idx].lastFetchedId = latestStatus.id
+                    saveMastodonAccounts()
                 }
             } catch { feed.feedError = error.localizedDescription }
         }

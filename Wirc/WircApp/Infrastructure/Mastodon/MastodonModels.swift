@@ -7,9 +7,10 @@ struct MastodonServerConfig: Codable, Identifiable, Equatable {
     var name: String
     var instanceURL: String
     var accessToken: String
+    var lastFetchedId: String?
 
     enum CodingKeys: String, CodingKey {
-        case name, instanceURL, accessToken
+        case name, instanceURL, accessToken, lastFetchedId
     }
 }
 
