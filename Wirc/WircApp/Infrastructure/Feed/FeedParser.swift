@@ -263,10 +263,7 @@ private final class FeedParserDelegate: NSObject, XMLParserDelegate {
     // MARK: - Commit item
 
     private func commitItem() {
-        guard let title = currentTitle else {
-            resetItemState()
-            return
-        }
+        let title = currentTitle ?? currentDescription.map { String($0.prefix(100)) } ?? "Untitled"
         // Resolve relative URLs before storing
         currentLink = resolvedLink(currentLink)
         currentEnclosureURL = resolvedLink(currentEnclosureURL)
