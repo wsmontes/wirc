@@ -1,203 +1,177 @@
 import SwiftUI
 
-/// Full-screen IRC chat with minimal header, timeline, input bar, and a bottom sheet
-/// for server/channel/user management. Maximizes message space: only 113pt of fixed chrome.
+/// Unified IRC chat view — server status bar + channel tabs + timeline + input.
+/// Combines the compact chrome of the original ChatView with the visible
+/// navigation of the MessageDeckView.
 struct IRCChatView: View {
     @Environment(AppState.self) private var appState
 
     @State private var messageText = ""
     @State private var showSheet = false
     @State private var sheetHeight: PresentationDetent = .medium
-    @State private var showChannelDropdown = false
     @State private var showBroadcastPicker = false
     @State private var expandedUsers: Set<String> = []
     @State private var loadMessagesTask: Task<Void, Never>?
     @State private var commandFeedback: String?
     @State private var commandFeedbackTask: Task<Void, Never>?
+    @State private var showJoinSheet = false
+    @State private var joinChannel = ""
+    @State private var joinServerId: UUID?
 
     private var manager: IRCChannelManager { appState.irc.channelManager }
 
     var body: some View {
         ZStack(alignment: .top) {
             VStack(spacing: 0) {
-                // Header bar
-                headerBar
-                Divider()
+                if appState.irc.servers.isEmpty {
+                    emptyState
+                } else if manager.channels.isEmpty && manager.visibleMessages.isEmpty {
+                    noChannelsState
+                } else {
+                    // Server status bar
+                    serverStatusBar
+                    Divider()
 
-            // Timeline
-            timelineView
-            Divider()
+                    // Channel tabs
+                    channelTabBar
+                    Divider()
 
-            // Input bar
-            inputBar
+                    // Timeline
+                    timelineView
+                    Divider()
 
-            // Drag handle
-            dragHandle
-        }
-        .background(DesignSystem.Colors.page)
-        .onAppear { refreshChannelList(); autoScanIfNeeded() }
-        .onChange(of: appState.irc.servers.count) { _, _ in refreshChannelList() }
-        .onChange(of: appState.irc.joinedChannels) { _, _ in refreshChannelList() }
-        .onChange(of: appState.womObjects.count) { _, _ in
-            // Debounce: coalesce rapid-fire appends (e.g. feed batch of 50 items) into a single load
-            loadMessagesTask?.cancel()
-            loadMessagesTask = Task {
-                try? await Task.sleep(for: .milliseconds(120))
-                guard !Task.isCancelled else { return }
-                manager.loadMessages()
-            }
-        }
-        .sheet(isPresented: $showSheet) {
-            channelSheet
-                .presentationDetents([.medium, .large], selection: $sheetHeight)
-                .presentationDragIndicator(.visible)
-        }
-        .sheet(isPresented: $showBroadcastPicker) {
-            BroadcastPicker(manager: manager)
-        }
+                    // Input bar
+                    inputBar
 
-        // Command feedback toast
-        if let feedback = commandFeedback {
-            VStack {
-                Text(feedback)
-                    .font(DesignSystem.Fonts.caption)
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, DesignSystem.Spacing.md)
-                    .padding(.vertical, DesignSystem.Spacing.sm)
-                    .background(DesignSystem.Colors.ink.opacity(0.85))
-                    .clipShape(RoundedRectangle(cornerRadius: DesignSystem.Radius.chip))
-                    .padding(.top, 60)
-                Spacer()
-            }
-            .transition(.move(edge: .top).combined(with: .opacity))
-        }
-    }
-}
-
-    // MARK: - Header Bar (44pt)
-
-    private var headerBar: some View {
-        HStack(spacing: DesignSystem.Spacing.xs) {
-            // Channel selector dropdown
-            Button { showChannelDropdown = true } label: {
-                HStack(spacing: 2) {
-                    Text(headerTitle)
-                        .font(DesignSystem.Fonts.data(12, weight: .bold))
-                        .foregroundStyle(DesignSystem.Colors.ink)
-                        .lineLimit(1)
-                    Image(systemName: "chevron.down")
-                        .font(.system(size: 8, weight: .bold))
-                        .foregroundStyle(DesignSystem.Colors.pencil)
+                    // Drag handle
+                    dragHandle
                 }
-                .frame(width: 90, alignment: .leading)
             }
-            .buttonStyle(.plain)
-            .popover(isPresented: $showChannelDropdown) {
-                channelDropdown
+            .background(DesignSystem.Colors.page)
+            .onAppear { refreshChannelList(); autoScanIfNeeded() }
+            .onChange(of: appState.irc.servers.count) { _, _ in refreshChannelList() }
+            .onChange(of: appState.irc.joinedChannels) { _, _ in refreshChannelList() }
+            .onChange(of: appState.womObjects.count) { _, _ in
+                loadMessagesTask?.cancel()
+                loadMessagesTask = Task {
+                    try? await Task.sleep(for: .milliseconds(120))
+                    guard !Task.isCancelled else { return }
+                    manager.loadMessages()
+                }
             }
-
-            // Server info (tappable → sheet)
-            Button { showSheet = true } label: {
-                HStack(spacing: DesignSystem.Spacing.xs) {
-                    Circle()
-                        .fill(connectionColor)
-                        .frame(width: 6, height: 6)
-                    Text(serverInfo)
-                        .font(DesignSystem.Fonts.data(10))
-                        .foregroundStyle(DesignSystem.Colors.pencil)
-                        .lineLimit(1)
-                    if let active = manager.activeChannel {
-                        Text("· \(active.name)")
-                            .font(DesignSystem.Fonts.data(10))
-                            .foregroundStyle(DesignSystem.Colors.ink)
-                        Text("· \(active.userCount)")
-                            .font(DesignSystem.Fonts.data(10))
-                            .foregroundStyle(DesignSystem.Colors.pencil)
+            .sheet(isPresented: $showSheet) {
+                channelSheet
+                    .presentationDetents([.medium, .large], selection: $sheetHeight)
+                    .presentationDragIndicator(.visible)
+            }
+            .sheet(isPresented: $showBroadcastPicker) {
+                BroadcastPicker(manager: manager)
+            }
+            .sheet(isPresented: $showJoinSheet) {
+                JoinChannelSheet(serverId: $joinServerId, channel: $joinChannel) {
+                    if let sid = joinServerId, !joinChannel.isEmpty {
+                        appState.irc.joinChannel(joinChannel, serverId: sid)
                     }
-                    #if DEBUG
-                    Text("Σ\(appState.irc.totalEventsReceived) p\(appState.irc.privmsgCount)")
-                        .font(.system(size: 8))
-                        .foregroundStyle(DesignSystem.Colors.signal)
-                    #endif
+                    joinChannel = ""
+                    showJoinSheet = false
                 }
             }
-            .buttonStyle(.plain)
 
-            Spacer()
-        }
-        .padding(.horizontal, DesignSystem.Spacing.md)
-        .padding(.vertical, DesignSystem.Spacing.sm)
-        .frame(height: 44)
-    }
-
-    private var headerTitle: String {
-        if let ch = manager.activeChannel { return ch.name }
-        if manager.channels.isEmpty { return "All" }
-        return "All \(manager.channels.count)"
-    }
-
-    private var connectionColor: Color {
-        let states = appState.irc.connectionStates.values
-        if states.contains(.online) { return DesignSystem.Colors.github }
-        if states.contains(.connecting) { return .orange }
-        return .gray
-    }
-
-    private var serverInfo: String {
-        if let ch = manager.activeChannel {
-            return ch.serverHost
-        }
-        if let first = appState.irc.servers.first {
-            return first.name.isEmpty ? first.host : first.name
-        }
-        return "No servers"
-    }
-
-    // MARK: - Channel Dropdown
-
-    private var channelDropdown: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            Button {
-                manager.setActiveChannel(nil)
-                showChannelDropdown = false
-            } label: {
-                HStack {
-                    Text("All \(manager.channels.count)")
-                        .font(DesignSystem.Fonts.data(12, weight: manager.isAllMode ? .bold : .regular))
+            // Command feedback toast
+            if let feedback = commandFeedback {
+                VStack {
+                    Text(feedback)
+                        .font(DesignSystem.Fonts.caption)
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, DesignSystem.Spacing.md)
+                        .padding(.vertical, DesignSystem.Spacing.sm)
+                        .background(DesignSystem.Colors.ink.opacity(0.85))
+                        .clipShape(RoundedRectangle(cornerRadius: DesignSystem.Radius.chip))
+                        .padding(.top, 60)
                     Spacer()
-                    if manager.isAllMode { Image(systemName: "checkmark") }
                 }
-                .padding(.horizontal, DesignSystem.Spacing.md)
-                .padding(.vertical, DesignSystem.Spacing.sm)
+                .transition(.move(edge: .top).combined(with: .opacity))
             }
-            .buttonStyle(.plain)
+        }
+    }
 
-            Divider()
+    // MARK: - Server Status Bar
 
-            ForEach(manager.channels) { ch in
-                Button {
-                    manager.setActiveChannel(ch)
-                    showChannelDropdown = false
-                } label: {
-                    HStack {
-                        Text(ch.name)
-                            .font(DesignSystem.Fonts.data(12, weight: manager.activeChannel?.id == ch.id ? .bold : .regular))
-                        Spacer()
-                        Text("\(ch.userCount)")
-                            .font(DesignSystem.Fonts.data(10))
-                            .foregroundStyle(DesignSystem.Colors.pencil)
-                        if manager.activeChannel?.id == ch.id {
-                            Image(systemName: "checkmark")
+    private var serverStatusBar: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: DesignSystem.Spacing.sm) {
+                ForEach(appState.irc.servers) { server in
+                    Button {
+                        showSheet = true
+                    } label: {
+                        HStack(spacing: 4) {
+                            Circle()
+                                .fill(statusColor(appState.irc.connectionStates[server.id] ?? .disconnected))
+                                .frame(width: 6, height: 6)
+                            Text(server.name.isEmpty ? server.host : server.name)
+                                .font(DesignSystem.Fonts.caption)
+                                .foregroundStyle(DesignSystem.Colors.ink)
                         }
+                        .padding(.horizontal, DesignSystem.Spacing.sm)
+                        .padding(.vertical, 4)
+                        .background(DesignSystem.Colors.border.opacity(0.5))
+                        .clipShape(Capsule())
                     }
-                    .padding(.horizontal, DesignSystem.Spacing.md)
-                    .padding(.vertical, DesignSystem.Spacing.sm)
+                    .buttonStyle(.plain)
+                }
+
+                Button {
+                    showSheet = true
+                    sheetHeight = .large
+                } label: {
+                    Image(systemName: "gear")
+                        .font(DesignSystem.Fonts.caption)
                 }
                 .buttonStyle(.plain)
             }
+            .padding(.horizontal, DesignSystem.Spacing.md)
+            .padding(.vertical, DesignSystem.Spacing.xs)
         }
-        .frame(width: 200)
-        .frame(minHeight: min(CGFloat(manager.channels.count + 1) * 36, 300))
+    }
+
+    // MARK: - Channel Tab Bar
+
+    private var channelTabBar: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            LazyHStack(spacing: 2) {
+                ChannelTab(
+                    label: "All",
+                    isActive: manager.isAllMode,
+                    badge: manager.channels.count
+                ) {
+                    manager.setActiveChannel(nil)
+                }
+
+                ForEach(manager.channels) { ch in
+                    ChannelTab(
+                        label: ch.name,
+                        isActive: manager.activeChannel?.id == ch.id,
+                        badge: nil
+                    ) {
+                        manager.setActiveChannel(ch)
+                    }
+                }
+
+                Button {
+                    joinServerId = manager.activeChannel?.serverId ?? appState.irc.servers.first?.id
+                    showJoinSheet = true
+                } label: {
+                    Image(systemName: "plus")
+                        .font(.caption)
+                        .foregroundStyle(DesignSystem.Colors.pencil)
+                        .padding(.horizontal, DesignSystem.Spacing.sm)
+                        .padding(.vertical, 6)
+                }
+                .buttonStyle(.plain)
+            }
+            .padding(.horizontal, DesignSystem.Spacing.sm)
+            .padding(.vertical, DesignSystem.Spacing.xs)
+        }
     }
 
     // MARK: - Timeline
@@ -207,7 +181,6 @@ struct IRCChatView: View {
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 4) {
                     if manager.visibleMessages.isEmpty {
-                        // Show system events while waiting for messages
                         let sysEvents = appState.womObjects.filter {
                             $0.type.contains("wom:SystemEvent") && $0.type.contains("wom:TransportEnvelope")
                         }.sorted { $0.createdAt > $1.createdAt }.prefix(20)
@@ -272,7 +245,7 @@ struct IRCChatView: View {
         let nick = object.attributedTo?.name ?? object.data["nick"] ?? "unknown"
         let text = object.content?.text ?? ""
         let channel = object.data["channel"]
-        let isDM = object.data["visibility"] == "direct"
+        let isDM = object.data["visibility"] == "direct" || object.data["recipient"] != nil
         let network = object.data["network"] ?? "irc"
 
         let localNick = appState.irc.config(for: manager.activeChannel?.serverId ?? appState.irc.servers.first?.id ?? UUID())?.nickname ?? ""
@@ -286,7 +259,7 @@ struct IRCChatView: View {
                         .foregroundStyle(isDM ? DesignSystem.Colors.mastodon : DesignSystem.Colors.forSource(network))
                 }
             }
-            if isBroadcast, let count = object.data["targetCount"] {
+            if isBroadcast, let count = object.data["targetCount"] ?? object.data["broadcastCount"] {
                 Text("📢 to \(count) channels")
                     .font(.system(size: 9, weight: .medium, design: .monospaced))
                     .foregroundStyle(DesignSystem.Colors.signal)
@@ -317,16 +290,13 @@ struct IRCChatView: View {
         .id(object.id)
     }
 
-    // MARK: - Input Bar (48pt)
+    // MARK: - Input Bar
 
     private var inputBar: some View {
         HStack(spacing: DesignSystem.Spacing.sm) {
-            // Channel prefix (tappable for quick switch)
             Button {
                 if manager.isAllMode && manager.hasBroadcastTargets {
                     showBroadcastPicker = true
-                } else {
-                    showChannelDropdown = true
                 }
             } label: {
                 HStack(spacing: 2) {
@@ -370,7 +340,7 @@ struct IRCChatView: View {
         return manager.activeChannel?.name ?? ""
     }
 
-    // MARK: - Drag Handle (20pt)
+    // MARK: - Drag Handle
 
     private var dragHandle: some View {
         Button { showSheet = true } label: {
@@ -388,29 +358,24 @@ struct IRCChatView: View {
     private var channelSheet: some View {
         NavigationStack {
             List {
-                // Servers section
                 Section("Servers") {
                     ForEach(appState.irc.servers) { server in
                         serverSection(server)
                     }
-
                     Button {
                         showSheet = true
                         sheetHeight = .large
                     } label: {
                         Label("Add Server...", systemImage: "plus")
-                            .font(DesignSystem.Fonts.caption)
                     }
                 }
 
-                // Quick Join
                 Section("Quick Join") {
                     QuickJoinField(servers: appState.irc.servers, activeServerId: manager.activeChannel?.serverId) { channel, serverId in
                         appState.irc.joinChannel(channel, serverId: serverId)
                     }
                 }
 
-                // Popular channels
                 if !appState.irc.orchestrator.globalChannels.isEmpty {
                     Section("Popular") {
                         if appState.irc.orchestrator.isScanning {
@@ -456,7 +421,6 @@ struct IRCChatView: View {
         let channels = appState.irc.conversations(forServer: server.host)
 
         DisclosureGroup {
-            // Connection controls
             HStack {
                 Button(isOnline ? "Disconnect" : "Connect") {
                     if isOnline { appState.irc.disconnect(from: server.id) }
@@ -472,7 +436,6 @@ struct IRCChatView: View {
             }
             .padding(.top, 4)
 
-            // Channel list
             if channels.isEmpty {
                 Text("No channels joined")
                     .font(DesignSystem.Fonts.caption)
@@ -499,8 +462,6 @@ struct IRCChatView: View {
                             Circle().fill(DesignSystem.Colors.signal).frame(width: 7, height: 7)
                             Text("\(unread)").font(DesignSystem.Fonts.data(9)).foregroundStyle(DesignSystem.Colors.signal)
                         }
-
-                        // Expand user list button
                         Button {
                             if expandedUsers.contains(key) { expandedUsers.remove(key) }
                             else { expandedUsers.insert(key) }
@@ -513,7 +474,6 @@ struct IRCChatView: View {
                     }
                 }
 
-                // Expanded user list
                 if expandedUsers.contains(key), let users = appState.irc.channelUsers[key] {
                     ForEach(users.prefix(50)) { user in
                         HStack(spacing: 2) {
@@ -550,6 +510,109 @@ struct IRCChatView: View {
         }
     }
 
+    // MARK: - Empty States
+
+    private var emptyState: some View {
+        VStack(spacing: DesignSystem.Spacing.lg) {
+            Spacer()
+            ContentUnavailableView(
+                "No IRC servers configured",
+                systemImage: "antenna.radiowaves.left.and.right",
+                description: Text("Add an IRC server in Settings to start chatting.")
+            )
+            Button {
+                // Navigate to Settings
+                showSheet = true
+                sheetHeight = .large
+            } label: {
+                Label("Open Settings", systemImage: "gearshape")
+            }
+            .buttonStyle(.bordered)
+            Spacer()
+        }
+    }
+
+    private var noChannelsState: some View {
+        VStack(spacing: DesignSystem.Spacing.lg) {
+            Spacer()
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: DesignSystem.Spacing.sm) {
+                    ForEach(appState.irc.servers) { server in
+                        serverStatusPill(server)
+                    }
+                }
+                .padding(.horizontal, DesignSystem.Spacing.md)
+            }
+            .padding(.top, DesignSystem.Spacing.md)
+
+            Spacer()
+
+            ContentUnavailableView(
+                "No channels joined",
+                systemImage: "number",
+                description: Text("Join a channel or use Quick Join in the channel sheet.")
+            )
+
+            if !appState.irc.orchestrator.globalChannels.isEmpty {
+                VStack {
+                    Text("Popular channels").font(DesignSystem.Fonts.caption).foregroundStyle(DesignSystem.Colors.pencil)
+                    ForEach(appState.irc.orchestrator.globalChannels.prefix(10)) { ch in
+                        Button {
+                            if let sid = appState.irc.servers.first(where: { $0.host == ch.serverHost })?.id {
+                                appState.irc.joinChannel(ch.name, serverId: sid)
+                            }
+                        } label: {
+                            HStack {
+                                Text(ch.name).font(DesignSystem.Fonts.data(13)).foregroundStyle(DesignSystem.Colors.ink)
+                                Spacer()
+                                Text("\(ch.users)").font(DesignSystem.Fonts.data(10)).foregroundStyle(DesignSystem.Colors.pencil)
+                            }
+                            .padding(.horizontal, DesignSystem.Spacing.lg)
+                            .padding(.vertical, 4)
+                        }
+                    }
+                }
+            } else {
+                Button { appState.irc.orchestrator.startScan() } label: {
+                    Label("Scan for channels", systemImage: "magnifyingglass")
+                }
+                .buttonStyle(.bordered)
+            }
+
+            Spacer()
+        }
+    }
+
+    private func serverStatusPill(_ server: IRCConnectionConfig) -> some View {
+        let state = appState.irc.connectionStates[server.id] ?? .disconnected
+        return Button {
+            if state == .online { appState.irc.disconnect(from: server.id) }
+            else { appState.irc.connect(to: server.id) }
+        } label: {
+            HStack(spacing: 4) {
+                Circle().fill(statusColor(state)).frame(width: 6, height: 6)
+                Text(server.name.isEmpty ? server.host : server.name)
+                    .font(DesignSystem.Fonts.caption)
+                Text(stateLabel(state))
+                    .font(DesignSystem.Fonts.data(10))
+            }
+            .foregroundStyle(DesignSystem.Colors.ink)
+            .padding(.horizontal, DesignSystem.Spacing.sm)
+            .padding(.vertical, 8)
+            .background(DesignSystem.Colors.border.opacity(0.5))
+            .clipShape(RoundedRectangle(cornerRadius: DesignSystem.Radius.chip))
+        }
+        .buttonStyle(.plain)
+    }
+
+    private func statusColor(_ s: IRCManager.ConnectionStatus) -> Color {
+        switch s { case .disconnected: return .gray; case .connecting: return .orange; case .online: return DesignSystem.Colors.github }
+    }
+
+    private func stateLabel(_ s: IRCManager.ConnectionStatus) -> String {
+        switch s { case .disconnected: return "off"; case .connecting: return "connecting..."; case .online: return "on" }
+    }
+
     // MARK: - Actions
 
     private func send() {
@@ -566,14 +629,11 @@ struct IRCChatView: View {
         switch cmd {
         case .message:
             if let ch = manager.activeChannel {
-                // Single channel mode
                 appState.sendMessage(text, channel: ch.name, serverId: ch.serverId)
             } else {
-                // All mode — broadcast to selected targets or ALL joined channels
                 let targets = manager.hasBroadcastTargets
                     ? Array(manager.broadcastTargets)
                     : manager.channels
-                // Save as a single local WOM object for the timeline
                 let localObj = WOMObject(
                     id: WOMIDGenerator.generate(type: "message"),
                     type: ["wom:Message", "wom:Broadcast"],
@@ -584,7 +644,6 @@ struct IRCChatView: View {
                     provenance: .localUser()
                 )
                 Task { try? await appState.store.save(localObj); appState.womObjects.append(localObj) }
-                // Send to each target
                 for target in targets {
                     appState.sendMessage(text, channel: target.name, serverId: target.serverId)
                 }
@@ -592,7 +651,8 @@ struct IRCChatView: View {
         case .me(let action):
             let nick = appState.irc.config(for: sid)?.nickname ?? "user"
             let targets: [String] = manager.activeChannel.map { [$0.name] } ?? manager.channels.map { $0.name }
-            for target in targets.prefix(1) {
+            // Send to ALL relevant targets (not just first)
+            for target in targets {
                 appState.irc.client(for: sid)?.sendMessage("\u{01}ACTION \(action)\u{01}", to: target)
             }
             let obj = WOMObject(id: WOMIDGenerator.generate(type: "message"), type: ["wom:Message", "wom:Action"],
