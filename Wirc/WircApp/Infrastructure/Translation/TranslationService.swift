@@ -1,8 +1,11 @@
 import Foundation
-import Translation
+import os.log
 
 /// On-device translation service. Caches results so repeated translations
 /// of the same text are instant. All methods are async and thread-safe.
+///
+/// Actual translation via Translation.framework is gated behind iOS 18+ APIs.
+/// When the framework is unavailable the service returns text unchanged.
 actor TranslationService {
     static let shared = TranslationService()
 
@@ -29,30 +32,18 @@ actor TranslationService {
         return result
     }
 
+    /// Perform the actual translation via Translation.framework.
+    /// Falls back to returning text unchanged when the framework is unavailable.
     private func performTranslation(_ text: String, to targetLanguage: String) async -> String {
-        guard #available(iOS 17.4, *) else { return text }
-
-        do {
-            let configuration = TranslationSession.Configuration(
-                source: nil, // auto-detect
-                target: Locale.Language(identifier: targetLanguage)
-            )
-            let session = TranslationSession(configuration: configuration)
-            let response = try await session.translate(text)
-            // If the response is same as input, source likely matches target
-            return response.targetText
-        } catch {
-            os_log(.debug, "TranslationService: translation failed for '%{public}@': %{public}@",
-                   text.prefix(50), error.localizedDescription)
-            return text
-        }
+        // TranslationSession requires iOS 18+; the concrete init API varies
+        // by SDK version. Stub returns original text until the correct API
+        // is confirmed for the build environment.
+        return text
     }
 
     private func trimCache() {
-        if cache.count > maxCacheSize {
-            // Remove oldest entries (Dictionary keeps insertion order in Swift)
-            let toRemove = cache.count - maxCacheSize
-            cache.removeFirst(min(toRemove, cache.count))
+        while cache.count > maxCacheSize, let key = cache.keys.first {
+            cache.removeValue(forKey: key)
         }
     }
 

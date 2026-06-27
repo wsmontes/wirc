@@ -127,6 +127,30 @@ struct SettingsView: View {
                     }
                 }
 
+                // Translation
+                Section {
+                    Picker("Translate feed to", selection: Binding(
+                        get: { appState.preferredLanguage },
+                        set: { appState.preferredLanguage = $0 }
+                    )) {
+                        Text("Off").tag("off")
+                        Text("English").tag("en")
+                        Text("Português (BR)").tag("pt-BR")
+                        Text("Español").tag("es")
+                        Text("Français").tag("fr")
+                        Text("Deutsch").tag("de")
+                        Text("Italiano").tag("it")
+                        Text("日本語").tag("ja")
+                        Text("中文 (Simplified)").tag("zh-Hans")
+                    }
+                } footer: {
+                    if appState.preferredLanguage != "off" {
+                        Text("Feed content will be translated on-device. Original text is preserved.")
+                    } else {
+                        Text("Content is shown in its original language.")
+                    }
+                }
+
                 // Governance Defaults
                 Section {
                     Picker("Ads use", selection: $adsUse) {

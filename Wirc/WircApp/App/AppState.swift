@@ -22,6 +22,17 @@ final class AppState {
         didSet { UserDefaults.standard.set(onboardingCompleted, forKey: "wirc.onboarding.completed") }
     }
 
+    // MARK: - Translation
+    /// Target language for on-device feed translation. "off" means no translation.
+    var preferredLanguage: String = UserDefaults.standard.string(forKey: "wirc.translation.language") ?? "off" {
+        didSet {
+            UserDefaults.standard.set(preferredLanguage, forKey: "wirc.translation.language")
+            if preferredLanguage != oldValue {
+                Task { await TranslationService.shared.clearCache() }
+            }
+        }
+    }
+
     // MARK: - Debug logs
     var rawEvents: [DebugRawEvent] = [] {
         didSet { if rawEvents.count > 500 { rawEvents = Array(rawEvents.suffix(500)) } }
