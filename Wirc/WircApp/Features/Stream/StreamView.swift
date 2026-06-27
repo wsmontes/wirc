@@ -92,6 +92,9 @@ struct StreamView: View {
             isInitialLoad = false
         }
         .onChange(of: appState.womObjects.count) { _, _ in
+            // Only update when NOT refreshing — during refresh, timeline rebuilds at end.
+            // This prevents crashes from array mutation during active scroll gesture.
+            guard !appState.feed.isRefreshing else { return }
             refreshTask?.cancel()
             refreshTask = Task {
                 try? await Task.sleep(for: .milliseconds(100))
@@ -100,7 +103,10 @@ struct StreamView: View {
             }
         }
         .onChange(of: appState.feed.isRefreshing) { _, refreshing in
-            if !refreshing { isInitialLoad = false }
+            isInitialLoad = false
+            if !refreshing {
+                refreshTimeline() // Safe — no concurrent batches arriving
+            }
         }
         .onChange(of: selectedSource) { _, _ in refreshTimeline() }
         .refreshable {
