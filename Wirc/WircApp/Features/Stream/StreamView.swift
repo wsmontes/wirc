@@ -28,14 +28,15 @@ struct StreamView: View {
         }
         sourceFilters = ["All"] + sorted
 
-        // Timeline — for "All" mode: round-robin by source so each card is a
-        // different provider. Within each source, newest-first chronology.
+        // Timeline — chronological, newest first. Source filter chips provide
+        // per-type filtering when the user wants to focus on one content type.
+        let filtered: [WOMObject]
         if selectedSource == "All" {
-            timeline = mixedTimeline(posts, cap: 200)
+            filtered = posts
         } else {
-            let filtered = posts.filter { ($0.data["network"] ?? "").capitalized == selectedSource }
-            timeline = Array(filtered.prefix(200))
+            filtered = posts.filter { ($0.data["network"] ?? "").capitalized == selectedSource }
         }
+        timeline = Array(filtered.prefix(200))
     }
 
     var body: some View {
@@ -92,9 +93,7 @@ struct StreamView: View {
             isInitialLoad = false
         }
         .onChange(of: appState.womObjects.count) { _, _ in
-            // Only update when NOT refreshing — during refresh, timeline rebuilds at end.
-            // This prevents crashes from array mutation during active scroll gesture.
-            guard !appState.feed.isRefreshing else { return }
+            // If refreshing, rebuild fully (batches are done). Otherwise debounce.
             refreshTask?.cancel()
             refreshTask = Task {
                 try? await Task.sleep(for: .milliseconds(100))
@@ -103,9 +102,9 @@ struct StreamView: View {
             }
         }
         .onChange(of: appState.feed.isRefreshing) { _, refreshing in
-            isInitialLoad = false
             if !refreshing {
-                refreshTimeline() // Safe — no concurrent batches arriving
+                isInitialLoad = false
+                refreshTimeline() // Full rebuild when refresh completes
             }
         }
         .onChange(of: selectedSource) { _, _ in refreshTimeline() }
