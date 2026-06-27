@@ -1,6 +1,7 @@
 import XCTest
 @testable import Wirc
 
+@MainActor
 final class IRCChannelManagerTests: XCTestCase {
     var manager: IRCChannelManager!
     var store: JSONFileStore!

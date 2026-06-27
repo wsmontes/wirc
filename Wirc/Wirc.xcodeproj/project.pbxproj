@@ -28,6 +28,7 @@
 		3E814D0755AD1D8801399E5C /* WOMGovernance.swift in Sources */ = {isa = PBXBuildFile; fileRef = 080F7B7462FB8F4E7F90D92E /* WOMGovernance.swift */; };
 		3F838981C16016FD2DF0443C /* FeedCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02BFA0A70998650F4CAD3670 /* FeedCard.swift */; };
 		482FF42391DCA8EDCC895329 /* WOMProvenance.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB33105D31E371B41A8F523F /* WOMProvenance.swift */; };
+		4A58AD35C4691EB4B048A4B4 /* TranslationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F053C15FC8BBFD4D53111C4 /* TranslationService.swift */; };
 		4DA3E8A6D23BBF6ED1126E17 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAE7D6E8E5F39710B7B47F82 /* SettingsView.swift */; };
 		56B48B28FEBC91BA1D1EDF8F /* FeedItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 878395F92963933AFF5376AF /* FeedItem.swift */; };
 		571A9657E75DCEE173032659 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 997D4CFB00768A0732B2714D /* OnboardingView.swift */; };
@@ -74,6 +75,7 @@
 		BAF1FDE75ACD1D0345ABFEB6 /* IRCManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 634FEF7293B9F11FFDF05727 /* IRCManager.swift */; };
 		BFF889896BCD1E83FB50974C /* IRCCommandExecutor.swift in Sources */ = {isa = PBXBuildFile; fileRef = D26189FDE6636FCBD366020C /* IRCCommandExecutor.swift */; };
 		C00BDA18AEA42FBE756F0C1C /* IRCServerManagerSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FD71A62971FCAC7D6CE5AF1 /* IRCServerManagerSheet.swift */; };
+		C02E5523E1C2653759DD6DB8 /* IRCChannelManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E48F5F6928D947A130AFEC5 /* IRCChannelManagerTests.swift */; };
 		C72ACA83860950DE1B36C730 /* ShareViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A6278833766B2AAC5010770 /* ShareViewController.swift */; };
 		CEA4029066FE26C9FC4B6A6A /* DefaultFeeds.json in Resources */ = {isa = PBXBuildFile; fileRef = CAF9F7C7688711D4C9C33E4E /* DefaultFeeds.json */; };
 		D3A953C8893F023EFB20D6CB /* InMemoryWOMStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A9D83E615CA39680B6D1405 /* InMemoryWOMStore.swift */; };
@@ -121,6 +123,7 @@
 		110725662E9CAF4F796B6DDC /* RawEventLogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RawEventLogView.swift; sourceTree = "<group>"; };
 		116B884F1396D33A37753847 /* WOMContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WOMContent.swift; sourceTree = "<group>"; };
 		1512EF345EA5BE6212461B8B /* StreamView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamView.swift; sourceTree = "<group>"; };
+		1E48F5F6928D947A130AFEC5 /* IRCChannelManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IRCChannelManagerTests.swift; sourceTree = "<group>"; };
 		1F1B694593898DDB87326792 /* ConversationListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationListView.swift; sourceTree = "<group>"; };
 		1FCFECC386025CB0EB6A95E1 /* WOMClassification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WOMClassification.swift; sourceTree = "<group>"; };
 		200CC371A9E5453AF90AA6F3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
@@ -154,6 +157,7 @@
 		65A2BA21941352A18A47D072 /* BroadcastPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BroadcastPicker.swift; sourceTree = "<group>"; };
 		6EF838065FB3476BD06759AB /* WorkshopView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkshopView.swift; sourceTree = "<group>"; };
 		7301E9B32895F506FF41AB79 /* WOMBinding.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WOMBinding.swift; sourceTree = "<group>"; };
+		7F053C15FC8BBFD4D53111C4 /* TranslationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranslationService.swift; sourceTree = "<group>"; };
 		7FAAB9DB82E9EA69AB9BFAB4 /* mastodon_config.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = mastodon_config.json; sourceTree = "<group>"; };
 		82E54BAAED3C1E38E70AAC22 /* ObjectInspectorSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObjectInspectorSheet.swift; sourceTree = "<group>"; };
 		878395F92963933AFF5376AF /* FeedItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedItem.swift; sourceTree = "<group>"; };
@@ -386,6 +390,7 @@
 				9D6E03E92B2659AB6B6A9176 /* IRC */,
 				50B0F8AE07F0D83C7830E073 /* Mastodon */,
 				1339EE67F10569CE15BD969C /* Persistence */,
+				D92F6BB1981D8C438719516C /* Translation */,
 			);
 			path = Infrastructure;
 			sourceTree = "<group>";
@@ -418,6 +423,7 @@
 			children = (
 				0F8B99745782483F8175E32D /* FeedParserTests.swift */,
 				2B60813C81C8013AA04E99FE /* Info.plist */,
+				1E48F5F6928D947A130AFEC5 /* IRCChannelManagerTests.swift */,
 				9FDFB27251D13368A0B2F48F /* JSONFileStoreTests.swift */,
 			);
 			path = WircTests;
@@ -451,6 +457,14 @@
 				DAE7D6E8E5F39710B7B47F82 /* SettingsView.swift */,
 			);
 			path = Settings;
+			sourceTree = "<group>";
+		};
+		D92F6BB1981D8C438719516C /* Translation */ = {
+			isa = PBXGroup;
+			children = (
+				7F053C15FC8BBFD4D53111C4 /* TranslationService.swift */,
+			);
+			path = Translation;
 			sourceTree = "<group>";
 		};
 		E6680ADA8D25684C7089E484 /* Feed */ = {
@@ -699,6 +713,7 @@
 				3242860B98431E405FDE756C /* StreamView.swift in Sources */,
 				B28C05DA310EF2AE7F9492A2 /* SuggestedChannels.swift in Sources */,
 				28F555CA915D88B0DB64E00F /* SuggestedServers.swift in Sources */,
+				4A58AD35C4691EB4B048A4B4 /* TranslationService.swift in Sources */,
 				208A7FE391E119C11444ECB8 /* TrustRelation.swift in Sources */,
 				1E42AF5DCC3C22889B1FB5C6 /* WOMBinding.swift in Sources */,
 				B8FA6CA3BEF0D950871DAE84 /* WOMClassification.swift in Sources */,
@@ -722,6 +737,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				1AD901DCA5C98058428C6947 /* FeedParserTests.swift in Sources */,
+				C02E5523E1C2653759DD6DB8 /* IRCChannelManagerTests.swift in Sources */,
 				85DC63F3F4C71F7478785E13 /* JSONFileStoreTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
