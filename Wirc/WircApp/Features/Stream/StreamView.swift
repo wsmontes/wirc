@@ -10,6 +10,7 @@ struct StreamView: View {
     @State private var timeline: [WOMObject] = []
     @State private var refreshTask: Task<Void, Never>?
     @State private var isInitialLoad = true
+    @State private var scrollToTop = false
 
     /// Recompute filters & timeline once when underlying data changes (not on every body eval).
     private func refreshTimeline() {
@@ -46,10 +47,11 @@ struct StreamView: View {
                     .transition(.move(edge: .top).combined(with: .opacity))
             }
 
-            // New posts indicator — tappable pill showing how many new items arrived
+            // New posts indicator — tappable pill; scrolls to top on tap
             if !appState.feed.isRefreshing && appState.feed.newPostCount > 0 && !timeline.isEmpty {
                 Button {
                     appState.feed.newPostCount = 0
+                    scrollToTop = true
                 } label: {
                     HStack(spacing: 4) {
                         Image(systemName: "arrow.down")
@@ -76,13 +78,22 @@ struct StreamView: View {
             if timeline.isEmpty {
                 emptyState
             } else {
-                ScrollView {
-                    LazyVStack(spacing: 0) {
-                        ForEach(timeline) { object in
-                            FeedCard(post: object)
+                ScrollViewReader { proxy in
+                    ScrollView {
+                        LazyVStack(spacing: 0) {
+                            ForEach(timeline) { object in
+                                FeedCard(post: object)
+                                    .id(object.id)
+                            }
+                        }
+                        .padding(.vertical, DesignSystem.Spacing.lg)
+                    }
+                    .onChange(of: scrollToTop) { _, trigger in
+                        if trigger, let first = timeline.first?.id {
+                            proxy.scrollTo(first, anchor: .top)
+                            scrollToTop = false
                         }
                     }
-                    .padding(.vertical, DesignSystem.Spacing.lg)
                 }
             }
         }
