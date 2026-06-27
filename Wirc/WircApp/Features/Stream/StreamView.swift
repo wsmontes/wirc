@@ -115,8 +115,8 @@ struct StreamView: View {
         }
         .onChange(of: selectedSource) { _, _ in refreshTimeline() }
         .refreshable {
-            let newObjects = await appState.feed.refreshAllFeedsBatched(womStore: appState.store)
-            await MainActor.run { appState.womObjects.append(contentsOf: newObjects) }
+            // onIncrementalBatch handles per-batch appends; just kick off the refresh
+            _ = await appState.feed.refreshAllFeedsBatched(womStore: appState.store)
         }
     }
 

@@ -149,14 +149,11 @@ final class AppState {
         if existingCount > 0, let existing = try? store.allSync() {
             womObjects = Array(existing.suffix(2000))
         }
-        // Fetch new items in background — doesn't block existing content from showing.
-        // FeedManager.newPostCount is set internally by refreshAllFeedsBatched.
+        // Fetch new items in background. Incremental results arrive via feed.onIncrementalBatch
+        // (set above), so we only need the refresh to run — nothing to do with the return value.
         Task { [weak self] in
             guard let self else { return }
-            let allNew = await self.feed.refreshAllFeedsBatched(womStore: self.store)
-            if !allNew.isEmpty {
-                await MainActor.run { self.womObjects.append(contentsOf: allNew) }
-            }
+            _ = await self.feed.refreshAllFeedsBatched(womStore: self.store)
         }
     }
 
