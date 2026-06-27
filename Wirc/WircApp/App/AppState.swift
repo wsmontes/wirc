@@ -152,6 +152,9 @@ final class AppState {
         let existingCount = store.diskCount
         if existingCount > 0, let existing = try? store.allSync() {
             womObjects = Array(existing.suffix(2000))
+            os_log(.info, "AppState: loaded %d objects from persistent store", womObjects.count)
+        } else if existingCount == 0 {
+            os_log(.info, "AppState: persistent store is empty (first launch or data was cleared)")
         }
         // Fetch new items in background. Incremental results arrive via feed.onIncrementalBatch
         // (set above), so we only need the refresh to run — nothing to do with the return value.
