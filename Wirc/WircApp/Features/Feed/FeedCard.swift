@@ -20,6 +20,14 @@ struct FeedCard: View {
 
     // MARK: - Derived properties
 
+    private var displayText: String? {
+        post.data["translatedText"] ?? strippedBody
+    }
+
+    private var isTranslated: Bool {
+        post.data["translatedText"] != nil
+    }
+
     private var network: String { post.data["network"] ?? "" }
 
     private var sourceColor: Color {
@@ -55,7 +63,7 @@ struct FeedCard: View {
         .padding(.horizontal, DesignSystem.Spacing.lg)
         .padding(.vertical, DesignSystem.Spacing.sm)
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("\(networkDisplayName) post: \(post.name ?? (strippedBody.map { String($0.prefix(100)) } ?? "untitled"))")
+        .accessibilityLabel("\(networkDisplayName) post: \(post.name ?? (displayText.map { String($0.prefix(100)) } ?? "untitled"))")
         .accessibilityAddTraits(.isButton)
         .accessibilityHint("Double-tap to open article")
         .onTapGesture {
@@ -131,6 +139,21 @@ struct FeedCard: View {
                 Text(post.createdAt, style: .relative)
                     .font(DesignSystem.Fonts.timestamp)
                     .foregroundStyle(DesignSystem.Colors.pencil)
+                if isTranslated {
+                    Text("\u{00B7}")
+                        .foregroundStyle(DesignSystem.Colors.pencil)
+                    HStack(spacing: 2) {
+                        Image(systemName: "translate")
+                            .font(.system(size: 8))
+                        Text("Translated")
+                            .font(.system(size: 8))
+                    }
+                    .foregroundStyle(DesignSystem.Colors.pencil)
+                    .padding(.horizontal, 4)
+                    .padding(.vertical, 2)
+                    .background(DesignSystem.Colors.border.opacity(0.5))
+                    .clipShape(RoundedRectangle(cornerRadius: 3))
+                }
             }
             .padding(.horizontal, DesignSystem.Spacing.md)
             .padding(.vertical, DesignSystem.Spacing.sm)
@@ -220,8 +243,8 @@ struct FeedCard: View {
                     .foregroundStyle(DesignSystem.Colors.ink)
                     .padding(.horizontal, DesignSystem.Spacing.md)
             }
-            if let stripped = strippedBody, !stripped.isEmpty {
-                Text(stripped)
+            if let display = displayText, !display.isEmpty {
+                Text(display)
                     .font(DesignSystem.Fonts.messageBody)
                     .foregroundStyle(DesignSystem.Colors.ink)
                     .lineLimit(12)
@@ -269,8 +292,8 @@ struct FeedCard: View {
                 .padding(.top, DesignSystem.Spacing.sm)
             }
             // Original content rendered same as mastodon post
-            if let stripped = strippedBody, !stripped.isEmpty {
-                Text(stripped)
+            if let display = displayText, !display.isEmpty {
+                Text(display)
                     .font(DesignSystem.Fonts.messageBody)
                     .foregroundStyle(DesignSystem.Colors.ink)
                     .lineLimit(12)
@@ -291,8 +314,8 @@ struct FeedCard: View {
                     .padding(.horizontal, DesignSystem.Spacing.md)
                     .padding(.top, DesignSystem.Spacing.md)
             }
-            if let stripped = strippedBody, !stripped.isEmpty {
-                Text(stripped)
+            if let display = displayText, !display.isEmpty {
+                Text(display)
                     .font(DesignSystem.Fonts.cardBody)
                     .foregroundStyle(DesignSystem.Colors.ink)
                     .lineLimit(8)
@@ -421,8 +444,8 @@ struct FeedCard: View {
             Text(post.data["feedTitle"] ?? "")
                 .font(DesignSystem.Fonts.data(12))
                 .foregroundStyle(DesignSystem.Colors.pencil)
-            if let stripped = strippedBody, !stripped.isEmpty {
-                Text(stripped.prefix(200) + (stripped.count > 200 ? "..." : ""))
+            if let display = displayText, !display.isEmpty {
+                Text(display.prefix(200) + (display.count > 200 ? "..." : ""))
                     .font(DesignSystem.Fonts.body())
                     .foregroundStyle(DesignSystem.Colors.ink)
                     .lineLimit(5)
