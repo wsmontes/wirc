@@ -133,6 +133,8 @@ final class FeedManager {
             if !batchItems.isEmpty, let onBatch = onIncrementalBatch {
                 await MainActor.run { onBatch(batchItems) }
             }
+            // Respect cancellation so the task stops when the user navigates away
+            if Task.isCancelled { break }
             try? await Task.sleep(for: .milliseconds(100))
         }
 

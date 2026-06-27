@@ -26,9 +26,12 @@ final class AppState {
     var rawEvents: [DebugRawEvent] = [] {
         didSet { if rawEvents.count > 500 { rawEvents = Array(rawEvents.suffix(500)) } }
     }
+    private var isTrimming = false
     var womObjects: [WOMObject] = [] {
         didSet {
+            guard !isTrimming else { return }
             if womObjects.count > 2000 {
+                isTrimming = true
                 let feedPosts = womObjects.filter { $0.type.contains("wom:Post") }
                 let ircMessages = womObjects.filter { !$0.type.contains("wom:Post") }
                 // Keep all feed posts + most recent IRC messages up to 2000 total
@@ -37,6 +40,7 @@ final class AppState {
                 let ircCap = 2000 - keptFeed.count
                 let keptIRC = Array(ircMessages.suffix(ircCap))
                 womObjects = keptFeed + keptIRC
+                isTrimming = false
                 let totalDropped = oldValue.count - womObjects.count
                 if totalDropped > 0 {
                     os_log(.debug, "AppState: evicted %d objects (kept %d feed, %d IRC)", totalDropped, keptFeed.count, keptIRC.count)
