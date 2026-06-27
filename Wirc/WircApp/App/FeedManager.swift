@@ -18,6 +18,10 @@ final class FeedManager {
     var feedError: String?
     /// Incremental progress during batch refresh — updated on each batch completion.
     var refreshProgress: (completed: Int, total: Int) = (0, 0)
+    /// Number of genuinely new posts added during the most recent refresh.
+    var newPostCount: Int = 0
+    /// Called per batch during refresh so consumers can show incremental results.
+    var onIncrementalBatch: (([WOMObject]) -> Void)?
     var isRefreshing = false
     /// Completion summary that lingers after refresh ends (auto-clears after 4s).
     var refreshSummary: String?
@@ -125,11 +129,16 @@ final class FeedManager {
             allNew.append(contentsOf: batchItems)
             completed += batchSubs.count
             refreshProgress = (completed, all.count)
+            // Publish incremental results so UI updates as each batch arrives
+            if !batchItems.isEmpty, let onBatch = onIncrementalBatch {
+                await MainActor.run { onBatch(batchItems) }
+            }
             try? await Task.sleep(for: .milliseconds(100))
         }
 
         // Completion summary — lingers for 4s then auto-clears
         isRefreshing = false
+        newPostCount = allNew.count
         refreshProgress = (all.count, all.count)
         refreshSummary = "✓ \(all.count) sources · \(allNew.count) new posts"
         Task { @MainActor in

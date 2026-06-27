@@ -17,9 +17,9 @@ final class AppState {
     let store: WOMStore = JSONFileStore()
 
     // MARK: - Onboarding
-    var onboardingCompleted: Bool {
-        get { UserDefaults.standard.bool(forKey: "wirc.onboarding.completed") }
-        set { UserDefaults.standard.set(newValue, forKey: "wirc.onboarding.completed") }
+    /// Stored property so @Observable tracks changes. Synced to UserDefaults on write.
+    var onboardingCompleted: Bool = UserDefaults.standard.bool(forKey: "wirc.onboarding.completed") {
+        didSet { UserDefaults.standard.set(onboardingCompleted, forKey: "wirc.onboarding.completed") }
     }
 
     // MARK: - Debug logs
@@ -116,6 +116,10 @@ final class AppState {
     init() {
         irc = IRCManager(store: store)
         feed = FeedManager()
+        // Publish incremental feed results so cards appear as each batch arrives
+        feed.onIncrementalBatch = { [weak self] batch in
+            self?.womObjects.append(contentsOf: batch)
+        }
         // Wire IRC events → WOM pipeline
         irc.onWOMObjects = { [weak self] objects in
             guard let self else { return }
@@ -138,16 +142,17 @@ final class AppState {
             DefaultFeedsLoader.loadIfEmpty(into: feed.subscriptionStore)
             UserDefaults.standard.set(true, forKey: "wirc.feeds.defaultsLoaded")
         }
-        // Load previously saved objects from disk first, then fetch new content.
-        // Without this, every launch starts with an empty timeline and only shows
-        // items published since the last session (favouring frequently-updated feeds).
+        // Load previously saved objects from disk FIRST so the UI always has
+        // content to show. Then refresh feeds in background for new items.
+        // (store.loadIndex is now sync, so all() is instant — no Task needed.)
+        let existingCount = store.diskCount
+        if existingCount > 0, let existing = try? store.allSync() {
+            womObjects = Array(existing.suffix(2000))
+        }
+        // Fetch new items in background — doesn't block existing content from showing.
+        // FeedManager.newPostCount is set internally by refreshAllFeedsBatched.
         Task { [weak self] in
             guard let self else { return }
-            // 1. Restore existing items from persistent store
-            if let existing = try? await self.store.all(), !existing.isEmpty {
-                await MainActor.run { self.womObjects = Array(existing.suffix(2000)) }
-            }
-            // 2. Fetch new items and append
             let allNew = await self.feed.refreshAllFeedsBatched(womStore: self.store)
             if !allNew.isEmpty {
                 await MainActor.run { self.womObjects.append(contentsOf: allNew) }

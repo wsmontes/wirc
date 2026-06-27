@@ -46,6 +46,26 @@ struct StreamView: View {
                     .transition(.move(edge: .top).combined(with: .opacity))
             }
 
+            // New posts indicator — tappable pill showing how many new items arrived
+            if !appState.feed.isRefreshing && appState.feed.newPostCount > 0 && !timeline.isEmpty {
+                Button {
+                    appState.feed.newPostCount = 0
+                } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: "arrow.down")
+                        Text("\(appState.feed.newPostCount) new posts")
+                    }
+                    .font(DesignSystem.Fonts.data(11, weight: .medium))
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, DesignSystem.Spacing.md)
+                    .padding(.vertical, 6)
+                    .background(DesignSystem.Colors.signal)
+                    .clipShape(Capsule())
+                }
+                .padding(.top, DesignSystem.Spacing.xs)
+                .transition(.move(edge: .top).combined(with: .opacity))
+            }
+
             // Dynamic source filter chips
             if sourceFilters.count > 1 {
                 filterBar

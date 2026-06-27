@@ -38,4 +38,10 @@ final class InMemoryWOMStore: WOMStore, @unchecked Sendable {
         storage[object.id] = object
         return true
     }
+
+    func allSync() throws -> [WOMObject] {
+        Array(storage.values)
+    }
+
+    var diskCount: Int { storage.count }
 }

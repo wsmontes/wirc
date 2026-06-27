@@ -41,10 +41,9 @@ final class JSONFileStore: WOMStore, @unchecked Sendable {
         objectsDir = docs.appendingPathComponent("wirc/objects", isDirectory: true)
         try? FileManager.default.createDirectory(at: objectsDir, withIntermediateDirectories: true)
         checkSchemaVersion()
-        // Load index on background queue — avoids blocking init on 2000 JSON file reads.
-        queue.async { [weak self] in
-            self?.loadIndex()
-        }
+        // Load index synchronously — store must be ready before any read.
+        // I/O runs on the store's background queue via sync, so main thread isn't blocked.
+        queue.sync { loadIndex() }
     }
 
     // MARK: - WOMStore
@@ -169,6 +168,12 @@ final class JSONFileStore: WOMStore, @unchecked Sendable {
                 continuation.resume(returning: Array(self.index.values))
             }
         }
+    }
+
+    /// Synchronous read for init-time use. The index is guaranteed loaded because
+    /// loadIndex() runs via queue.sync in init() before any caller can access this.
+    func allSync() throws -> [WOMObject] {
+        queue.sync { Array(index.values) }
     }
 
     /// Atomically checks for an existing object with the same canonical URL
@@ -296,12 +301,6 @@ final class JSONFileStore: WOMStore, @unchecked Sendable {
 
     /// The number of objects currently in the on-disk index (for tests/debug).
     var diskCount: Int {
-        get async {
-            await withCheckedContinuation { continuation in
-                queue.async { [weak self] in
-                    continuation.resume(returning: self?.index.count ?? 0)
-                }
-            }
-        }
+        queue.sync { index.count }
     }
 }

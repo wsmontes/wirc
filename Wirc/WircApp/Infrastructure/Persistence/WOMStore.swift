@@ -14,6 +14,11 @@ protocol WOMStore: AnyObject, Sendable {
 
     /// Query objects by time range, source network, and/or topic.
     func query(since: Date?, until: Date?, source: String?, topic: String?, limit: Int?) async throws -> [WOMObject]
+
+    /// Synchronous read for init-time use. Guaranteed to be available after init returns.
+    func allSync() throws -> [WOMObject]
+    /// Number of objects currently in the in-memory index.
+    var diskCount: Int { get }
 }
 
 extension WOMStore {
