@@ -225,54 +225,6 @@ struct StreamView: View {
     ///
     /// Result: RSS → Mastodon → YouTube → Podcast → GitHub → RSS → Mastodon → …
     /// (never two of the same source in a row while enough variety remains).
-    private func mixedTimeline(_ posts: [WOMObject], cap: Int) -> [WOMObject] {
-        guard !posts.isEmpty else { return [] }
-
-        // 1. Group by source network (posts already sorted by createdAt desc)
-        var buckets: [String: [WOMObject]] = [:]
-        for post in posts {
-            let network = post.data["network"] ?? "other"
-            buckets[network, default: []].append(post)
-        }
-
-        // 2. Source order: text-first, then media, then other → visual diversity
-        let orderedKeys = ["rss", "mastodon", "github", "youtube", "podcast"] +
-            buckets.keys.filter { !["rss", "mastodon", "github", "youtube", "podcast"].contains($0) }
-
-        // 3. Round-robin: one from each source per round
-        var result: [WOMObject] = []
-        var round = 0
-        while result.count < cap {
-            var added = false
-            for key in orderedKeys {
-                guard let bucket = buckets[key], round < bucket.count else { continue }
-                result.append(bucket[round])
-                added = true
-                if result.count >= cap { break }
-            }
-            if !added { break }
-            round += 1
-        }
-
-        // 4. Diversity pass: avoid consecutive same-source cards by looking ahead
-        // and swapping with the next different-source card when possible.
-        var i = 1
-        while i < result.count - 1 {
-            let prevNetwork = result[i - 1].data["network"] ?? ""
-            let curNetwork = result[i].data["network"] ?? ""
-            if prevNetwork == curNetwork {
-                // Find the next card from a different source to swap with
-                if let swapIdx = result[i...].firstIndex(where: { ($0.data["network"] ?? "") != prevNetwork }),
-                   swapIdx != i {
-                    result.swapAt(i, swapIdx)
-                }
-            }
-            i += 1
-        }
-
-        return Array(result.prefix(cap))
-    }
-
     // MARK: - Empty State
 
     @ViewBuilder
