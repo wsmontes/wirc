@@ -131,6 +131,7 @@ final class AppState {
     init() {
         irc = IRCManager(store: store)
         feed = FeedManager()
+        feed.preferredLanguage = preferredLanguage
         // Publish incremental feed results so cards appear as each batch arrives
         feed.onIncrementalBatch = { [weak self] batch in
             self?.womObjects.append(contentsOf: batch)
@@ -264,12 +265,13 @@ final class AppState {
         guard let client = mastodonClients[accountId] ?? { if let acct = mastodonAccounts.first(where: { $0.id == accountId }) { let c = MastodonClient(config: acct); mastodonClients[accountId] = c; return c }; return nil }() else { return }
         feed.feedError = nil
         let adapter = MastodonToWOMAdapter(instanceURL: client.config.instanceURL)
+        adapter.preferredLanguage = preferredLanguage
         Task { @MainActor in
             do {
                 let lastId = mastodonAccounts.first(where: { $0.id == accountId })?.lastFetchedId
                 let timeline = try await client.homeTimeline(maxId: lastId, limit: 40)
                 for status in timeline {
-                    let obj = adapter.convert(status: status)
+                    let obj = await adapter.convertWithTranslation(status: status)
                     try? await store.save(obj)
                     if !womObjects.contains(where: { $0.id == obj.id }) { womObjects.append(obj) }
                 }
@@ -289,7 +291,8 @@ final class AppState {
             do {
                 let status = try await client.postStatus(text, visibility: visibility)
                 let adapter = MastodonToWOMAdapter(instanceURL: client.config.instanceURL)
-                let obj = adapter.convert(status: status)
+                adapter.preferredLanguage = preferredLanguage
+                let obj = await adapter.convertWithTranslation(status: status)
                 var localObj = obj; localObj.provenance = .localUser()
                 try? await store.save(localObj); womObjects.append(localObj)
             } catch { rawEvents.append(DebugRawEvent(timestamp: Date(), server: client.config.instanceURL, raw: error.localizedDescription, parsedAs: "mastodon_post_error")) }

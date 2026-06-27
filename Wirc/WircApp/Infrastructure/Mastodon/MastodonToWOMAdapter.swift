@@ -1,7 +1,9 @@
 import Foundation
 
-final class MastodonToWOMAdapter {
+final class MastodonToWOMAdapter: @unchecked Sendable {
     let instanceURL: String
+    /// Target language for on-device translation. "off" means no translation.
+    var preferredLanguage: String = "off"
 
     init(instanceURL: String) {
         self.instanceURL = instanceURL
@@ -12,6 +14,18 @@ final class MastodonToWOMAdapter {
             return convertReblog(status: status, reblog: reblog)
         }
         return convertStatus(status)
+    }
+
+    /// Convert a status and translate its content if a target language is configured.
+    func convertWithTranslation(status: MastodonStatus) async -> WOMObject {
+        var obj = convert(status: status)
+        if preferredLanguage != "off", let text = obj.content?.text, !text.isEmpty {
+            let translated = await TranslationService.shared.translate(text, to: preferredLanguage)
+            if translated != text {
+                obj.data["translatedText"] = translated
+            }
+        }
+        return obj
     }
 
     // MARK: - Conversion

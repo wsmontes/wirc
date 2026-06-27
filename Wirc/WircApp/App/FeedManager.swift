@@ -26,6 +26,8 @@ final class FeedManager {
     /// Completion summary that lingers after refresh ends (auto-clears after 4s).
     var refreshSummary: String?
     var subscriptionCount: Int { subscriptionStore.getAll().count }
+    /// Target language for on-device translation of feed content. "off" means no translation.
+    var preferredLanguage: String = "off"
 
     // MARK: - Init
 
@@ -176,7 +178,7 @@ final class FeedManager {
                 sub.lastModified = httpResponse.allHeaderFields["Last-Modified"] as? String
             }
             subscriptionStore.update(sub)
-            return await adapter.convert(items: result.items, subscription: sub, store: womStore)
+            return await adapter.convert(items: result.items, subscription: sub, store: womStore, preferredLanguage: preferredLanguage)
         } catch {
             var sub = subscription; sub.errorCount += 1; sub.lastFetchedAt = Date(); subscriptionStore.update(sub)
             feedError = error.localizedDescription

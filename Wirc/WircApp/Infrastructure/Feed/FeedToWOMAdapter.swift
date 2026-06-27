@@ -9,14 +9,16 @@ final class FeedToWOMAdapter: @unchecked Sendable {
     /// Convert feed items to WOM objects, saving each one atomically via the store's
     /// dedup-aware `saveIfNew`. Returns only the objects that were newly saved
     /// (skipping duplicates). This avoids the TOCTOU race between dedup check and save.
+    /// - Parameter preferredLanguage: Language code for translation, or "off" to skip.
     func convert(
         items: [FeedItem],
         subscription: FeedSubscription,
-        store: WOMStore
+        store: WOMStore,
+        preferredLanguage: String = "off"
     ) async -> [WOMObject] {
         var savedObjects: [WOMObject] = []
         for (idx, item) in items.enumerated() {
-            let object = convertItem(item, subscription: subscription, index: idx)
+            let object = await convertItem(item, subscription: subscription, index: idx, preferredLanguage: preferredLanguage)
             let canonicalURL = object.data["canonicalUrl"] ?? item.link
             do {
                 let isNew = try await store.saveIfNew(object, byCanonicalURL: canonicalURL)
@@ -33,7 +35,7 @@ final class FeedToWOMAdapter: @unchecked Sendable {
 
     // MARK: - Private
 
-    private func convertItem(_ item: FeedItem, subscription: FeedSubscription, index: Int = 0) -> WOMObject {
+    private func convertItem(_ item: FeedItem, subscription: FeedSubscription, index: Int = 0, preferredLanguage: String = "off") async -> WOMObject {
         let types = womTypes(for: subscription.sourceType)
         let objectID = WOMIDGenerator.generate(type: "post")
 
@@ -100,6 +102,15 @@ final class FeedToWOMAdapter: @unchecked Sendable {
         // Stagger fallback timestamps: 30s per item + per-feed offset so different
         // feeds interleave naturally instead of clustering at identical timestamps.
         let feedOffset = abs(subscription.id.hashValue) % 30
+
+        // Translate content if a target language is configured
+        if preferredLanguage != "off", let originalText = item.description, !originalText.isEmpty {
+            let translated = await TranslationService.shared.translate(originalText, to: preferredLanguage)
+            if translated != originalText {
+                data["translatedText"] = translated
+            }
+        }
+
         return WOMObject(
             id: objectID,
             type: types,
