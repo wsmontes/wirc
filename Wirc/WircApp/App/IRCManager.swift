@@ -243,9 +243,9 @@ final class IRCManager {
         case .nickChange(let oldNick, let newNick):
             let prefix = "\(config.host)|"
             for (key, _) in channelUsers where key.hasPrefix(prefix) {
-                if let idx = channelUsers[key]?.firstIndex(where: { $0.nick == oldNick }) {
-                    channelUsers[key]?[idx] = ChannelUser(nick: newNick, prefix: channelUsers[key]![idx].prefix)
-                }
+                guard let users = channelUsers[key],
+                      let idx = users.firstIndex(where: { $0.nick == oldNick }) else { continue }
+                channelUsers[key]?[idx] = ChannelUser(nick: newNick, prefix: users[idx].prefix)
             }
         case .kick(let channel, let nick, _, _):
             channelUsers[channelKey(serverId: serverId, channel: channel)]?.removeAll { $0.nick == nick }

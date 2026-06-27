@@ -196,6 +196,8 @@ final class AppState {
     // MARK: - Event pipeline (IRC → WOM)
     func processIRCEvent(_ event: IRCEvent, serverId: UUID) {
         guard let config = irc.config(for: serverId) else { return }
+        // handleEvent does its own WOM conversion + delivery via onWOMObjects callback.
+        // Do NOT convert again here — that would double every object in womObjects.
         irc.handleEvent(event, serverId: serverId)
 
         switch event {
@@ -204,11 +206,6 @@ final class AppState {
         case .error(let msg):
             rawEvents.append(DebugRawEvent(timestamp: Date(), server: config.host, raw: msg, parsedAs: "error"))
         default: break
-        }
-
-        let objects = ircToWOM.convert(event, config: config)
-        if !objects.isEmpty {
-            Task { try? await store.saveMany(objects); womObjects.append(contentsOf: objects) }
         }
     }
 
