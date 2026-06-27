@@ -32,6 +32,9 @@ struct WircApp: App {
                     OnboardingView().environment(appState)
                 }
                 .opacity(showSplash ? 0 : 1)
+                .onChange(of: appState.preferredLanguage) { _, _ in
+                    appState.retranslateAllFeedContent()
+                }
 
                 // Splash screen — shown while store loads
                 if showSplash {

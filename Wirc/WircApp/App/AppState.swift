@@ -33,6 +33,32 @@ final class AppState {
         }
     }
 
+    // MARK: - Retranslation
+
+    /// Translates all existing feed post content to the current preferredLanguage.
+    /// Runs in a background task; persists translated text back to the store.
+    func retranslateAllFeedContent() {
+        let language = preferredLanguage
+        guard language != "off" else { return }
+        Task.detached(priority: .background) { [weak self] in
+            guard let self else { return }
+            let objects = await MainActor.run { self.womObjects.filter { $0.type.contains("wom:Post") } }
+            for i in 0..<objects.count {
+                var obj = objects[i]
+                if let text = obj.content?.text, !text.isEmpty {
+                    let translated = await TranslationService.shared.translate(text, to: language)
+                    if translated != text {
+                        obj.data["translatedText"] = translated
+                        try? await self.store.save(obj)
+                    }
+                }
+            }
+            await MainActor.run {
+                self.invalidateIndexes()
+            }
+        }
+    }
+
     // MARK: - Debug logs
     var rawEvents: [DebugRawEvent] = [] {
         didSet { if rawEvents.count > 500 { rawEvents = Array(rawEvents.suffix(500)) } }
