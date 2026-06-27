@@ -19,6 +19,8 @@ protocol WOMStore: AnyObject, Sendable {
     func allSync() throws -> [WOMObject]
     /// Number of objects currently in the in-memory index.
     var diskCount: Int { get }
+    /// True after the store has finished loading its index from disk.
+    var isReady: Bool { get set }
 }
 
 extension WOMStore {

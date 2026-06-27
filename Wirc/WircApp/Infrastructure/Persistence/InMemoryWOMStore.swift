@@ -2,6 +2,7 @@ import Foundation
 
 final class InMemoryWOMStore: WOMStore, @unchecked Sendable {
     private var storage: [String: WOMObject] = [:]
+    var isReady = true  // No disk I/O, always ready
 
     func save(_ object: WOMObject) async throws {
         storage[object.id] = object

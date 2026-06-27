@@ -146,20 +146,19 @@ final class AppState {
             DefaultFeedsLoader.loadIfEmpty(into: feed.subscriptionStore)
             UserDefaults.standard.set(true, forKey: "wirc.feeds.defaultsLoaded")
         }
-        // Load previously saved objects from disk FIRST so the UI always has
-        // content to show. Then refresh feeds in background for new items.
-        // (store.loadIndex is now sync, so all() is instant — no Task needed.)
-        let existingCount = store.diskCount
-        if existingCount > 0, let existing = try? store.allSync() {
-            womObjects = Array(existing.suffix(2000))
-            os_log(.info, "AppState: loaded %d objects from persistent store", womObjects.count)
-        } else if existingCount == 0 {
-            os_log(.info, "AppState: persistent store is empty (first launch or data was cleared)")
-        }
-        // Fetch new items in background. Incremental results arrive via feed.onIncrementalBatch
-        // (set above), so we only need the refresh to run — nothing to do with the return value.
+        // Load saved objects once the store is ready, then refresh feeds.
         Task { [weak self] in
             guard let self else { return }
+            // Wait for the store's background index load to complete
+            while !store.isReady { try? await Task.sleep(for: .milliseconds(50)) }
+            let existingCount = store.diskCount
+            if existingCount > 0, let existing = try? store.allSync() {
+                await MainActor.run {
+                    womObjects = Array(existing.suffix(2000))
+                }
+                os_log(.info, "AppState: loaded %d objects from persistent store", existing.count)
+            }
+            // Fetch new items in background
             _ = await self.feed.refreshAllFeedsBatched(womStore: self.store)
         }
     }

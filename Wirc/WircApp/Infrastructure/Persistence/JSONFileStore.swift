@@ -12,6 +12,7 @@ final class JSONFileStore: WOMStore, @unchecked Sendable {
     private var index: [String: WOMObject] = [:]
     /// Maps canonicalUrl → objectId for O(1) dedup lookups.
     private var canonicalIndex: [String: String] = [:]
+    var isReady = false
     private let objectsDir: URL
     private let queue = DispatchQueue(label: "wirc.jsonfilestore", attributes: .concurrent)
 
@@ -41,9 +42,13 @@ final class JSONFileStore: WOMStore, @unchecked Sendable {
         objectsDir = docs.appendingPathComponent("wirc/objects", isDirectory: true)
         try? FileManager.default.createDirectory(at: objectsDir, withIntermediateDirectories: true)
         checkSchemaVersion()
-        // Load index synchronously — store must be ready before any read.
-        // I/O runs on the store's background queue via sync, so main thread isn't blocked.
-        queue.sync { loadIndex() }
+        // Load index on background queue. Set isReady when done so UI can show splash.
+        queue.async { [weak self] in
+            self?.loadIndex()
+            Task { @MainActor in
+                self?.isReady = true
+            }
+        }
     }
 
     // MARK: - WOMStore
